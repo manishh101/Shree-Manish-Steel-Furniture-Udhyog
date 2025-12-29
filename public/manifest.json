@@ -1,0 +1,34 @@
+{
+  "short_name": "Manish Steel",
+  "name": "Shree Manish Steel Furniture Udhyog",
+  "description": "Premium quality steel furniture manufacturer in Biratnagar, Nepal",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/logo192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#0057A3",
+  "background_color": "#ffffff",
+  "scope": "/",
+  "id": "manish-steel-furniture",
+  "orientation": "portrait-primary",
+  "categories": ["shopping", "business"],
+  "lang": "en",
+  "dir": "ltr"
+}

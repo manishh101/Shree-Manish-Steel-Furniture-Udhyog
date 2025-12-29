@@ -1,0 +1,47 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { connectDB } from '@/lib/db';
+import Product from '@/models/Product';
+
+// GET /api/products/top-products - Get top products
+export async function GET(request: NextRequest) {
+  try {
+    await connectDB();
+
+    const { searchParams } = new URL(request.url);
+    const limit = parseInt(searchParams.get('limit') || '6');
+
+    // First try to get products marked as isTopProduct
+    let products = await Product.find({ isTopProduct: true })
+      .populate('categoryId', 'name')
+      .sort({ rating: -1, salesCount: -1 })
+      .limit(limit)
+      .lean();
+
+    // If no top products found, get featured products
+    if (!products || products.length === 0) {
+      products = await Product.find({ featured: true })
+        .populate('categoryId', 'name')
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .lean();
+    }
+
+    // If still no products, get latest products
+    if (!products || products.length === 0) {
+      products = await Product.find({})
+        .populate('categoryId', 'name')
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .lean();
+    }
+
+    // Return in the expected format { products: [] }
+    return NextResponse.json({ products });
+  } catch (error) {
+    console.error('Error fetching top products:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch top products', products: [] },
+      { status: 500 }
+    );
+  }
+}
