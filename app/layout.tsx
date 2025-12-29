@@ -150,7 +150,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: 'cdkL5SZOd34Xw59VJfTztNlk1LTEjJqiffCEL_SK03M',
+    google: 'wESfcK5NYIoxGC9o3yIduzXbJM0wcx6tWAqKzUuI9Zw',
   },
   alternates: {
     canonical: siteConfig.url,
