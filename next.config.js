@@ -72,10 +72,12 @@ const nextConfig = {
     ];
   },
   
-  // Redirects for SEO
+  // Redirects for SEO - www to non-www
+  // NOTE: Make sure Vercel Dashboard has manishsteel.com.np as PRIMARY domain
+  // and www.manishsteel.com.np redirects TO the primary (not the other way around)
   async redirects() {
     return [
-      // Redirect www to non-www
+      // Redirect www to non-www (canonical URL)
       {
         source: '/:path*',
         has: [{ type: 'host', value: 'www.manishsteel.com.np' }],
