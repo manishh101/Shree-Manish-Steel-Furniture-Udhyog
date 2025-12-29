@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { testimonials } from '@/data/testimonials';
 import ScrollAnimator from '@/components/ScrollAnimator';
@@ -253,14 +254,16 @@ export default function HomePage() {
             
             {/* Right Image */}
             <div className="md:w-1/2 animate-fadeIn" style={{animationDelay: '0.3s'}}>
-              <div className="relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+              <div className="relative h-[400px] md:h-[500px]">
+                <Image
                   key={imageKey}
                   src={homepageContent.heroImage || '/images/home-page-1.png'}
                   alt="Manish Steel Furniture Collection" 
-                  className="w-full h-auto rounded-lg shadow-xl object-cover"
-                  style={{ minHeight: '400px', maxHeight: '500px' }}
+                  fill
+                  priority
+                  quality={85}
+                  className="rounded-lg shadow-xl object-cover"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (target.src !== '/images/home-page-1.png') {

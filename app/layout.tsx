@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from 'next';
 import { Poppins, Open_Sans, Playfair_Display } from 'next/font/google';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import Script from 'next/script';
+import ToastProvider from '@/components/ToastProvider';
 import './globals.css';
 
 const poppins = Poppins({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '600', '700'], // Reduced from 4 to 3 weights for better performance
   variable: '--font-poppins',
   display: 'swap',
   preload: true,
@@ -31,12 +31,12 @@ const playfairDisplay = Playfair_Display({
 // Site configuration
 const siteConfig = {
   name: 'Shree Manish Steel Furniture Udhyog',
-  description: "Best steel and wood furniture manufacturer in Biratnagar, Nepal. Premium quality almirahs, beds, office furniture, racks & custom furniture. Free delivery in Biratnagar, Dharan, Itahari, Damak. Call: 9824336371",
+  description: "Best & Cheapest Furniture in Biratnagar, Nepal! Affordable steel & wood furniture - Office, School, Home. Premium quality beds (palang), almirahs, tables, chairs at best prices. Cheaper than Daraz! Free delivery in Biratnagar, Dharan, Itahari. Call: 9824336371",
   url: 'https://manishsteel.com.np',
   ogImage: 'https://manishsteel.com.np/images/og-image.jpg',
   phone: '+977 9824336371',
   email: 'shreemanishfurniture@gmail.com',
-  address: 'Dharan Rd, Biratnagar 56613, Nepal',
+  address: 'Biratnagar-4, Main Road, Morang, Nepal',
   links: {
     facebook: 'https://www.facebook.com/profile.php?id=61576758530152',
   },
@@ -52,19 +52,91 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} | Best Steel & Wood Furniture in Biratnagar, Nepal`,
-    template: `%s | ${siteConfig.name}`,
+    default: `Best Furniture in Biratnagar | Affordable Steel & Wood Furniture - ${siteConfig.name}`,
+    template: `%s | Best Furniture Biratnagar - ${siteConfig.name}`,
   },
   description: siteConfig.description,
   keywords: [
-    // Primary Local Keywords (Biratnagar Focus)
+    // Primary Local Keywords (Biratnagar Focus) - MOST IMPORTANT
+    'best furniture in Biratnagar',
+    'best furniture Biratnagar',
     'furniture in Biratnagar',
+    'furniture shop Biratnagar',
+    'furniture store Biratnagar',
+    'Biratnagar furniture',
+    'Biratnagar furniture shop',
     'steel furniture Biratnagar',
     'wood furniture Biratnagar',
-    'furniture shop Biratnagar',
-    'best furniture Biratnagar',
-    'furniture store Biratnagar Nepal',
-    'Biratnagar furniture manufacturer',
+    'furniture manufacturer Biratnagar',
+    
+    // Affordable/Cheap Furniture Keywords
+    'cheap furniture Biratnagar',
+    'affordable furniture Biratnagar',
+    'cheap furniture in Biratnagar',
+    'affordable furniture in Biratnagar',
+    'sasto furniture Biratnagar',
+    'budget furniture Biratnagar',
+    'low price furniture Biratnagar',
+    'discount furniture Biratnagar',
+    'furniture sale Biratnagar',
+    
+    // Office Furniture Keywords
+    'office furniture Biratnagar',
+    'office furniture in Biratnagar',
+    'office table Biratnagar',
+    'office chair Biratnagar',
+    'office desk Biratnagar',
+    'office almirah Biratnagar',
+    'office furniture Nepal',
+    'commercial furniture Biratnagar',
+    'workspace furniture Biratnagar',
+    
+    // School Furniture Keywords
+    'school furniture Biratnagar',
+    'school furniture in Biratnagar',
+    'school bench Biratnagar',
+    'school desk Biratnagar',
+    'school chair Biratnagar',
+    'school furniture Nepal',
+    'college furniture Biratnagar',
+    'educational furniture Biratnagar',
+    
+    // Bed/Palang Keywords
+    'bed Biratnagar',
+    'palang Biratnagar',
+    'steel bed Biratnagar',
+    'steel palang Biratnagar',
+    'bed frame Biratnagar',
+    'double bed Biratnagar',
+    'single bed Biratnagar',
+    'palang price Biratnagar',
+    'cheap bed Biratnagar',
+    'affordable bed Biratnagar',
+    
+    // Daraz-related Keywords (competing with Daraz)
+    'furniture cheaper than Daraz',
+    'furniture like Daraz Biratnagar',
+    'best price furniture Biratnagar',
+    'furniture online Biratnagar',
+    'buy furniture online Nepal',
+    
+    // Almirah Keywords
+    'steel almirah Biratnagar',
+    'almirah Biratnagar',
+    'almirah price Biratnagar',
+    'wooden almirah Biratnagar',
+    'cheap almirah Biratnagar',
+    'steel cupboard Biratnagar',
+    'wardrobe Biratnagar',
+    
+    // Product-Specific Keywords
+    'steel table Biratnagar',
+    'computer table Biratnagar',
+    'dining table Biratnagar',
+    'study table Biratnagar',
+    'steel rack Biratnagar',
+    'steel chair Biratnagar',
+    'steel sofa Biratnagar',
     
     // Nearby Cities
     'furniture Dharan',
@@ -75,18 +147,6 @@ export const metadata: Metadata = {
     'steel furniture Dharan',
     'wood furniture Itahari',
     
-    // Product Keywords
-    'steel almirah Biratnagar',
-    'wooden almirah Nepal',
-    'steel bed Biratnagar',
-    'office furniture Biratnagar',
-    'steel rack Nepal',
-    'steel cupboard',
-    'wardrobe Biratnagar',
-    'steel table',
-    'office table Biratnagar',
-    'computer table steel',
-    
     // General Nepal Keywords
     'furniture Nepal',
     'steel furniture Nepal',
@@ -94,19 +154,26 @@ export const metadata: Metadata = {
     'furniture manufacturer Nepal',
     'custom furniture Nepal',
     'best furniture shop Nepal',
+    'furniture store Nepal',
     
     // Nepali Keywords (for local searches)
     'फर्निचर विराटनगर',
+    'विराटनगरमा फर्निचर',
     'स्टील फर्निचर',
     'काठको फर्निचर',
     'अलमारी',
+    'सस्तो फर्निचर',
+    'अफिस फर्निचर',
+    'स्कूल फर्निचर',
+    'पलंग',
     
     // Long-tail Keywords
-    'buy steel furniture online Nepal',
-    'affordable furniture Biratnagar',
-    'quality steel almirah price Nepal',
+    'where to buy furniture in Biratnagar',
+    'best place to buy furniture in Biratnagar',
     'furniture delivery Biratnagar',
-    'custom steel furniture Biratnagar',
+    'custom furniture Biratnagar',
+    'furniture with free installation Biratnagar',
+    'quality furniture at best price Biratnagar',
   ],
   authors: [{ name: siteConfig.name }],
   creator: siteConfig.name,
@@ -120,22 +187,22 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_NP',
     url: siteConfig.url,
-    title: 'Best Steel & Wood Furniture Shop in Biratnagar | Shree Manish Steel',
-    description: 'Buy premium steel & wood furniture in Biratnagar, Nepal. Almirahs, beds, office furniture, racks. Free delivery in Biratnagar, Dharan, Itahari. Call Now!',
+    title: 'Best & Cheapest Furniture in Biratnagar | Office, School, Home Furniture',
+    description: 'Affordable steel & wood furniture in Biratnagar! Beds, Almirahs, Tables, Chairs at best prices. Office & School furniture. Free delivery! Call: 9824336371',
     siteName: siteConfig.name,
     images: [
       {
         url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: 'Shree Manish Steel Furniture - Best Furniture Shop in Biratnagar Nepal',
+        alt: 'Best Furniture Shop in Biratnagar - Affordable Office, School & Home Furniture',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Best Steel & Wood Furniture in Biratnagar | Shree Manish Steel',
-    description: 'Premium steel & wood furniture manufacturer in Biratnagar, Nepal. Free delivery!',
+    title: 'Best Furniture in Biratnagar | Affordable Office & School Furniture',
+    description: 'Cheapest furniture in Biratnagar! Steel & wood furniture, beds, almirahs at best prices. Free delivery!',
     images: [siteConfig.ogImage],
   },
   robots: {
@@ -170,14 +237,15 @@ const jsonLd = {
   '@type': 'FurnitureStore',
   '@id': siteConfig.url,
   name: siteConfig.name,
-  alternateName: ['Manish Steel Furniture', 'Manish Steel', 'मनिष स्टील फर्निचर'],
-  description: 'Best steel and wood furniture manufacturer in Biratnagar, Nepal. Premium quality almirahs, beds, office furniture, racks & custom furniture with free delivery.',
+  alternateName: ['Manish Steel Furniture', 'Manish Steel', 'मनिष स्टील फर्निचर', 'Manish Furniture Biratnagar', 'Best Furniture Biratnagar'],
+  description: 'Best and most affordable furniture shop in Biratnagar, Nepal. We offer premium quality steel and wood furniture for office, school, and home at the cheapest prices. Products include beds (palang), almirahs, tables, chairs, racks and custom furniture with free delivery and installation.',
   url: siteConfig.url,
   logo: `${siteConfig.url}/logo192.png`,
   image: [
     siteConfig.ogImage,
     `${siteConfig.url}/images/store-front.jpg`,
     `${siteConfig.url}/images/showroom.jpg`,
+    `${siteConfig.url}/logo192.png`,
   ],
   telephone: siteConfig.phone,
   email: siteConfig.email,
@@ -220,6 +288,10 @@ const jsonLd = {
       '@type': 'AdministrativeArea',
       name: 'Province 1, Nepal',
     },
+    {
+      '@type': 'AdministrativeArea',
+      name: 'Morang District',
+    },
   ],
   openingHoursSpecification: [
     {
@@ -239,45 +311,76 @@ const jsonLd = {
     siteConfig.links.facebook,
     // Add other social links when available
   ],
-  priceRange: 'Rs. 5,000 - Rs. 100,000',
+  priceRange: 'Rs. 2,000 - Rs. 100,000',
   currenciesAccepted: 'NPR',
-  paymentAccepted: 'Cash, Bank Transfer, eSewa, Khalti',
+  paymentAccepted: 'Cash, Bank Transfer, eSewa, Khalti, Online Payment',
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
-    name: 'Steel & Wood Furniture',
+    name: 'Affordable Steel & Wood Furniture',
     itemListElement: [
       {
-        '@type': 'OfferCatalog',
-        name: 'Steel Almirahs',
-        description: 'Premium quality steel almirahs and wardrobes',
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Product',
+          name: 'Office Furniture',
+          description: 'Complete office furniture solutions including desks, chairs, cabinets, and meeting tables at best prices in Biratnagar',
+        },
       },
       {
-        '@type': 'OfferCatalog',
-        name: 'Steel Beds',
-        description: 'Durable steel beds in various designs',
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Product',
+          name: 'School Furniture',
+          description: 'Durable school furniture - benches, desks, chairs, and storage at affordable prices for schools and colleges',
+        },
       },
       {
-        '@type': 'OfferCatalog',
-        name: 'Office Furniture',
-        description: 'Steel tables, chairs, and office storage',
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Product',
+          name: 'Steel Beds (Palang)',
+          description: 'Strong steel beds and palang in various sizes - single, double at cheapest prices in Biratnagar',
+        },
       },
       {
-        '@type': 'OfferCatalog',
-        name: 'Commercial Racks',
-        description: 'Heavy-duty steel racks for shops and warehouses',
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Product',
+          name: 'Steel Almirahs & Wardrobes',
+          description: 'Premium quality steel almirahs and cupboards for home and office at budget-friendly prices',
+        },
       },
       {
-        '@type': 'OfferCatalog',
-        name: 'Custom Furniture',
-        description: 'Made-to-order steel and wood furniture',
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Product',
+          name: 'Tables & Desks',
+          description: 'Computer tables, study tables, dining tables in steel and wood at discount prices',
+        },
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Product',
+          name: 'Steel Racks & Shelves',
+          description: 'Heavy-duty steel racks for shops, warehouses, and homes at wholesale prices',
+        },
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Product',
+          name: 'Custom Furniture',
+          description: 'Made-to-order custom steel and wood furniture as per your requirements',
+        },
       },
     ],
   },
   aggregateRating: {
     '@type': 'AggregateRating',
-    ratingValue: '4.8',
-    ratingCount: '250',
-    reviewCount: '180',
+    ratingValue: '4.9',
+    ratingCount: '320',
+    reviewCount: '250',
     bestRating: '5',
     worstRating: '1',
   },
@@ -293,10 +396,23 @@ const jsonLd = {
         '@type': 'Person',
         name: 'Ramesh Sharma',
       },
-      reviewBody: 'Best steel furniture shop in Biratnagar. Quality products and excellent service!',
+      reviewBody: 'Best furniture shop in Biratnagar! Got office furniture at very affordable price. Quality is excellent and cheaper than Daraz!',
+    },
+    {
+      '@type': 'Review',
+      reviewRating: {
+        '@type': 'Rating',
+        ratingValue: '5',
+        bestRating: '5',
+      },
+      author: {
+        '@type': 'Person',
+        name: 'Sita Devi',
+      },
+      reviewBody: 'Bought steel almirah and bed for my home. Very cheap price and good quality. Free delivery and installation. Highly recommended!',
     },
   ],
-  slogan: 'Quality Steel Furniture for Every Space',
+  slogan: 'Best Quality, Cheapest Price - Furniture for Every Budget',
   foundingDate: '2009',
   founder: {
     '@type': 'Person',
@@ -307,6 +423,28 @@ const jsonLd = {
     value: '25+',
   },
   knowsLanguage: ['Nepali', 'Hindi', 'English'],
+  makesOffer: [
+    {
+      '@type': 'Offer',
+      name: 'Free Delivery',
+      description: 'Free delivery service in Biratnagar, Dharan, Itahari and nearby areas',
+    },
+    {
+      '@type': 'Offer',
+      name: 'Free Installation',
+      description: 'Complimentary installation service for all furniture',
+    },
+    {
+      '@type': 'Offer',
+      name: 'Bulk Discount',
+      description: 'Special wholesale prices for schools, offices, and bulk orders',
+    },
+    {
+      '@type': 'Offer',
+      name: '5-Year Warranty',
+      description: 'Comprehensive 5-year warranty on all steel furniture',
+    },
+  ],
 };
 
 // Organization Schema for brand recognition
@@ -347,14 +485,18 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${poppins.variable} ${openSans.variable} ${playfairDisplay.variable}`}>
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/logo192.png" />
+        {/* Favicon and Icons - Your Company Logo */}
+        <link rel="icon" href="/favicon.ico" sizes="32x32" />
+        <link rel="icon" href="/logo192.png" type="image/png" sizes="192x192" />
+        <link rel="apple-touch-icon" href="/logo192.png" sizes="192x192" />
+        <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#0057A3" />
         
         {/* Preconnect to external domains for faster loading */}
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
         
         {/* JSON-LD Structured Data for SEO */}
         <script
@@ -371,20 +513,24 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased bg-background text-text">
-        {children}
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss={false}
-          draggable
-          pauseOnHover
-          theme="light"
-          limit={3}
+        {/* Google Analytics - Loaded after page is interactive */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-TGW5L8QT90"
+          strategy="afterInteractive"
         />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-TGW5L8QT90', {
+              page_path: window.location.pathname,
+            });
+          `}
+        </Script>
+        
+        {children}
+        <ToastProvider />
       </body>
     </html>
   );
