@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import Image from 'next/image';
 import { FaImage } from 'react-icons/fa';
 import ImageService from '../../services/imageService';
 
@@ -12,11 +13,11 @@ interface OptimizedImageProps {
   size?: 'small' | 'medium' | 'large' | 'thumbnail';
   category?: string;
   lazy?: boolean;
-  aspectRatio?: 'square' | 'wide' | 'tall';
-  onLoad?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
-  onError?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
-  priority?: string;
-  [key: string]: unknown;
+  aspectRatio?: 'square' | 'wide' | 'tall' | 'auto';
+  onLoad?: () => void;
+  onError?: () => void;
+  priority?: boolean;
+  fill?: boolean;
 }
 
 interface ImageState {
@@ -35,21 +36,39 @@ const sizeConfig: Record<string, { width: number; height: number }> = {
 const aspectRatioClasses: Record<string, string> = {
   square: 'aspect-square',
   wide: 'aspect-video',
-  tall: 'aspect-[3/4]'
+  tall: 'aspect-[3/4]',
+  auto: '' // No aspect ratio class - inherits from parent container
+};
+
+// Responsive sizes for Next.js Image
+const getSizes = (size: string): string => {
+  switch (size) {
+    case 'thumbnail':
+      return '150px';
+    case 'small':
+      return '(max-width: 640px) 50vw, (max-width: 768px) 33vw, 300px';
+    case 'medium':
+      return '(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 400px';
+    case 'large':
+      return '(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 800px';
+    default:
+      return '(max-width: 640px) 100vw, (max-width: 768px) 50vw, 400px';
+  }
 };
 
 const OptimizedImage: React.FC<OptimizedImageProps> = ({ 
   src,
-  alt,
+  alt = 'Product Image',
   className = '',
   style = {},
   size = 'medium',
   category = '',
   lazy = true,
-  aspectRatio = 'square',
+  aspectRatio = 'auto', // Default to auto - inherits from parent
   onLoad,
   onError,
-  ...props
+  priority = false,
+  fill = true,
 }) => {
   const [imageState, setImageState] = useState<ImageState>({
     loaded: false,
@@ -57,32 +76,31 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     currentSrc: null
   });
   const imgRef = useRef<HTMLDivElement>(null);
-  const [isInView, setIsInView] = useState(!lazy);
+  const [isInView, setIsInView] = useState(!lazy || priority);
 
   // Get optimized image source - prioritize Cloudinary URLs
-  const getOptimizedSrc = () => {
+  const getOptimizedSrc = (): string => {
     // No src provided - use Cloudinary placeholder
     if (!src) {
-      return ImageService.getCloudinaryPlaceholder(category);
+      return ImageService.getCloudinaryPlaceholder(category) || '/images/furniture-1.jpg';
     }
     
-    // Use ImageService to get the optimized URL
-    const optimizedUrl = ImageService.getOptimizedImageUrl(src, {
-      ...sizeConfig[size],
-      category
-    });
+    // Add Cloudinary optimizations for Cloudinary URLs
+    if (src.includes('res.cloudinary.com') && !src.includes('f_auto')) {
+      return src.replace('/upload/', '/upload/f_auto,q_auto,w_auto,c_limit/');
+    }
     
-    return optimizedUrl;
+    return src;
   };
 
-  // Get fallback source - use Cloudinary placeholder for production
-  const getFallbackSrc = () => {
-    return ImageService.getCloudinaryPlaceholder(category);
+  // Get fallback source - use local placeholder
+  const getFallbackSrc = (): string => {
+    return '/images/furniture-1.jpg';
   };
 
-  // Intersection Observer for lazy loading
+  // Intersection Observer for lazy loading (only when not using priority)
   useEffect(() => {
-    if (!lazy || isInView) {
+    if (priority || !lazy || isInView) {
       setImageState(prev => ({ ...prev, currentSrc: getOptimizedSrc() }));
       return;
     }
@@ -97,7 +115,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       },
       { 
         threshold: 0.1,
-        rootMargin: '50px'
+        rootMargin: '100px' // Load slightly before coming into view
       }
     );
 
@@ -107,21 +125,21 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
     return () => observer.disconnect();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src, size, lazy, category]);
+  }, [src, size, lazy, category, priority]);
 
-  const handleLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  const handleLoad = () => {
     setImageState(prev => ({ ...prev, loaded: true }));
-    onLoad?.(e);
+    onLoad?.();
   };
 
-  const handleError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  const handleError = () => {
     const failedSrc = imageState.currentSrc;
     
     // Check if this was already a local placeholder - if so, don't try another fallback
     const wasAlreadyLocalPlaceholder = failedSrc && (
       failedSrc.startsWith('/images/furniture') ||
-      failedSrc.includes('placeholder-thumbnail') ||
-      failedSrc.includes('/images/')
+      failedSrc.includes('placeholder') ||
+      failedSrc === '/images/furniture-1.jpg'
     );
     
     if (wasAlreadyLocalPlaceholder || imageState.error) {
@@ -136,23 +154,22 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       const fallbackSrc = getFallbackSrc();
       setImageState(prev => ({ 
         ...prev, 
-        error: false, // Reset error since we're trying a new image
+        error: false,
         currentSrc: fallbackSrc,
-        loaded: false // Reset loaded to show loading state for placeholder
+        loaded: false
       }));
     }
     
-    onError?.(e);
+    onError?.();
   };
 
   const combinedClassName = `
     relative overflow-hidden bg-gray-100
-    ${aspectRatioClasses[aspectRatio] || 'aspect-square'}
-    ${className}
+    ${aspectRatioClasses[aspectRatio] || ''}
+    ${aspectRatio === 'auto' ? 'w-full h-full' : ''}
   `.trim();
 
-  // Filter out custom props that shouldn't be passed to img
-  const { priority, ...restProps } = props;
+  const imageSrc = imageState.currentSrc || getOptimizedSrc();
 
   return (
     <div 
@@ -162,27 +179,28 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     >
       {/* Loading placeholder - with smoother transition */}
       {!imageState.loaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 transition-opacity duration-500">
-          <FaImage className="w-8 h-8 text-gray-300" />
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 transition-opacity duration-300 z-10">
+          <FaImage className="w-8 h-8 text-gray-300 animate-pulse" />
         </div>
       )}
 
-      {/* Main image */}
-      {imageState.currentSrc && imageState.currentSrc.trim() !== '' && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={imageState.currentSrc}
-          srcSet={lazy ? undefined : ImageService.generateSrcSet(src, { category })}
-          sizes={lazy ? undefined : ImageService.getImageSizes()}
+      {/* Main image using Next.js Image component */}
+      {imageSrc && imageSrc.trim() !== '' && (
+        <Image
+          src={imageSrc}
           alt={alt || ImageService.getImageAlt({ name: alt, category })}
-          loading={lazy ? 'lazy' : 'eager'}
+          fill={fill}
+          sizes={getSizes(size)}
+          priority={priority}
+          quality={85}
           onLoad={handleLoad}
           onError={handleError}
           className={`
-            w-full h-full object-cover transition-all duration-700 ease-in-out
+            object-cover transition-all duration-500 ease-out
             ${imageState.loaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}
+            ${className}
           `}
-          {...restProps}
+          unoptimized={imageSrc.includes('res.cloudinary.com')} // Cloudinary handles its own optimization
         />
       )}
     </div>

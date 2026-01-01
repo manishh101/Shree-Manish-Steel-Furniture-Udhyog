@@ -236,8 +236,7 @@ const AdminProducts = () => {
                     src={product.image || ''} 
                     alt={product.name}
                     className="h-16 w-16 rounded-md object-cover mr-3"
-                    width={64}
-                    height={64}
+                    size="thumbnail"
                   />
                   <div className="flex-1">
                     <h3 className="font-medium text-gray-900 mb-1">{product.name}</h3>
@@ -318,8 +317,7 @@ const AdminProducts = () => {
                         src={product.image || ''} 
                         alt={product.name}
                         className="h-10 w-10 rounded-md object-cover"
-                        width={40}
-                        height={40}
+                        size="thumbnail"
                       />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{product.name}</td>

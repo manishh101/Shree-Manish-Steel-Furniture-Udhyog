@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import type { Metadata } from 'next';
 import { connectDB } from '@/lib/db';
 import About from '@/models/About';
@@ -155,12 +156,16 @@ export default async function AboutPage() {
               <div className="relative">
                 <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl transform rotate-3"></div>
                 {content.storyImage ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img 
-                    src={content.storyImage} 
-                    alt="Our Story" 
-                    className="relative rounded-xl shadow-2xl w-full h-96 object-cover transform -rotate-1 hover:rotate-0 transition-transform duration-500"
-                  />
+                  <div className="relative rounded-xl shadow-2xl w-full h-96 transform -rotate-1 hover:rotate-0 transition-transform duration-500 overflow-hidden">
+                    <Image 
+                      src={content.storyImage} 
+                      alt="Our Story" 
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover"
+                      priority
+                    />
+                  </div>
                 ) : (
                   <div className="relative rounded-xl shadow-2xl w-full transform -rotate-1 hover:rotate-0 transition-transform duration-500 bg-gradient-to-br from-primary/10 to-accent/10 h-96 flex items-center justify-center">
                     <div className="text-center">
@@ -288,13 +293,18 @@ export default async function AboutPage() {
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {content.workshopImages.filter(img => img).map((image, idx) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img 
+                <div 
                   key={idx}
-                  src={image} 
-                  alt={`Workshop ${idx + 1}`}
-                  className="w-full h-48 md:h-64 object-cover rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300"
-                />
+                  className="relative w-full h-48 md:h-64 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
+                >
+                  <Image 
+                    src={image} 
+                    alt={`Workshop ${idx + 1}`}
+                    fill
+                    sizes="(max-width: 768px) 50vw, 33vw"
+                    className="object-cover"
+                  />
+                </div>
               ))}
             </div>
           </div>

@@ -213,8 +213,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
             }`}
             onLoad={handleImageLoad}
             onError={handleImageError}
-            lazy={true}
-            priority={variant === 'featured' ? 'true' : undefined}
+            lazy={variant !== 'featured' && variant !== 'bestseller'}
+            priority={variant === 'featured' || variant === 'bestseller'}
           />
         </Link>
         

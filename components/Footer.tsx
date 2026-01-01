@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { categoryAPI } from '../services/api';
 import { getCategories as getLocalCategories } from '../utils/categoryData';
@@ -61,11 +62,16 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo and About */}
           <div className="md:col-span-1">
-            <img 
-              src="/images/new-logo-1.png" 
-              alt={settings.businessName || "Shree Manish Steel Furniture Industry"}
-              className="h-16 mb-4"
-            />
+            <div className="relative h-16 w-40 mb-4">
+              <Image 
+                src="/images/new-logo-1.png" 
+                alt={settings.businessName || "Shree Manish Steel Furniture Industry"}
+                fill
+                sizes="160px"
+                className="object-contain object-left"
+                priority
+              />
+            </div>
             <p className="text-white/80 mb-4">
               {settings.tagline || 'Providing quality steel furniture solutions for homes and offices across Nepal since 2067.'}
             </p>

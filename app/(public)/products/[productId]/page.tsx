@@ -529,16 +529,15 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
                 )}
                 
                 {/* Main product image */}
-                <OptimizedImage
-                  src={allImages[selectedImageIndex]}
-                  alt={imageService.getImageAlt(product) || "Product Image"}
-                  category={product?.category}
-                  size="large"
-                  className={`w-full h-full transition-all duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'} cursor-pointer`}
-                  onLoad={() => setImageLoading(false)}
-                  onClick={handleImageZoom}
-                  lazy={false}
-                />
+                <div onClick={handleImageZoom} className="cursor-pointer">
+                  <OptimizedImage
+                    src={allImages[selectedImageIndex]}
+                    alt={imageService.getImageAlt(product) || "Product Image"}
+                    fill
+                    className={`object-contain transition-all duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                    priority
+                  />
+                </div>
                 
                 {/* Enlarge button */}
                 <button 

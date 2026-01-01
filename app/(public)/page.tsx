@@ -8,6 +8,7 @@ import { testimonials } from '@/data/testimonials';
 import ScrollAnimator from '@/components/ScrollAnimator';
 import CleanTopProductsSection from '@/components/CleanTopProductsSection';
 import CleanMostSellingSection from '@/components/CleanMostSellingSection';
+import OptimizedImage from '@/components/common/OptimizedImage';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { servicesAPI, Service, homepageAPI, HomepageData } from '@/services/api';
 
@@ -365,25 +366,16 @@ export default function HomePage() {
                   className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl animate-fadeInUp group flex-shrink-0 w-[85vw] md:w-auto snap-center"
                   style={{animationDelay: `${0.1 + (index * 0.1)}s`}}
                 >
-                  <div className="relative w-full aspect-[4/3] overflow-hidden bg-gray-100">
-                    {thumbnailUrl ? (
-                      <img 
-                        src={thumbnailUrl}
-                        alt={`${category.name} Products`}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = fallbackUrl;
-                        }}
-                      />
-                    ) : (
-                      <img 
-                        src={fallbackUrl}
-                        alt={`${category.name} Products`}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4">
+                  <div className="relative w-full overflow-hidden bg-gray-100" style={{aspectRatio: '4/3'}}>
+                    <OptimizedImage 
+                      src={thumbnailUrl || fallbackUrl}
+                      alt={`${category.name} Products`}
+                      size="medium"
+                      category={category.name}
+                      className="transition-transform duration-500 group-hover:scale-105"
+                      priority={index < 3}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-primary/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4 z-20">
                       <button 
                         onClick={() => handleCategoryClick(categoryId)}
                         className="bg-primary text-white px-6 py-2 rounded-full font-medium transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300"

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, Variants } from 'framer-motion';
 
 interface GalleryHeroProps {
@@ -83,11 +84,13 @@ const GalleryHero: React.FC<GalleryHeroProps> = ({
         {/* Optional hero image with overlay */}
         {heroImage && (
           <div className="absolute inset-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
+            <Image 
               src={heroImage} 
               alt="Gallery Cover" 
-              className="w-full h-full object-cover opacity-20"
+              fill
+              sizes="100vw"
+              className="object-cover opacity-20"
+              priority
             />
           </div>
         )}
