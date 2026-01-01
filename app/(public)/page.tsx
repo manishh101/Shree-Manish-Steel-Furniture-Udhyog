@@ -254,8 +254,8 @@ export default function HomePage() {
             </div>
             
             {/* Right Image */}
-            <div className="md:w-1/2 animate-fadeIn" style={{animationDelay: '0.3s'}}>
-              <div className="relative h-[400px] md:h-[500px]">
+            <div className="w-full md:w-1/2 animate-fadeIn" style={{animationDelay: '0.3s'}}>
+              <div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px]">
                 <Image
                   key={imageKey}
                   src={homepageContent.heroImage || '/images/home-page-1.png'}
@@ -264,7 +264,7 @@ export default function HomePage() {
                   priority
                   quality={85}
                   className="rounded-lg shadow-xl object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, 50vw"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (target.src !== '/images/home-page-1.png') {
@@ -272,7 +272,7 @@ export default function HomePage() {
                     }
                   }}
                 />
-                <div className="absolute -bottom-4 -right-4 bg-accent w-24 h-24 rounded-full flex items-center justify-center text-primary font-bold text-lg z-10">
+                <div className="absolute -bottom-4 -right-4 bg-accent w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center text-primary font-bold text-sm sm:text-lg z-10">
                   New<br/>Designs
                 </div>
               </div>
