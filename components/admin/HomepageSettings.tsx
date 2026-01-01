@@ -8,6 +8,7 @@ import {
   CheckCircleIcon,
   XCircleIcon,
 } from '@heroicons/react/24/outline';
+import { homepageAPI } from '@/services/api';
 
 // Default hero image path
 const DEFAULT_HERO_IMAGE = '/images/home-page-1.png';
@@ -16,6 +17,10 @@ interface HomepageSettingsData {
   heroImage: string;
   lastUpdated?: string;
 }
+
+// Cloudinary upload configuration
+const CLOUDINARY_UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ml_default';
+const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'your-cloud-name';
 
 /**
  * HomepageSettings - Admin component for managing homepage hero section
@@ -40,14 +45,30 @@ const HomepageSettings: React.FC = () => {
 
   // Load current settings on component mount
   useEffect(() => {
-    const savedSettings = localStorage.getItem('homepageSettings');
-    if (savedSettings) {
-      const settings: HomepageSettingsData = JSON.parse(savedSettings);
-      setHeroImage(settings.heroImage || '');
-    } else {
-      // Set default image path
-      setHeroImage(DEFAULT_HERO_IMAGE);
-    }
+    const loadSettings = async () => {
+      try {
+        // Fetch from database
+        const response = await homepageAPI.getContent();
+        if (response?.success && response.data) {
+          setHeroImage(response.data.heroImage || DEFAULT_HERO_IMAGE);
+        } else {
+          // Fallback to default
+          setHeroImage(DEFAULT_HERO_IMAGE);
+        }
+      } catch (error) {
+        console.error('Error loading homepage settings:', error);
+        // Try localStorage as fallback
+        const savedSettings = localStorage.getItem('homepageSettings');
+        if (savedSettings) {
+          const settings: HomepageSettingsData = JSON.parse(savedSettings);
+          setHeroImage(settings.heroImage || DEFAULT_HERO_IMAGE);
+        } else {
+          setHeroImage(DEFAULT_HERO_IMAGE);
+        }
+      }
+    };
+
+    loadSettings();
   }, []);
 
   // Handle file selection
@@ -59,7 +80,7 @@ const HomepageSettings: React.FC = () => {
   };
 
   // Handle image upload
-  const handleImageUpload = (file: File) => {
+  const handleImageUpload = async (file: File) => {
     // Validate file type
     if (!file.type.startsWith('image/')) {
       showMessage('Please select a valid image file.', false);
@@ -74,20 +95,48 @@ const HomepageSettings: React.FC = () => {
 
     setIsUploading(true);
 
-    // Create a preview URL
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const imageUrl = e.target?.result as string;
-      setPreviewImage(imageUrl);
-      setHeroImage(imageUrl);
+    try {
+      // Create a preview URL for immediate feedback
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const imageUrl = e.target?.result as string;
+        setPreviewImage(imageUrl);
+      };
+      reader.readAsDataURL(file);
+
+      // Upload to Cloudinary
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      formData.append('folder', 'homepage');
+
+      const cloudinaryResponse = await fetch(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+
+      if (!cloudinaryResponse.ok) {
+        throw new Error('Failed to upload image to Cloudinary');
+      }
+
+      const cloudinaryData = await cloudinaryResponse.json();
+      const uploadedImageUrl = cloudinaryData.secure_url;
+
+      // Update state with Cloudinary URL
+      setHeroImage(uploadedImageUrl);
+      setPreviewImage(null); // Clear preview since we now have the real URL
       setIsUploading(false);
-      showMessage("Image uploaded successfully! Don't forget to save changes.", true);
-    };
-    reader.onerror = () => {
+      
+      showMessage('Image uploaded successfully! Click "Save Changes" to apply.', true);
+    } catch (error) {
+      console.error('Error uploading image:', error);
       setIsUploading(false);
+      setPreviewImage(null);
       showMessage('Failed to upload image. Please try again.', false);
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   // Trigger file input
@@ -114,22 +163,30 @@ const HomepageSettings: React.FC = () => {
   // Save homepage settings
   const handleSave = async () => {
     try {
-      const settings: HomepageSettingsData = {
+      // Save to database via API
+      const response = await homepageAPI.updateContent({
         heroImage: heroImage,
-        lastUpdated: new Date().toISOString(),
-      };
+      });
 
-      // Save to localStorage
-      localStorage.setItem('homepageSettings', JSON.stringify(settings));
+      if (response?.success) {
+        // Also save to localStorage as backup
+        const settings: HomepageSettingsData = {
+          heroImage: heroImage,
+          lastUpdated: new Date().toISOString(),
+        };
+        localStorage.setItem('homepageSettings', JSON.stringify(settings));
 
-      // Dispatch custom event to notify homepage about the update
-      window.dispatchEvent(
-        new CustomEvent('homepageSettingsUpdated', {
-          detail: settings,
-        })
-      );
+        // Dispatch custom event to notify homepage about the update
+        window.dispatchEvent(
+          new CustomEvent('homepageSettingsUpdated', {
+            detail: settings,
+          })
+        );
 
-      showMessage('Homepage settings saved successfully!', true);
+        showMessage('Homepage settings saved successfully! Changes will appear on the live site.', true);
+      } else {
+        throw new Error('Failed to save to database');
+      }
     } catch (error) {
       console.error('Error saving homepage settings:', error);
       showMessage('Failed to save settings. Please try again.', false);
@@ -137,26 +194,44 @@ const HomepageSettings: React.FC = () => {
   };
 
   // Reset to default image
-  const handleReset = () => {
-    const defaultImage = DEFAULT_HERO_IMAGE;
-    setHeroImage(defaultImage);
-    setPreviewImage(null);
+  const handleReset = async () => {
+    if (!window.confirm('Are you sure you want to reset to the default image?')) {
+      return;
+    }
 
-    // Update localStorage immediately
-    const settings: HomepageSettingsData = {
-      heroImage: defaultImage,
-      lastUpdated: new Date().toISOString(),
-    };
-    localStorage.setItem('homepageSettings', JSON.stringify(settings));
+    try {
+      const defaultImage = DEFAULT_HERO_IMAGE;
+      setHeroImage(defaultImage);
+      setPreviewImage(null);
 
-    // Dispatch event to notify homepage
-    window.dispatchEvent(
-      new CustomEvent('homepageSettingsUpdated', {
-        detail: settings,
-      })
-    );
+      // Save to database
+      const response = await homepageAPI.updateContent({
+        heroImage: defaultImage,
+      });
 
-    showMessage('Reset to default image. Changes applied immediately!', true);
+      if (response?.success) {
+        // Update localStorage
+        const settings: HomepageSettingsData = {
+          heroImage: defaultImage,
+          lastUpdated: new Date().toISOString(),
+        };
+        localStorage.setItem('homepageSettings', JSON.stringify(settings));
+
+        // Dispatch event to notify homepage
+        window.dispatchEvent(
+          new CustomEvent('homepageSettingsUpdated', {
+            detail: settings,
+          })
+        );
+
+        showMessage('Reset to default image successfully!', true);
+      } else {
+        throw new Error('Failed to reset in database');
+      }
+    } catch (error) {
+      console.error('Error resetting to default:', error);
+      showMessage('Failed to reset. Please try again.', false);
+    }
   };
 
   // Show status message
