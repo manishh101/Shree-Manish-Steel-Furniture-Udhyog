@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { aboutAPI } from '@/services/api';
 import { FaEye, FaSave, FaUndo, FaPlus, FaTrash, FaImage, FaInfoCircle } from 'react-icons/fa';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface CoreValue {
   title: string;
@@ -323,13 +324,15 @@ const AdminAbout = () => {
 
               {aboutData.storyImage && (
                 <div className="flex justify-center">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={aboutData.storyImage}
-                    alt="Story preview"
-                    className="max-w-md w-full h-64 object-cover rounded-lg shadow-md border border-gray-200"
-                    onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
+                  <div className="relative max-w-md w-full h-64">
+                    <Image
+                      src={aboutData.storyImage}
+                      alt="Story preview"
+                      fill
+                      className="object-cover rounded-lg shadow-md border border-gray-200"
+                      sizes="(max-width: 768px) 100vw, 448px"
+                    />
+                  </div>
                 </div>
               )}
 
@@ -550,14 +553,15 @@ const AdminAbout = () => {
                 {aboutData.workshopImages.some(img => img) && (
                   <div className="flex flex-wrap gap-3 mt-4">
                     {aboutData.workshopImages.filter(img => img).map((img, index) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        key={index}
-                        src={img}
-                        alt={`Workshop ${index + 1}`}
-                        className="w-28 h-24 object-cover rounded-lg shadow-md"
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                      />
+                      <div key={index} className="relative w-28 h-24">
+                        <Image
+                          src={img}
+                          alt={`Workshop ${index + 1}`}
+                          fill
+                          className="object-cover rounded-lg shadow-md"
+                          sizes="112px"
+                        />
+                      </div>
                     ))}
                   </div>
                 )}
