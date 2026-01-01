@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { galleryAPI, categoryAPI, GallerySection, GalleryImage, GalleryConfig, Category } from '@/services/api';
+import Image from 'next/image';
 import { 
   FaPlus, 
   FaEdit, 
@@ -778,11 +779,13 @@ const AdminGallery = () => {
                   viewMode === 'list' ? 'flex items-center p-4' : ''
                 }`}
               >
-                <div className={viewMode === 'grid' ? 'aspect-square' : 'w-24 h-24 flex-shrink-0'}>
-                  <img
+                <div className={viewMode === 'grid' ? 'aspect-square relative' : 'w-24 h-24 flex-shrink-0 relative'}>
+                  <Image
                     src={image.url}
                     alt={image.title || 'Gallery image'}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes={viewMode === 'grid' ? '(max-width: 768px) 50vw, 33vw' : '96px'}
                   />
                 </div>
                 <div className={viewMode === 'grid' ? 'p-3' : 'flex-1 ml-4'}>
@@ -920,11 +923,15 @@ const AdminGallery = () => {
                     className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-colors"
                   >
                     {previewImage || (editingItem && 'url' in editingItem && editingItem.url) ? (
-                      <img
-                        src={previewImage || ((editingItem as GalleryImage).url)}
-                        alt="Preview"
-                        className="max-h-48 mx-auto rounded"
-                      />
+                      <div className="relative max-h-48 h-48 mx-auto">
+                        <Image
+                          src={previewImage || ((editingItem as GalleryImage).url)}
+                          alt="Preview"
+                          fill
+                          className="object-contain rounded"
+                          sizes="(max-width: 768px) 100vw, 384px"
+                        />
+                      </div>
                     ) : (
                       <>
                         <FaUpload className="h-8 w-8 text-gray-400 mx-auto mb-2" />

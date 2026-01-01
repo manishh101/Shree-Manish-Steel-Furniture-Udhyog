@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { productAPI, categoryAPI, subcategoryAPI, uploadAPI, Product, Category, Subcategory } from '@/services/api';
 import { FaTimes, FaPlus, FaImage } from 'react-icons/fa';
+import Image from 'next/image';
 
 interface FormData {
   name: string;
@@ -487,11 +488,15 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
                 className="flex-1 border border-gray-300 rounded-md px-3 py-2"
               />
               {formData.imagePreviews.main && (
-                <img 
-                  src={formData.imagePreviews.main} 
-                  alt="Main preview" 
-                  className="w-20 h-20 object-cover border rounded-md"
-                />
+                <div className="relative w-20 h-20">
+                  <Image 
+                    src={formData.imagePreviews.main} 
+                    alt="Main preview" 
+                    fill
+                    className="object-cover border rounded-md"
+                    sizes="80px"
+                  />
+                </div>
               )}
             </div>
           </div>
@@ -510,11 +515,15 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
                     className="w-full border border-gray-300 rounded-md px-3 py-2"
                   />
                   {formData.imagePreviews.additional[index] && (
-                    <img 
-                      src={formData.imagePreviews.additional[index]} 
-                      alt={`Additional preview ${index + 1}`} 
-                      className="w-full h-32 object-cover border rounded-md"
-                    />
+                    <div className="relative w-full h-32">
+                      <Image 
+                        src={formData.imagePreviews.additional[index]} 
+                        alt={`Additional preview ${index + 1}`} 
+                        fill
+                        className="object-cover border rounded-md"
+                        sizes="(max-width: 768px) 100vw, 300px"
+                      />
+                    </div>
                   )}
                 </div>
               ))}
