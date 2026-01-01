@@ -255,7 +255,7 @@ export default function HomePage() {
             
             {/* Right Image */}
             <div className="w-full md:w-1/2 animate-fadeIn" style={{animationDelay: '0.3s'}}>
-              <div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] bg-gray-100 rounded-lg overflow-hidden">
+              <div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] bg-gray-100 rounded-lg overflow-hidden shadow-xl">
                 <Image
                   key={imageKey}
                   src={homepageContent.heroImage || '/images/home-page-1.png'}
@@ -263,10 +263,10 @@ export default function HomePage() {
                   fill
                   priority
                   quality={90}
-                  unoptimized={!homepageContent.heroImage || homepageContent.heroImage?.startsWith('/images')}
-                  className="rounded-lg shadow-xl object-cover"
-                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, 50vw"
-                  style={{ objectFit: 'cover' }}
+                  unoptimized
+                  className="object-cover"
+                  sizes="100vw"
+                  style={{ objectFit: 'cover', width: '100%', height: '100%' }}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     console.error('Hero image failed to load:', target.src);
