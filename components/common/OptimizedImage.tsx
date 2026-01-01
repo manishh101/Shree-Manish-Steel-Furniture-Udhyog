@@ -18,6 +18,7 @@ interface OptimizedImageProps {
   onError?: () => void;
   priority?: boolean;
   fill?: boolean;
+  objectFit?: 'cover' | 'contain' | 'fill' | 'none';
 }
 
 interface ImageState {
@@ -69,6 +70,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   onError,
   priority = false,
   fill = true,
+  objectFit = 'cover', // Default to cover, can be changed to 'contain' for galleries
 }) => {
   const [imageState, setImageState] = useState<ImageState>({
     loaded: false,
@@ -98,6 +100,18 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     return '/images/furniture-1.jpg';
   };
 
+  // Reset loaded state when src changes (for image sliding functionality)
+  useEffect(() => {
+    const newSrc = getOptimizedSrc();
+    setImageState(prev => ({
+      ...prev,
+      loaded: false,
+      error: false,
+      currentSrc: newSrc
+    }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src]);
+
   // Intersection Observer for lazy loading (only when not using priority)
   useEffect(() => {
     if (priority || !lazy || isInView) {
@@ -125,7 +139,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
     return () => observer.disconnect();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [src, size, lazy, category, priority]);
+  }, [size, lazy, category, priority]);
 
   const handleLoad = () => {
     setImageState(prev => ({ ...prev, loaded: true }));
@@ -196,7 +210,8 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
           onLoad={handleLoad}
           onError={handleError}
           className={`
-            object-cover transition-all duration-500 ease-out
+            ${objectFit === 'contain' ? 'object-contain' : objectFit === 'fill' ? 'object-fill' : objectFit === 'none' ? 'object-none' : 'object-cover'}
+            transition-all duration-500 ease-out
             ${imageState.loaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}
             ${className}
           `}
