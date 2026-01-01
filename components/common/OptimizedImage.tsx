@@ -9,6 +9,8 @@ interface OptimizedImageProps {
   src?: string | null;
   alt?: string;
   className?: string;
+  imageClassName?: string;
+  containerClassName?: string;
   style?: React.CSSProperties;
   size?: 'small' | 'medium' | 'large' | 'thumbnail';
   category?: string;
@@ -61,6 +63,8 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   src,
   alt = 'Product Image',
   className = '',
+  imageClassName = '',
+  containerClassName = '',
   style = {},
   size = 'medium',
   category = '',
@@ -177,18 +181,32 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     onError?.();
   };
 
+  // Check if caller provided explicit sizing classes (h-*, w-*)
+  const hasExplicitSize = className && /\b[hw]-\d+|\b[hw]-\[/.test(className);
+
   const combinedClassName = `
     relative overflow-hidden bg-gray-100
     ${aspectRatioClasses[aspectRatio] || ''}
-    ${aspectRatio === 'auto' ? 'w-full h-full' : ''}
+    ${aspectRatio === 'auto' && !hasExplicitSize ? 'w-full h-full' : ''}
   `.trim();
 
+  // Merge container-specific classes so caller sizing (h/w/rounded) applies to wrapper
+  // Put className AFTER combinedClassName so caller's explicit sizes take precedence
+  const wrapperClassName = [combinedClassName, className, containerClassName]
+    .filter(Boolean)
+    .join(' ');
+
   const imageSrc = imageState.currentSrc || getOptimizedSrc();
+  const isRemote = imageSrc.startsWith('http');
+
+  // Use unoptimized rendering for any remote URL (including non-Cloudinary)
+  // so admin pages still show images even if the domain is not whitelisted
+  const shouldUnoptimize = isRemote;
 
   return (
     <div 
       ref={imgRef}
-      className={combinedClassName}
+      className={wrapperClassName}
       style={style}
     >
       {/* Loading placeholder - with smoother transition */}
@@ -213,9 +231,9 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
             ${objectFit === 'contain' ? 'object-contain' : objectFit === 'fill' ? 'object-fill' : objectFit === 'none' ? 'object-none' : 'object-cover'}
             transition-all duration-500 ease-out
             ${imageState.loaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}
-            ${className}
+            ${imageClassName || className}
           `}
-          unoptimized={imageSrc.includes('res.cloudinary.com')} // Cloudinary handles its own optimization
+          unoptimized={shouldUnoptimize}
         />
       )}
     </div>
