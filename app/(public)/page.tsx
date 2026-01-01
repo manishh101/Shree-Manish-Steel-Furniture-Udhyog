@@ -255,24 +255,30 @@ export default function HomePage() {
             
             {/* Right Image */}
             <div className="w-full md:w-1/2 animate-fadeIn" style={{animationDelay: '0.3s'}}>
-              <div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px]">
+              <div className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] bg-gray-100 rounded-lg overflow-hidden">
                 <Image
                   key={imageKey}
                   src={homepageContent.heroImage || '/images/home-page-1.png'}
                   alt="Manish Steel Furniture Collection" 
                   fill
                   priority
-                  quality={85}
+                  quality={90}
+                  unoptimized={!homepageContent.heroImage || homepageContent.heroImage?.startsWith('/images')}
                   className="rounded-lg shadow-xl object-cover"
                   sizes="(max-width: 640px) 100vw, (max-width: 768px) 100vw, 50vw"
+                  style={{ objectFit: 'cover' }}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
+                    console.error('Hero image failed to load:', target.src);
                     if (target.src !== '/images/home-page-1.png') {
                       target.src = '/images/home-page-1.png';
                     }
                   }}
+                  onLoadingComplete={(result) => {
+                    console.log('Hero image loaded:', result.naturalWidth, 'x', result.naturalHeight);
+                  }}
                 />
-                <div className="absolute -bottom-4 -right-4 bg-accent w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center text-primary font-bold text-sm sm:text-lg z-10">
+                <div className="absolute -bottom-4 -right-4 bg-accent w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center text-primary font-bold text-sm sm:text-lg z-10 shadow-lg">
                   New<br/>Designs
                 </div>
               </div>
