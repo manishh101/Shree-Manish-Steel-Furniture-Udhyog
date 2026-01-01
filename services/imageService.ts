@@ -53,21 +53,36 @@ class ImageService {
   }
 
   static getOptimizedImageUrl(imageUrl: string | null | undefined, options: TransformationOptions = {}): string {
-    // If no image URL provided, use Cloudinary placeholder
+    // If no image URL provided, use placeholder
     if (!imageUrl) {
-      return this.getCloudinaryPlaceholder(options.category);
+      return this.getPlaceholderImage(options.category);
     }
 
     // Clean and normalize the URL
     const cleanUrl = imageUrl.trim();
+    
+    // If empty after trim, use placeholder
+    if (!cleanUrl) {
+      return this.getPlaceholderImage(options.category);
+    }
 
-    // PRIORITY 1: Cloudinary URLs - fix double transformation and missing cloud names
+    // PRIORITY 1: Cloudinary URLs - optimize them
     if (this.isCloudinaryUrl(cleanUrl)) {
       return this.fixCloudinaryUrl(cleanUrl, options);
     }
     
-    // PRIORITY 2: Convert all other URLs to Cloudinary for production
-    return this.convertToCloudinaryUrl(cleanUrl, options);
+    // PRIORITY 2: Local URLs (starting with /) - return as-is
+    if (cleanUrl.startsWith('/')) {
+      return cleanUrl;
+    }
+    
+    // PRIORITY 3: External URLs - return as-is (don't try to convert)
+    if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
+      return cleanUrl;
+    }
+    
+    // PRIORITY 4: Relative paths - prepend /
+    return `/${cleanUrl}`;
   }
 
   static getApiBaseUrl(): string {

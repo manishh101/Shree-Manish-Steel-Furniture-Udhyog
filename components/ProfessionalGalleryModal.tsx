@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import OptimizedImage from './common/OptimizedImage';
 import { FaTimes, FaChevronLeft, FaChevronRight, FaTh } from 'react-icons/fa';
 
 interface ProfessionalGalleryModalProps {
@@ -20,7 +19,6 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
   productName = 'Product Gallery' 
 }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
-  const [isLoading, setIsLoading] = useState(true);
   const [imageLoadErrors, setImageLoadErrors] = useState<Set<number>>(new Set());
   const [showThumbnails, setShowThumbnails] = useState(true);
   const thumbnailsContainerRef = useRef<HTMLDivElement>(null);
@@ -35,7 +33,6 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
     if (isOpen) {
       setCurrentIndex(initialIndex);
       setImageLoadErrors(new Set());
-      setIsLoading(true);
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -97,7 +94,6 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
     if (images.length <= 1) return;
     
     setCurrentIndex((prev) => (prev + 1) % images.length);
-    setIsLoading(true);
     
     if (thumbnailsContainerRef.current) {
       const nextIndex = (currentIndex + 1) % images.length;
@@ -109,7 +105,6 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
     if (images.length <= 1) return;
     
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-    setIsLoading(true);
     
     if (thumbnailsContainerRef.current) {
       const prevIndex = (currentIndex - 1 + images.length) % images.length;
@@ -118,7 +113,6 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
   }, [images.length, currentIndex]);
 
   const handleImageLoad = () => {
-    setIsLoading(false);
     if (thumbnailsContainerRef.current) {
       scrollToThumbnail(currentIndex);
     }
@@ -126,7 +120,6 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
 
   const handleImageError = (index: number) => {
     setImageLoadErrors(prev => new Set(prev).add(index));
-    setIsLoading(false);
   };
   
   // Touch event handlers
@@ -159,7 +152,7 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
   const handleThumbnailClick = (index: number) => {
     if (currentIndex !== index) {
       setCurrentIndex(index);
-      setIsLoading(true);
+      scrollToThumbnail(index);
     }
   };
 
@@ -212,12 +205,6 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
-          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-white/20 border-t-white"></div>
-            </div>
-          )}
-          
           {hasError ? (
             <div className="text-center text-white/70">
               <svg className="w-16 h-16 mx-auto mb-4 text-white/40" viewBox="0 0 24 24" fill="currentColor">
@@ -226,15 +213,14 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
               <p>Unable to load this image</p>
             </div>
           ) : (
-            <OptimizedImage
+            <img
+              key={`gallery-main-${currentIndex}`}
               src={currentImageUrl}
               alt={`${productName} - Image ${currentIndex + 1}`}
               onLoad={handleImageLoad}
               onError={() => handleImageError(currentIndex)}
-              className={`max-h-[70vh] max-w-full object-contain transition-opacity duration-300 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
-              size="large"
-              category={productName}
-              lazy={false}
+              className="max-w-full max-h-[70vh] object-contain transition-opacity duration-300"
+              style={{ margin: 'auto' }}
             />
           )}
           
@@ -282,13 +268,10 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
                   }`}
                   onClick={() => handleThumbnailClick(index)}
                 >
-                  <OptimizedImage
+                  <img
                     src={image}
-                    alt={`Thumbnail ${index + 1}`} 
+                    alt={`Thumbnail ${index + 1}`}
                     className="w-full h-full object-cover"
-                    size="thumbnail"
-                    category={productName}
-                    lazy={false}
                   />
                 </button>
               ))}

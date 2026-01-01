@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { FaTimes, FaEye } from 'react-icons/fa';
 import imageService from '@/services/imageService';
-import OptimizedImage from './common/OptimizedImage';
 
 interface Product {
   _id?: string;
@@ -132,16 +131,19 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
             {/* Enhanced Image Section */}
             <div className="space-y-4">
               <div className="relative group">
-                <OptimizedImage
-                  src={product.image || (product.images && product.images[0])}
-                  alt={imageService.getImageAlt(product)}
-                  category={product.category}
-                  size="large"
-                  className="w-full h-64 md:h-80 lg:h-96 rounded-xl shadow-md transition-transform group-hover:scale-105"
-                  lazy={false}
-                  onLoad={() => setLoadedImages(prev => ({...prev, [product._id || product.id || '']: true}))}
-                  onError={() => {}}
-                />
+                <div className="relative w-full h-64 md:h-80 lg:h-96 rounded-xl shadow-md overflow-hidden bg-gray-100 flex items-center justify-center">
+                  <img
+                    key={`quickview-${product._id || product.id}-main`}
+                    src={product.image || (product.images && product.images[0]) || '/images/furniture-1.jpg'}
+                    alt={imageService.getImageAlt(product)}
+                    className="w-full h-full object-contain transition-transform group-hover:scale-105"
+                    onLoad={() => setLoadedImages(prev => ({...prev, [product._id || product.id || '']: true}))}
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/images/furniture-1.jpg';
+                    }}
+                  />
+                </div>
                 
                 {/* Full Screen View Button */}
                 <button
@@ -162,7 +164,7 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
                       `);
                     }
                   }}
-                  className="absolute top-3 right-3 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-2 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100"
+                  className="absolute top-3 right-3 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-2 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100 z-10"
                 >
                   <FaEye className="h-4 w-4" />
                 </button>
@@ -172,15 +174,20 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
               {product.images && product.images.length > 1 && (
                 <div className="flex gap-2 overflow-x-auto">
                   {product.images.slice(0, 4).map((image, index) => (
-                    <OptimizedImage
+                    <div 
                       key={index}
-                      src={image}
-                      alt={`${product.name} ${index + 1}`}
-                      category={product.category}
-                      size="thumbnail"
-                      className="w-16 h-16 rounded-lg border-2 border-gray-200 hover:border-primary cursor-pointer transition-colors flex-shrink-0"
-                      lazy={false}
-                    />
+                      className="relative w-16 h-16 rounded-lg border-2 border-gray-200 hover:border-primary cursor-pointer transition-colors flex-shrink-0 overflow-hidden"
+                    >
+                      <img
+                        src={image}
+                        alt={`${product.name} ${index + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/images/furniture-1.jpg';
+                        }}
+                      />
+                    </div>
                   ))}
                 </div>
               )}

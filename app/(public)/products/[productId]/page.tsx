@@ -7,7 +7,6 @@ import { FaChevronLeft, FaChevronRight, FaExpand, FaTimes, FaShare, FaHeart } fr
 import { productAPI, Product } from '@/services/api';
 import { scrollToTop } from '@/utils/scrollUtils';
 import imageService from '@/services/imageService';
-import OptimizedImage from '@/components/common/OptimizedImage';
 import ProductCard from '@/components/common/ProductCard';
 import QuickView from '@/components/QuickView';
 import useQuickView from '@/hooks/useQuickView';
@@ -36,7 +35,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [imageLoading, setImageLoading] = useState(false);
   const [touchPosition, setTouchPosition] = useState<{ x: number; y: number } | null>(null);
   const [fullScreenView, setFullScreenView] = useState(false);
   const imageContainerRef = useRef<HTMLDivElement>(null);
@@ -57,12 +55,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
     // PRIORITY 1: Product images array from database
     if (product?.images?.length) {
       const validImages = product.images
-        .filter(img => img && typeof img === 'string')
-        .map(img => imageService.getOptimizedImageUrl(img, {
-          category: product.category,
-          width: 800,
-          height: 800
-        }));
+        .filter(img => img && typeof img === 'string' && img.trim() !== '');
       
       if (validImages.length > 0) {
         images = [...validImages];
@@ -70,28 +63,23 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
     }
     
     // PRIORITY 2: Main product image if not already included
-    if (product?.image && typeof product.image === 'string') {
-      const optimizedMainImage = imageService.getOptimizedImageUrl(product.image, {
-        category: product.category,
-        width: 800,
-        height: 800
-      });
+    if (product?.image && typeof product.image === 'string' && product.image.trim() !== '') {
+      const mainImage = product.image.trim();
       
       const isDuplicate = images.some(img => {
         const normalizedImg = img.split('?')[0];
-        const normalizedMain = optimizedMainImage.split('?')[0];
+        const normalizedMain = mainImage.split('?')[0];
         return normalizedImg === normalizedMain;
       });
       
       if (!isDuplicate) {
-        images.unshift(optimizedMainImage);
+        images.unshift(mainImage);
       }
     }
     
     // Only use placeholders if absolutely needed
     if (images.length === 0) {
-      const placeholder = imageService.getPlaceholderImage(product?.category);
-      images.push(placeholder);
+      images.push('/images/furniture-1.jpg');
     }
     
     return images;
@@ -104,13 +92,11 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
         const newIndex = selectedImageIndex > 0 
           ? selectedImageIndex - 1 
           : allImages.length - 1;
-        setImageLoading(true);
         setSelectedImageIndex(newIndex);
       } else if (e.key === 'ArrowRight') {
         const newIndex = selectedImageIndex < allImages.length - 1 
           ? selectedImageIndex + 1 
           : 0;
-        setImageLoading(true);
         setSelectedImageIndex(newIndex);
       } else if (e.key === 'Escape') {
         if (fullScreenView) {
@@ -132,22 +118,7 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
     const safeIndex = Math.min(Math.max(0, index), allImages.length - 1);
     
     if (safeIndex !== selectedImageIndex) {
-      const img = new Image();
-      img.src = allImages[safeIndex];
-      
-      if (img.complete) {
-        setSelectedImageIndex(safeIndex);
-      } else {
-        setImageLoading(true);
-        img.onload = () => {
-          setSelectedImageIndex(safeIndex);
-          setImageLoading(false);
-        };
-        img.onerror = () => {
-          setSelectedImageIndex(safeIndex);
-          setImageLoading(false);
-        };
-      }
+      setSelectedImageIndex(safeIndex);
     }
   };
   
@@ -156,7 +127,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
     const newIndex = selectedImageIndex > 0 
       ? selectedImageIndex - 1 
       : allImages.length - 1;
-    setImageLoading(true);
     setSelectedImageIndex(newIndex);
   };
   
@@ -165,7 +135,6 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
     const newIndex = selectedImageIndex < allImages.length - 1 
       ? selectedImageIndex + 1 
       : 0;
-    setImageLoading(true);
     setSelectedImageIndex(newIndex);
   };
   
@@ -522,21 +491,29 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
                   <FaChevronRight className="text-gray-700 text-xl" />
                 </button>
                 
-                {imageLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-80 z-20">
-                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-opacity-40 border-t-primary"></div>
-                  </div>
-                )}
-                
                 {/* Main product image */}
-                <div onClick={handleImageZoom} className="cursor-pointer">
-                  <OptimizedImage
-                    src={allImages[selectedImageIndex]}
-                    alt={imageService.getImageAlt(product) || "Product Image"}
-                    fill
-                    className={`object-contain transition-all duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
-                    priority
-                  />
+                <div 
+                  onClick={handleImageZoom} 
+                  className="absolute inset-0 cursor-pointer flex items-center justify-center bg-gray-50 p-4"
+                >
+                  {allImages.length > 0 && allImages[selectedImageIndex] ? (
+                    <img
+                      key={`product-main-${selectedImageIndex}`}
+                      src={allImages[selectedImageIndex]}
+                      alt={imageService.getImageAlt(product) || "Product Image"}
+                      className="w-full h-full object-contain transition-opacity duration-300"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/images/furniture-1.jpg';
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src="/images/furniture-1.jpg"
+                      alt="Product Image"
+                      className="w-full h-full object-contain"
+                    />
+                  )}
                 </div>
                 
                 {/* Enlarge button */}
@@ -557,20 +534,19 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
                   {allImages.slice(0, 4).map((img, idx) => (
                     <button
                       key={idx}
-                      onClick={() => setSelectedImageIndex(idx)}
-                      className={`w-32 h-32 rounded-xl border-2 transition-all duration-200 bg-gray-50 shadow-sm hover:shadow-lg ${selectedImageIndex === idx ? 'border-primary ring-2 ring-primary' : 'border-gray-200 hover:border-primary'}`}
+                      onClick={() => handleThumbnailClick(idx)}
+                      className={`w-32 h-32 rounded-xl border-2 transition-all duration-200 bg-gray-50 shadow-sm hover:shadow-lg overflow-hidden ${selectedImageIndex === idx ? 'border-primary ring-2 ring-primary' : 'border-gray-200 hover:border-primary'}`}
                       aria-label={`View product image ${idx + 1}`}
                     >
-                      <div className="w-full h-full overflow-hidden rounded-xl relative">
-                        <OptimizedImage
-                          src={img}
-                          alt={`Product view ${idx + 1}`}
-                          category={product?.category}
-                          size="thumbnail"
-                          className="w-full h-full object-cover"
-                          lazy={false}
-                        />
-                      </div>
+                      <img
+                        src={img}
+                        alt={`Product view ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/images/furniture-1.jpg';
+                        }}
+                      />
                     </button>
                   ))}
                 </div>
@@ -976,16 +952,18 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
           
           {/* Full screen image */}
           <div 
-            className="max-w-full max-h-full p-4"
+            className="flex items-center justify-center w-full h-full p-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <OptimizedImage
+            <img
+              key={`fullscreen-${selectedImageIndex}`}
               src={allImages[selectedImageIndex]}
               alt={imageService.getImageAlt(product) || "Product Image"}
-              category={product?.category}
-              size="large"
-              className="max-w-full max-h-full object-contain"
-              lazy={false}
+              className="max-w-full max-h-[85vh] object-contain"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = '/images/furniture-1.jpg';
+              }}
             />
           </div>
           
