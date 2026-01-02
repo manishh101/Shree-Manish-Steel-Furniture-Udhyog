@@ -219,9 +219,9 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="min-h-[85vh] flex items-center justify-center bg-background py-8">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center">
+          <div className="flex flex-col md:flex-row items-center gap-8 md:gap-10">
             {/* Left Content */}
-            <div className="md:w-1/2 mb-10 md:mb-0 md:pr-10 animate-fadeIn">
+            <div className="md:w-[48%] lg:w-[45%] mb-10 md:mb-0 animate-fadeIn">
               {/* Premium Typography for Shree Manish Steel Furniture Udhyog */}
               <div className="text-center md:text-left">
                 <p className="text-xs md:text-sm text-primary/80 font-medium tracking-widest uppercase mb-2 animate-fadeIn">
@@ -255,8 +255,8 @@ export default function HomePage() {
             
            
             {/* Right Image */}
-            <div className="w-full md:w-1/2 animate-fadeIn mt-8 md:mt-0" style={{animationDelay: '0.3s'}}>
-              <div className="relative w-full h-[280px] sm:h-[320px] md:h-[500px] mx-auto" style={{ maxWidth: '500px' }}>
+            <div className="w-full md:w-[52%] lg:w-[55%] animate-fadeIn mt-8 md:mt-0" style={{animationDelay: '0.3s'}}>
+              <div className="relative w-full h-[320px] sm:h-[380px] md:aspect-[3/2] md:h-auto lg:aspect-[3/2] lg:h-auto xl:aspect-[3/2] xl:h-auto">
                 <Image
                   key={imageKey}
                   src={(homepageContent.heroImage && homepageContent.heroImage.trim() !== '') ? homepageContent.heroImage : '/images/home-page-1.png'}
@@ -264,9 +264,9 @@ export default function HomePage() {
                   fill
                   priority
                   quality={85}
-                  className="rounded-lg shadow-xl"
-                  style={{ objectFit: 'contain' }}
-                  sizes="(max-width: 768px) 90vw, 45vw"
+                  className="rounded-2xl shadow-xl"
+                  style={{ objectFit: 'cover' }}
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 52vw, 55vw"
                   unoptimized={homepageContent.heroImage?.includes('cloudinary') ? false : true}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
