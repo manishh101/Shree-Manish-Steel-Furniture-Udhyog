@@ -217,7 +217,7 @@ export default function HomePage() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="min-h-[85vh] flex items-center justify-center bg-background overflow-hidden py-8">
+      <section className="min-h-[85vh] flex items-center justify-center bg-background py-8">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row items-center">
             {/* Left Content */}
@@ -253,26 +253,29 @@ export default function HomePage() {
               </div>
             </div>
             
+           
             {/* Right Image */}
-            <div className="md:w-1/2 animate-fadeIn" style={{animationDelay: '0.3s'}}>
-              <div className="relative h-[400px] md:h-[500px]">
+            <div className="w-full md:w-1/2 animate-fadeIn mt-8 md:mt-0" style={{animationDelay: '0.3s'}}>
+              <div className="relative w-full h-[280px] sm:h-[320px] md:h-[450px] mx-auto" style={{ maxWidth: '450px' }}>
                 <Image
                   key={imageKey}
-                  src={homepageContent.heroImage || '/images/home-page-1.png'}
+                  src={(homepageContent.heroImage && homepageContent.heroImage.trim() !== '') ? homepageContent.heroImage : '/images/home-page-1.png'}
                   alt="Manish Steel Furniture Collection" 
                   fill
                   priority
                   quality={85}
-                  className="rounded-lg shadow-xl object-cover"
-                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className="rounded-lg shadow-xl"
+                  style={{ objectFit: 'contain' }}
+                  sizes="(max-width: 768px) 90vw, 45vw"
+                  unoptimized={homepageContent.heroImage?.includes('cloudinary') ? false : true}
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
-                    if (target.src !== '/images/home-page-1.png') {
+                    if (!target.src.includes('home-page-1.png')) {
                       target.src = '/images/home-page-1.png';
                     }
                   }}
                 />
-                <div className="absolute -bottom-4 -right-4 bg-accent w-24 h-24 rounded-full flex items-center justify-center text-primary font-bold text-lg z-10">
+                <div className="absolute -bottom-2 -right-2 md:-bottom-4 md:-right-4 bg-accent w-16 h-16 md:w-24 md:h-24 rounded-full flex items-center justify-center text-primary font-bold text-xs md:text-lg z-10 shadow-lg">
                   New<br/>Designs
                 </div>
               </div>

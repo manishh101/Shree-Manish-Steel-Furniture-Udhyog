@@ -78,8 +78,14 @@ const AdminHomepage = () => {
       formData.append('image', file);
       formData.append('folder', 'manish-steel/homepage');
       
+      // Get auth token from storage
+      const token = localStorage.getItem('token');
+      
       const response = await fetch('/api/upload', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
         body: formData,
       });
       

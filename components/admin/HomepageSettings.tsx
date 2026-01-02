@@ -104,28 +104,31 @@ const HomepageSettings: React.FC = () => {
       };
       reader.readAsDataURL(file);
 
-      // Upload to Cloudinary
+      // Upload via API route (handles authentication)
       const formData = new FormData();
-      formData.append('file', file);
-      formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+      formData.append('image', file);
       formData.append('folder', 'homepage');
 
-      const cloudinaryResponse = await fetch(
-        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-        {
-          method: 'POST',
-          body: formData,
-        }
-      );
+      // Get auth token from storage
+      const token = localStorage.getItem('token');
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-      if (!cloudinaryResponse.ok) {
-        throw new Error('Failed to upload image to Cloudinary');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to upload image');
       }
 
-      const cloudinaryData = await cloudinaryResponse.json();
-      const uploadedImageUrl = cloudinaryData.secure_url;
+      const data = await response.json();
+      const uploadedImageUrl = data.url;
 
-      // Update state with Cloudinary URL
+      // Update state with uploaded URL
       setHeroImage(uploadedImageUrl);
       setPreviewImage(null); // Clear preview since we now have the real URL
       setIsUploading(false);
@@ -135,7 +138,7 @@ const HomepageSettings: React.FC = () => {
       console.error('Error uploading image:', error);
       setIsUploading(false);
       setPreviewImage(null);
-      showMessage('Failed to upload image. Please try again.', false);
+      showMessage(error instanceof Error ? error.message : 'Failed to upload image. Please try again.', false);
     }
   };
 
