@@ -256,7 +256,7 @@ export default function HomePage() {
            
             {/* Right Image */}
             <div className="w-full md:w-1/2 animate-fadeIn mt-8 md:mt-0" style={{animationDelay: '0.3s'}}>
-              <div className="relative w-full h-[280px] sm:h-[320px] md:h-[450px] mx-auto" style={{ maxWidth: '450px' }}>
+              <div className="relative w-full h-[280px] sm:h-[320px] md:h-[500px] mx-auto" style={{ maxWidth: '500px' }}>
                 <Image
                   key={imageKey}
                   src={(homepageContent.heroImage && homepageContent.heroImage.trim() !== '') ? homepageContent.heroImage : '/images/home-page-1.png'}
