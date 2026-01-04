@@ -395,6 +395,45 @@ export default function ProductDetailPage({ params }: { params: Promise<{ produc
 
   return (
     <div className="bg-gray-50 min-h-screen py-4 sm:py-6 lg:py-8 pb-20 sm:pb-8">
+      {/* Product Structured Data for Google */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org/',
+            '@type': 'Product',
+            name: product.name,
+            image: allImages,
+            description: product.description || `${product.name} - High-quality steel furniture from Shree Manish Steel Furniture Nepal`,
+            brand: {
+              '@type': 'Brand',
+              name: 'Shree Manish Steel Furniture'
+            },
+            manufacturer: {
+              '@type': 'Organization',
+              name: 'Shree Manish Steel Furniture Udhyog',
+              address: {
+                '@type': 'PostalAddress',
+                streetAddress: 'Biratnagar',
+                addressLocality: 'Biratnagar',
+                addressRegion: 'Province 1',
+                addressCountry: 'NP'
+              }
+            },
+            category: product.subcategory || product.category || 'Steel Furniture',
+            offers: {
+              '@type': 'Offer',
+              availability: product.inStock !== false ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+              priceCurrency: 'NPR',
+              seller: {
+                '@type': 'Organization',
+                name: 'Shree Manish Steel Furniture Udhyog'
+              }
+            }
+          })
+        }}
+      />
+      
       {/* Mobile Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 sm:hidden z-40 shadow-lg">
         <div className="flex items-center gap-2">

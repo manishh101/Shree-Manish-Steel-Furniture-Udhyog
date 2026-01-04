@@ -15,17 +15,24 @@ export async function GET(
     const { id } = await params;
     await connectDB();
 
-    const product = await Product.findById(id)
+    const rawProduct = await Product.findById(id)
       .populate('categoryId', 'name')
       .populate('subcategoryId', 'name')
       .lean();
 
-    if (!product) {
+    if (!rawProduct) {
       return NextResponse.json(
         { error: 'Product not found' },
         { status: 404 }
       );
     }
+
+    // Transform product to include category and subcategory as string fields
+    const product = {
+      ...rawProduct,
+      category: (rawProduct as any).category || ((rawProduct as any).categoryId?.name) || 'Steel Furniture',
+      subcategory: (rawProduct as any).subcategory || ((rawProduct as any).subcategoryId?.name) || null,
+    };
 
     return NextResponse.json(product);
   } catch (error) {

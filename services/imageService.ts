@@ -244,9 +244,13 @@ class ImageService {
     if (!product) return 'Product image';
     
     const name = product.name || 'Product';
+    const subcategory = (product as any).subcategory || '';
     const category = product.category || '';
     
-    return category ? `${name} - ${category}` : name;
+    // Prefer subcategory for better SEO specificity
+    const categoryLabel = subcategory || category;
+    
+    return categoryLabel ? `${name} - ${categoryLabel} - Shree Manish Steel Furniture Nepal` : `${name} - Steel Furniture Nepal`;
   }
 }
 

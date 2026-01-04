@@ -10,9 +10,23 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata: Metadata = {
-  title: 'About Us - Best Furniture Manufacturer in Biratnagar',
-  description: 'Shree Manish Steel Furniture - Trusted furniture manufacturer in Biratnagar since 2009. Quality steel and wood furniture for homes and offices. Visit our showroom in Biratnagar.',
-  keywords: ['furniture manufacturer Biratnagar', 'about Manish Steel', 'furniture company Nepal', 'steel furniture factory'],
+  title: 'हाम्रो बारेमा | About Us - श्री मनिष स्टील फर्निचर विराटनगर',
+  description: 'श्री मनिष स्टील फर्निचर - विराटनगरको विश्वसनीय फर्निचर उत्पादक। २००९ देखि गुणस्तरीय स्टील र काठको फर्निचर। Trusted furniture manufacturer in Biratnagar since 2009.',
+  keywords: [
+    // Nepali keywords
+    'फर्निचर उत्पादक विराटनगर',
+    'स्टील फर्निचर कम्पनी नेपाल',
+    'श्री मनिष स्टील',
+    'फर्निचर कारखाना विराटनगर',
+    // English keywords
+    'furniture manufacturer Biratnagar',
+    'about Manish Steel',
+    'furniture company Nepal',
+    'steel furniture factory',
+  ],
+  openGraph: {
+    locale: 'ne_NP',
+  },
 };
 
 // Default content - fallback if database fetch fails

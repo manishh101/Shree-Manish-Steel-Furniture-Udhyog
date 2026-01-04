@@ -3,9 +3,24 @@ import ContactPageContent from '@/components/ContactPageContent';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Contact Us - Visit Our Furniture Showroom in Biratnagar',
-  description: 'Contact Shree Manish Steel Furniture in Biratnagar. Visit our showroom, call us, or send inquiry. Free furniture delivery in Biratnagar, Dharan, Itahari. Phone: 9824336371',
-  keywords: ['furniture shop Biratnagar address', 'contact furniture shop Nepal', 'furniture showroom Biratnagar', 'furniture delivery Biratnagar'],
+  title: 'सम्पर्क | Contact Us - श्री मनिष स्टील फर्निचर विराटनगर',
+  description: 'हामीलाई सम्पर्क गर्नुहोस्। श्री मनिष स्टील फर्निचर शोरुम विराटनगर। विराटनगर, धरान, इटहरीमा निःशुल्क डेलिभरी। फोन: 9824336371। Contact us for steel furniture in Biratnagar.',
+  keywords: [
+    // Nepali keywords
+    'फर्निचर पसल विराटनगर ठेगाना',
+    'फर्निचर सम्पर्क नेपाल',
+    'फर्निचर शोरुम विराटनगर',
+    'फर्निचर डेलिभरी विराटनगर',
+    'स्टील फर्निचर किन्ने',
+    // English keywords
+    'furniture shop Biratnagar address',
+    'contact furniture shop Nepal',
+    'furniture showroom Biratnagar',
+    'furniture delivery Biratnagar',
+  ],
+  openGraph: {
+    locale: 'ne_NP',
+  },
 };
 
 export default function ContactPage() {

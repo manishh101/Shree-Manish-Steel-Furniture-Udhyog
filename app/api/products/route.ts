@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    const [products, totalProducts] = await Promise.all([
+    const [rawProducts, totalProducts] = await Promise.all([
       Product.find(query)
         .populate('categoryId', 'name')
         .populate('subcategoryId', 'name')
@@ -44,6 +44,15 @@ export async function GET(request: NextRequest) {
         .lean(),
       Product.countDocuments(query)
     ]);
+
+    // Transform products to include category and subcategory as string fields
+    const products = rawProducts.map((product: any) => ({
+      ...product,
+      // Ensure category is a string (from populated categoryId or existing category field)
+      category: product.category || (product.categoryId?.name) || 'Steel Furniture',
+      // Ensure subcategory is a string (from populated subcategoryId or existing subcategory field)
+      subcategory: product.subcategory || (product.subcategoryId?.name) || null,
+    }));
 
     return NextResponse.json({
       products,

@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Product from '@/models/Product';
 import '@/models/Category'; // Required for populate()
+import '@/models/Subcategory'; // Required for populate()
+
+// Helper function to transform products with subcategory names
+function transformProducts(products: any[]) {
+  return products.map((product: any) => ({
+    ...product,
+    category: product.category || product.categoryId?.name || 'Steel Furniture',
+    subcategory: product.subcategory || product.subcategoryId?.name || null,
+  }));
+}
 
 // GET /api/products/top-products - Get top products
 export async function GET(request: NextRequest) {
@@ -14,6 +24,7 @@ export async function GET(request: NextRequest) {
     // First try to get products marked as isTopProduct
     let products = await Product.find({ isTopProduct: true })
       .populate('categoryId', 'name')
+      .populate('subcategoryId', 'name')
       .sort({ rating: -1, salesCount: -1 })
       .limit(limit)
       .lean();
@@ -22,6 +33,7 @@ export async function GET(request: NextRequest) {
     if (!products || products.length === 0) {
       products = await Product.find({ featured: true })
         .populate('categoryId', 'name')
+        .populate('subcategoryId', 'name')
         .sort({ createdAt: -1 })
         .limit(limit)
         .lean();
@@ -31,13 +43,17 @@ export async function GET(request: NextRequest) {
     if (!products || products.length === 0) {
       products = await Product.find({})
         .populate('categoryId', 'name')
+        .populate('subcategoryId', 'name')
         .sort({ createdAt: -1 })
         .limit(limit)
         .lean();
     }
 
+    // Transform products to include subcategory names
+    const transformedProducts = transformProducts(products);
+
     // Return in the expected format { products: [] }
-    return NextResponse.json({ products });
+    return NextResponse.json({ products: transformedProducts });
   } catch (error) {
     console.error('Error fetching top products:', error);
     return NextResponse.json(

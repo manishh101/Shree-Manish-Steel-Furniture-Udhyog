@@ -92,7 +92,7 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    const [products, totalProducts] = await Promise.all([
+    const [rawProducts, totalProducts] = await Promise.all([
       Product.find(query)
         .populate('categoryId', 'name')
         .populate('subcategoryId', 'name')
@@ -102,6 +102,13 @@ export async function GET(request: NextRequest) {
         .lean(),
       Product.countDocuments(query)
     ]);
+
+    // Transform products to include subcategory names
+    const products = rawProducts.map((product: any) => ({
+      ...product,
+      category: product.category || product.categoryId?.name || 'Steel Furniture',
+      subcategory: product.subcategory || product.subcategoryId?.name || null,
+    }));
 
     return NextResponse.json({
       products,

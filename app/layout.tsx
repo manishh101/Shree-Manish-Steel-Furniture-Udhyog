@@ -31,12 +31,14 @@ const playfairDisplay = Playfair_Display({
 // Site configuration
 const siteConfig = {
   name: 'Shree Manish Steel Furniture Udhyog',
-  description: "Best & Cheapest Furniture in Biratnagar, Nepal! Affordable steel & wood furniture - Office, School, Home. Premium quality beds (palang), almirahs, tables, chairs at best prices. Cheaper than Daraz! Free delivery in Biratnagar, Dharan, Itahari. Call: 9824336371",
+  nameNepali: 'श्री मनिष स्टील फर्निचर उद्योग',
+  description: "विराटनगरको सबैभन्दा सस्तो र राम्रो फर्निचर! Best & Cheapest Furniture in Biratnagar, Nepal! Affordable steel & wood furniture - Office, School, Home. Premium quality beds (palang/खाट), almirahs (अलमिरा), tables, chairs at best prices. Cheaper than Daraz! Free delivery in Biratnagar, Dharan, Itahari. Call: 9824336371",
   url: 'https://manishsteel.com.np',
   ogImage: 'https://manishsteel.com.np/images/og-image.jpg',
   phone: '+977 9824336371',
   email: 'shreemanishfurniture@gmail.com',
   address: 'Biratnagar-4, Main Road, Morang, Nepal',
+  addressNepali: 'विराटनगर-४, मुख्य सडक, मोरङ, नेपाल',
   links: {
     facebook: 'https://www.facebook.com/profile.php?id=61576758530152',
   },
@@ -52,8 +54,8 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `Best Furniture in Biratnagar | Affordable Steel & Wood Furniture - ${siteConfig.name}`,
-    template: `%s | Best Furniture Biratnagar - ${siteConfig.name}`,
+    default: `विराटनगरको उत्कृष्ट फर्निचर | Best Furniture in Biratnagar - ${siteConfig.name}`,
+    template: `%s | श्री मनिष स्टील फर्निचर विराटनगर`,
   },
   description: siteConfig.description,
   keywords: [
@@ -166,6 +168,38 @@ export const metadata: Metadata = {
     'अफिस फर्निचर',
     'स्कूल फर्निचर',
     'पलंग',
+    'स्टील अलमिरा',
+    'अलमिरा मूल्य',
+    'खाट',
+    'स्टील खाट',
+    'डबल बेड',
+    'सिंगल बेड',
+    'टेबल',
+    'कुर्सी',
+    'र्‍याक',
+    'वार्डरोब',
+    'कम्प्युटर टेबल',
+    'स्टडी टेबल',
+    'डाइनिंग टेबल',
+    'अफिस टेबल',
+    'फाइल क्याबिनेट',
+    'बुक शेल्फ',
+    'शू र्‍याक',
+    'किचन र्‍याक',
+    'धरान फर्निचर',
+    'इटहरी फर्निचर',
+    'श्री मनिष स्टील फर्निचर',
+    'फर्निचर पसल विराटनगर',
+    'फर्निचर किन्ने',
+    'घरको फर्निचर',
+    'अफिस सामान',
+    
+    // Transliterated Nepali terms (how people type in English)
+    'sasto furniture Nepal',
+    'khat price Biratnagar',
+    'palang price Nepal',
+    'almirah kinnu',
+    'furniture kinne thau',
     
     // Long-tail Keywords
     'where to buy furniture in Biratnagar',
@@ -185,17 +219,18 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    locale: 'en_NP',
+    locale: 'ne_NP',
+    alternateLocale: ['en_NP'],
     url: siteConfig.url,
-    title: 'Best & Cheapest Furniture in Biratnagar | Office, School, Home Furniture',
-    description: 'Affordable steel & wood furniture in Biratnagar! Beds, Almirahs, Tables, Chairs at best prices. Office & School furniture. Free delivery! Call: 9824336371',
+    title: 'विराटनगरको उत्कृष्ट फर्निचर | Best & Cheapest Furniture in Biratnagar',
+    description: 'सस्तो र राम्रो स्टील फर्निचर विराटनगरमा! अलमिरा, खाट, टेबल, कुर्सी - उत्तम मूल्यमा। अफिस र स्कूल फर्निचर। निःशुल्क डेलिभरी! फोन: 9824336371',
     siteName: siteConfig.name,
     images: [
       {
         url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: 'Best Furniture Shop in Biratnagar - Affordable Office, School & Home Furniture',
+        alt: 'श्री मनिष स्टील फर्निचर - विराटनगरको उत्कृष्ट फर्निचर पसल',
       },
     ],
   },
