@@ -120,8 +120,8 @@ export async function PUT(
     revalidatePath('/products');
     revalidatePath('/');
     revalidatePath('/admin/categories');
-    revalidateTag('subcategories');
-    revalidateTag('products');
+    revalidateTag('subcategories', {});
+    revalidateTag('products', {});
 
     return NextResponse.json(subcategory);
   } catch (error: any) {

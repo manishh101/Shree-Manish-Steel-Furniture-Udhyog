@@ -100,8 +100,8 @@ export async function PUT(
     revalidatePath('/products');
     revalidatePath('/');
     revalidatePath('/admin/categories');
-    revalidateTag('categories');
-    revalidateTag('products');
+    revalidateTag('categories', {});
+    revalidateTag('products', {});
 
     return NextResponse.json(category);
   } catch (error) {

@@ -98,7 +98,7 @@ export async function PUT(
     revalidatePath('/products');
     revalidatePath('/');
     revalidatePath('/admin/products');
-    revalidateTag('products');
+    revalidateTag('products', {});
 
     console.log('PUT /api/products/[id] - Product updated successfully:', product._id);
     return NextResponse.json(product);

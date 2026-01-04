@@ -13,6 +13,7 @@ interface Product {
   image?: string;
   description?: string;
   category?: string;
+  subcategory?: string;
 }
 
 interface CategorySectionProps {
