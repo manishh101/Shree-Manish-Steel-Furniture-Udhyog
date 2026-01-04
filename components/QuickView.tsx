@@ -99,7 +99,7 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
       default:
         return {
           badgeClass: 'bg-primary/10 text-primary',
-          badgeText: product.category,
+          badgeText: product.subcategory || product.category,
           buttonClass: 'bg-primary text-white hover:bg-primary/90'
         };
     }
@@ -200,10 +200,10 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
                   {product.name}
                 </h4>
                 
-                {product.category && (
+                {(product.subcategory || product.category) && (
                   <div className="mb-3">
                     <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${config.badgeClass}`}>
-                      {config.badgeText || product.category}
+                      {config.badgeText || product.subcategory || product.category}
                     </span>
                   </div>
                 )}

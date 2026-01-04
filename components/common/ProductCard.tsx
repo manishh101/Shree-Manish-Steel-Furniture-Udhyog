@@ -291,9 +291,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
           <h4 className="font-semibold text-gray-900 line-clamp-2 leading-tight">
             {safeProduct.name}
           </h4>
-          {safeProduct.category && (
+          {(safeProduct.subcategory || safeProduct.category) && (
             <p className="text-sm text-gray-500 mt-1">
-              {safeProduct.category}
+              {safeProduct.subcategory || safeProduct.category}
             </p>
           )}
         </div>

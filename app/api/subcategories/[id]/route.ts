@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { connectDB } from '@/lib/db';
 import Subcategory from '@/models/Subcategory';
 import Category from '@/models/Category';
+import Product from '@/models/Product';
 import { getUserFromRequest } from '@/lib/auth';
 
 // GET /api/subcategories/[id] - Get single subcategory
@@ -74,6 +76,8 @@ export async function PUT(
       );
     }
 
+    const oldName = subcategory.name;
+
     // Update fields
     subcategory.name = data.name;
     subcategory.description = data.description || '';
@@ -89,6 +93,12 @@ export async function PUT(
         );
       }
       subcategory.categoryId = data.categoryId;
+      
+      // Update the category field in products when category changes
+      await Product.updateMany(
+        { subcategoryId: id },
+        { $set: { category: category.name } }
+      );
     }
 
     if (data.displayOrder !== undefined) {
@@ -96,6 +106,22 @@ export async function PUT(
     }
 
     await subcategory.save();
+
+    // If the subcategory name changed, update all products with this subcategory
+    if (data.name && data.name !== oldName) {
+      await Product.updateMany(
+        { subcategoryId: id },
+        { $set: { subcategory: data.name } }
+      );
+      console.log(`Updated subcategory name from "${oldName}" to "${data.name}" in all related products`);
+    }
+
+    // Revalidate cache for all subcategory-related pages
+    revalidatePath('/products');
+    revalidatePath('/');
+    revalidatePath('/admin/categories');
+    revalidateTag('subcategories');
+    revalidateTag('products');
 
     return NextResponse.json(subcategory);
   } catch (error: any) {

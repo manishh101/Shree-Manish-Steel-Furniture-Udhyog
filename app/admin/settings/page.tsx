@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaCog, FaLock, FaDatabase, FaPalette, FaSave, FaSpinner, FaCheck, FaExclamationTriangle } from 'react-icons/fa';
 import { toast } from 'react-toastify';
+import { SyncProductNamesButton } from '@/components/admin';
 
 interface GeneralSettings {
   siteName: string;
@@ -499,6 +500,13 @@ const AdminSettings = () => {
                 {clearingCache ? <FaSpinner className="animate-spin" /> : null}
                 {clearingCache ? 'Clearing...' : 'Clear'}
               </button>
+            </div>
+            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+              <div>
+                <h3 className="font-medium">Sync Product Names</h3>
+                <p className="text-sm text-gray-500">Update all products with current category/subcategory names</p>
+              </div>
+              <SyncProductNamesButton />
             </div>
           </div>
         </div>

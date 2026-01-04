@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { connectDB } from '@/lib/db';
 import Category from '@/models/Category';
 import Subcategory from '@/models/Subcategory';
+import Product from '@/models/Product';
 import { getUserFromRequest } from '@/lib/auth';
 
 // GET /api/categories/[id] - Get category by ID
@@ -62,6 +64,16 @@ export async function PUT(
 
     const data = await request.json();
 
+    // Get the old category to check if name changed
+    const oldCategory = await Category.findById(id);
+    
+    if (!oldCategory) {
+      return NextResponse.json(
+        { error: 'Category not found' },
+        { status: 404 }
+      );
+    }
+
     const category = await Category.findByIdAndUpdate(
       id,
       { $set: data },
@@ -74,6 +86,22 @@ export async function PUT(
         { status: 404 }
       );
     }
+
+    // If the category name changed, update all products with this category
+    if (data.name && data.name !== oldCategory.name) {
+      await Product.updateMany(
+        { categoryId: id },
+        { $set: { category: data.name } }
+      );
+      console.log(`Updated category name from "${oldCategory.name}" to "${data.name}" in all related products`);
+    }
+
+    // Revalidate cache for all category-related pages
+    revalidatePath('/products');
+    revalidatePath('/');
+    revalidatePath('/admin/categories');
+    revalidateTag('categories');
+    revalidateTag('products');
 
     return NextResponse.json(category);
   } catch (error) {

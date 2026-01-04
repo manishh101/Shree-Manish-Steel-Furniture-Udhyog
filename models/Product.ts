@@ -163,6 +163,32 @@ ProductSchema.index({ isMostSelling: 1 });
 ProductSchema.index({ isTopProduct: 1 });
 ProductSchema.index({ usedAsCategoryThumbnail: 1, categoryId: 1 });
 
+// Pre-save middleware to automatically populate category and subcategory names
+ProductSchema.pre('save', async function(next) {
+  try {
+    // Only populate if the IDs are set but names are not
+    if (this.categoryId && !this.category) {
+      const Category = mongoose.model('Category');
+      const category = await Category.findById(this.categoryId);
+      if (category) {
+        this.category = (category as any).name;
+      }
+    }
+
+    if (this.subcategoryId && !this.subcategory) {
+      const Subcategory = mongoose.model('Subcategory');
+      const subcategory = await Subcategory.findById(this.subcategoryId);
+      if (subcategory) {
+        this.subcategory = (subcategory as any).name;
+      }
+    }
+
+    next();
+  } catch (error: any) {
+    next(error);
+  }
+});
+
 const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
 
 export default Product;

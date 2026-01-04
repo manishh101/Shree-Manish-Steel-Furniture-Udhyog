@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { connectDB } from '@/lib/db';
 import Product from '@/models/Product';
-import '@/models/Category'; // Required for populate()
-import '@/models/Subcategory'; // Required for populate()
+import Category from '@/models/Category';
+import Subcategory from '@/models/Subcategory';
 import { getUserFromRequest } from '@/lib/auth';
 
 // GET /api/products/[id] - Get product by ID
@@ -58,6 +59,21 @@ export async function PUT(
     const data = await request.json();
     console.log('PUT /api/products/[id] - Updating product:', id, 'with data:', data);
     
+    // If categoryId or subcategoryId is being updated, fetch the names
+    if (data.categoryId) {
+      const category = await Category.findById(data.categoryId);
+      if (category) {
+        data.category = category.name;
+      }
+    }
+    
+    if (data.subcategoryId) {
+      const subcategory = await Subcategory.findById(data.subcategoryId);
+      if (subcategory) {
+        data.subcategory = subcategory.name;
+      }
+    }
+    
     const product = await Product.findByIdAndUpdate(
       id,
       { $set: data },
@@ -70,6 +86,12 @@ export async function PUT(
         { status: 404 }
       );
     }
+
+    // Revalidate cache for product-related pages
+    revalidatePath('/products');
+    revalidatePath('/');
+    revalidatePath('/admin/products');
+    revalidateTag('products');
 
     console.log('PUT /api/products/[id] - Product updated successfully:', product._id);
     return NextResponse.json(product);

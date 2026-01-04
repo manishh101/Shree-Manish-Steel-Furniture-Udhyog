@@ -51,7 +51,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({
               name: product.title || product.name || 'Product',
               image: product.image || null,
               description: product.description || '',
-              category: product.category || 'Furniture'
+              category: product.category || 'Furniture',
+              subcategory: product.subcategory || undefined
             }}
             onQuickView={openQuickView}
             withActions={true}
