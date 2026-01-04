@@ -87,6 +87,13 @@ const nextConfig = {
         destination: 'https://manishsteel.com.np/:path*',
         permanent: true,
       },
+      // Redirect malformed product URLs (products.id -> products/id)
+      // This handles old indexed URLs or external links with wrong format
+      {
+        source: '/products\\.:productId',
+        destination: '/products/:productId',
+        permanent: true,
+      },
     ];
   },
 };
