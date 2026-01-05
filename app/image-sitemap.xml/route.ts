@@ -1,16 +1,25 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Product from '@/models/Product';
-import Category from '@/models/Category';
+import { GallerySection } from '@/models/Gallery';
 
 const baseUrl = 'https://manishsteel.com.np';
+
+interface ImageEntry {
+  url: string;
+  images: {
+    loc: string;
+    title: string;
+    caption: string;
+  }[];
+}
 
 export async function GET() {
   try {
     await connectDB();
 
-    // Get all products with images
-    const products = await Product.find({ isAvailable: { $ne: false } })
+    // Get all active products with images (consistent with main sitemap)
+    const products = await Product.find({ isActive: { $ne: false } })
       .populate('categoryId', 'name')
       .populate('subcategoryId', 'name')
       .select('_id name description image images category subcategory categoryId subcategoryId')
@@ -19,14 +28,19 @@ export async function GET() {
     // Build image sitemap XML
     const imageEntries = products.map((product: any) => {
       const productUrl = `${baseUrl}/products/${product._id}`;
+      const productName = product.name || 'Product';
+      const categoryName = product.categoryId?.name || product.category || 'Steel Furniture';
+      const subcategoryName = product.subcategoryId?.name || product.subcategory;
+      const fullCategory = subcategoryName ? `${subcategoryName} - ${categoryName}` : categoryName;
+      
       const images = [];
       
       // Add main product image
       if (product.image) {
         images.push({
           loc: product.image,
-          title: product.name,
-          caption: product.description || `${product.name} - ${product.subcategory || product.category || 'Steel Furniture'}`,
+          title: `${productName} | ${fullCategory} | Shree Manish Steel Furniture`,
+          caption: product.description || `${productName} - Premium ${fullCategory} from Biratnagar, Nepal`,
         });
       }
       
@@ -36,8 +50,8 @@ export async function GET() {
           if (img && img !== product.image) {
             images.push({
               loc: img,
-              title: `${product.name} - Image ${index + 1}`,
-              caption: product.description || `${product.name} - ${product.subcategory || product.category || 'Steel Furniture'}`,
+              title: `${productName} - View ${index + 1} | ${fullCategory}`,
+              caption: `${productName} detailed view - ${fullCategory} - Shree Manish Steel Furniture Nepal`,
             });
           }
         });
@@ -47,15 +61,43 @@ export async function GET() {
         url: productUrl,
         images: images
       };
-    }).filter(entry => entry.images.length > 0);
+    }).filter((entry: ImageEntry) => entry.images.length > 0);
+
+    // Get gallery images
+    const galleryItems = await GallerySection.find({ isActive: { $ne: false } })
+      .select('name description images category')
+      .lean();
+
+    const galleryEntries: ImageEntry[] = [];
+    const galleryUrl = `${baseUrl}/gallery`;
+
+    galleryItems.forEach((section: any) => {
+      if (section.images && Array.isArray(section.images)) {
+        section.images.forEach((img: any) => {
+          if (img.src) {
+            galleryEntries.push({
+              url: galleryUrl,
+              images: [{
+                loc: img.src,
+                title: img.title || section.name || 'Shree Manish Steel Furniture Gallery',
+                caption: img.description || section.description || `${section.category || 'Steel Furniture'} - Our Work Gallery`,
+              }]
+            });
+          }
+        });
+      }
+    });
+
+    // Combine all entries
+    const allEntries: ImageEntry[] = [...imageEntries, ...galleryEntries];
 
     // Generate XML
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-${imageEntries.map(entry => `  <url>
+${allEntries.map((entry: ImageEntry) => `  <url>
     <loc>${entry.url}</loc>
-${entry.images.map(img => `    <image:image>
+${entry.images.map((img: any) => `    <image:image>
       <image:loc>${img.loc}</image:loc>
       <image:title>${escapeXml(img.title)}</image:title>
       <image:caption>${escapeXml(img.caption)}</image:caption>
@@ -66,7 +108,7 @@ ${entry.images.map(img => `    <image:image>
     return new NextResponse(xml, {
       headers: {
         'Content-Type': 'application/xml',
-        'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+        'Cache-Control': 'public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400',
       },
     });
   } catch (error) {

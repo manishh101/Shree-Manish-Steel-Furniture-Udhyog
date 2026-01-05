@@ -7,7 +7,7 @@ import Subcategory from '@/models/Subcategory';
 const baseUrl = 'https://manishsteel.com.np';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Static pages
+  // Static pages with proper validation
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
@@ -53,40 +53,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Get all products for dynamic product pages
     const products = await Product.find({ isActive: { $ne: false } })
       .select('_id updatedAt')
+      .limit(1000) // Limit for sitemap size
       .lean();
 
-    const productPages: MetadataRoute.Sitemap = products.map((product: any) => ({
-      url: `${baseUrl}/products/${product._id}`,
-      lastModified: product.updatedAt || new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8, // Increased priority for individual products
-    }));
+    const productPages: MetadataRoute.Sitemap = products
+      .filter((product: any) => product._id) // Validate _id exists
+      .map((product: any) => ({
+        url: `${baseUrl}/products/${product._id.toString()}`,
+        lastModified: product.updatedAt ? new Date(product.updatedAt) : new Date(),
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      }));
 
-    // Get all categories for category filter pages
-    const categories = await Category.find({})
-      .select('_id name updatedAt')
-      .lean();
+    // Note: Removed category/subcategory filter pages as they use query params
+    // which Google doesn't prefer in sitemaps. These pages will still be crawled
+    // through internal links.
 
-    const categoryPages: MetadataRoute.Sitemap = categories.map((category: any) => ({
-      url: `${baseUrl}/products?category=${category._id}`,
-      lastModified: category.updatedAt || new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.75,
-    }));
-
-    // Get all subcategories for subcategory filter pages
-    const subcategories = await Subcategory.find({})
-      .select('_id categoryId updatedAt')
-      .lean();
-
-    const subcategoryPages: MetadataRoute.Sitemap = subcategories.map((subcategory: any) => ({
-      url: `${baseUrl}/products?category=${subcategory.categoryId}&subcategory=${subcategory._id}`,
-      lastModified: subcategory.updatedAt || new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.7,
-    }));
-
-    return [...staticPages, ...categoryPages, ...subcategoryPages, ...productPages];
+    return [...staticPages, ...productPages];
   } catch (error) {
     console.error('Error generating sitemap:', error);
     // Return static pages only if database fails

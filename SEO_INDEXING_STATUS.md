@@ -25,15 +25,31 @@
 - **After**: Production URLs (https://manishsteel.com.np)
 - **File**: `public/robots.txt`
 
-#### 3. **Sitemap Enhanced** ✅ IMPROVED
-- **Before**: Only products + category filters
+#### 3. **Sitemap Fixed & Enhanced** ✅ FIXED
+- **Before**: Included query parameters (`?category=`, `&subcategory=`) which Google doesn't accept
 - **After**: 
-  - ✅ All products (`/products/{id}`)
-  - ✅ Category pages (`/products?category={id}`)
-  - ✅ **NEW**: Subcategory pages (`/products?category={id}&subcategory={id}`)
+  - ✅ **FIXED**: Removed query parameter URLs (Google doesn't like them in sitemaps)
+  - ✅ Clean product URLs only (`/products/{id}`)
+  - ✅ Static pages with proper priorities
+  - ✅ Added validation and error handling
+  - ✅ Limited to 1000 products for sitemap size
+  - ✅ Proper date formatting
   - ✅ Higher priorities for product pages (0.8)
   
+**Note**: Category/subcategory pages will still be indexed through internal linking (not in sitemap).
+
 **File**: `app/sitemap.ts`
+
+#### 4. **Image Sitemap Enhanced** ✅ IMPROVED
+- **Before**: Only product images, used inconsistent field (`isAvailable`)
+- **After**:
+  - ✅ Fixed to use `isActive` (consistent with main sitemap)
+  - ✅ Enhanced image titles with full context
+  - ✅ **NEW**: Gallery images included
+  - ✅ Better captions with Nepali keywords
+  - ✅ Longer cache with stale-while-revalidate
+  
+**File**: `app/image-sitemap.xml/route.ts`
 
 ---
 
@@ -45,9 +61,13 @@
 |-----------|-------------|----------|---------|
 | Homepage | `/` | 1.0 | https://manishsteel.com.np/ |
 | Products List | `/products` | 0.9 | https://manishsteel.com.np/products |
-| Category Filter | `/products?category={id}` | 0.75 | https://manishsteel.com.np/products?category=123 |
-| Subcategory Filter | `/products?category={id}&subcategory={id}` | 0.7 | https://manishsteel.com.np/products?category=123&subcategory=456 |
 | **Individual Products** | `/products/{productId}` | **0.8** | https://manishsteel.com.np/products/zczbjgtkgxjxs399go1i |
+| About | `/about` | 0.8 | https://manishsteel.com.np/about |
+| Contact | `/contact` | 0.8 | https://manishsteel.com.np/contact |
+| Gallery | `/gallery` | 0.7 | https://manishsteel.com.np/gallery |
+| Custom Order | `/custom-order` | 0.7 | https://manishsteel.com.np/custom-order |
+
+**Note**: Category/subcategory pages (with `?category=` query params) will be crawled through internal links.
 
 ### Key SEO Features Per Product Page:
 
@@ -123,7 +143,11 @@ Google Search Console → Sitemaps → Submit:
 - https://manishsteel.com.np/sitemap.xml
 - https://manishsteel.com.np/image-sitemap.xml
 ```
-
+**Image Sitemap includes:**
+- All product images (main + additional images)
+- Gallery images from completed projects
+- Enhanced titles: "Product Name | Category | Shree Manish Steel Furniture"
+- SEO-optimized captions with location keywords
 ---
 
 ## 🚀 Next Steps for Maximum Indexing
@@ -179,7 +203,17 @@ Sitemap: https://manishsteel.com.np/sitemap.xml
 ---
 
 ## ⚠️ Common Indexing Issues & Solutions
+### **Why Query Parameters Were Removed from Sitemap**
+Google Search Console doesn't like URLs with query parameters (`?category=`, `&subcategory=`) in sitemaps because:
+- They can create duplicate content issues
+- They're often filtered/ignored by crawlers
+- XML validation may fail
+- Better to let Google discover them through internal links
 
+Category and subcategory pages will still be indexed through:
+- Internal navigation menus
+- Product listing page links
+- Breadcrumb navigation
 ### If Products Still Not Indexed After 1 Week:
 
 1. **Check robots.txt is accessible**
