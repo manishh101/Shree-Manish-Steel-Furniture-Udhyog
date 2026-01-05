@@ -1,8 +1,6 @@
 import { MetadataRoute } from 'next';
 import { connectDB } from '@/lib/db';
 import Product from '@/models/Product';
-import Category from '@/models/Category';
-import Subcategory from '@/models/Subcategory';
 
 const baseUrl = 'https://manishsteel.com.np';
 
@@ -58,12 +56,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     const productPages: MetadataRoute.Sitemap = products
       .filter((product: any) => product._id) // Validate _id exists
-      .map((product: any) => ({
-        url: `${baseUrl}/products/${product._id.toString()}`,
-        lastModified: product.updatedAt ? new Date(product.updatedAt) : new Date(),
-        changeFrequency: 'weekly' as const,
-        priority: 0.8,
-      }));
+      .map((product: any) => {
+        // Ensure product ID is properly stringified and URL-safe
+        const productId = String(product._id).trim();
+        return {
+          url: `${baseUrl}/products/${productId}`,
+          lastModified: product.updatedAt ? new Date(product.updatedAt) : new Date(),
+          changeFrequency: 'weekly' as const,
+          priority: 0.8,
+        };
+      });
 
     // Note: Removed category/subcategory filter pages as they use query params
     // which Google doesn't prefer in sitemaps. These pages will still be crawled
