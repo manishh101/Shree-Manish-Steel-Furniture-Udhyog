@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import { connectDB } from '@/lib/db';
 import Product from '@/models/Product';
 import Category from '@/models/Category';
+import Subcategory from '@/models/Subcategory';
 
 const baseUrl = 'https://manishsteel.com.np';
 
@@ -58,25 +59,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/products/${product._id}`,
       lastModified: product.updatedAt || new Date(),
       changeFrequency: 'weekly' as const,
-      priority: 0.6,
+      priority: 0.8, // Increased priority for individual products
     }));
 
     // Get all categories for category filter pages
     const categories = await Category.find({})
-      .select('_id updatedAt')
+      .select('_id name updatedAt')
       .lean();
 
     const categoryPages: MetadataRoute.Sitemap = categories.map((category: any) => ({
       url: `${baseUrl}/products?category=${category._id}`,
       lastModified: category.updatedAt || new Date(),
       changeFrequency: 'weekly' as const,
+      priority: 0.75,
+    }));
+
+    // Get all subcategories for subcategory filter pages
+    const subcategories = await Subcategory.find({})
+      .select('_id categoryId updatedAt')
+      .lean();
+
+    const subcategoryPages: MetadataRoute.Sitemap = subcategories.map((subcategory: any) => ({
+      url: `${baseUrl}/products?category=${subcategory.categoryId}&subcategory=${subcategory._id}`,
+      lastModified: subcategory.updatedAt || new Date(),
+      changeFrequency: 'weekly' as const,
       priority: 0.7,
     }));
 
-    return [...staticPages, ...categoryPages, ...productPages];
+    return [...staticPages, ...categoryPages, ...subcategoryPages, ...productPages];
   } catch (error) {
     console.error('Error generating sitemap:', error);
     // Return static pages only if database fails
     return staticPages;
   }
 }
+

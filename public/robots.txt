@@ -6,7 +6,8 @@ Disallow: /api
 Disallow: /login
 
 # Host
-Host: http://localhost:3000
+Host: https://manishsteel.com.np
 
 # Sitemaps
-Sitemap: http://localhost:3000/sitemap.xml
+Sitemap: https://manishsteel.com.np/sitemap.xml
+Sitemap: https://manishsteel.com.np/image-sitemap.xml
