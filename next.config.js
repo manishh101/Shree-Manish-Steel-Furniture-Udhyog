@@ -11,7 +11,7 @@ const nextConfig = {
       },
       // Only Cloudinary is used for product images - no external placeholder sites
     ],
-    formats: ['image/avif', 'image/webp'],
+    formats: ['image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
@@ -19,21 +19,21 @@ const nextConfig = {
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
-  
+
   // Performance Optimizations
   experimental: {
     optimizeCss: true,
   },
-  
+
   // Compression
   compress: true,
-  
+
   // Power optimization for production
   poweredByHeader: false,
-  
+
   // Generate ETags for caching
   generateEtags: true,
-  
+
   // Headers for caching and security
   async headers() {
     return [
@@ -82,7 +82,7 @@ const nextConfig = {
       },
     ];
   },
-  
+
   // Redirects for SEO - www to non-www
   // NOTE: Make sure Vercel Dashboard has manishsteel.com.np as PRIMARY domain
   // and www.manishsteel.com.np redirects TO the primary (not the other way around)

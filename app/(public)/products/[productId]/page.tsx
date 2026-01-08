@@ -38,7 +38,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   try {
     await connectDB();
-    
+
     // Fetch product with populated data
     const productDoc = await Product.findById(productId)
       .populate('categoryId', 'name')
@@ -51,7 +51,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
     // Convert MongoDB document to plain object
     const product = JSON.parse(JSON.stringify(productDoc));
-    
+
     // Transform data for client component
     const transformedProduct = {
       _id: product._id,
@@ -70,6 +70,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
       isBestSeller: product.isBestSeller || false,
       stock: product.stock,
       sku: product.sku,
+      deliveryInformation: product.deliveryInformation,
       createdAt: product.createdAt,
       updatedAt: product.updatedAt,
     };
@@ -97,8 +98,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 url: `https://manishsteel.com.np/products/${productId}`,
                 priceCurrency: 'NPR',
                 price: product.price,
-                availability: product.stock > 0 
-                  ? 'https://schema.org/InStock' 
+                availability: product.stock > 0
+                  ? 'https://schema.org/InStock'
                   : 'https://schema.org/OutOfStock',
                 seller: {
                   '@type': 'Organization',
@@ -120,11 +121,11 @@ export default async function ProductDetailPage({ params }: PageProps) {
           <meta itemProp="description" content={product.description} />
           <meta itemProp="image" content={product.image} />
           <meta itemProp="sku" content={product.sku || product._id} />
-          
+
           <div itemProp="brand" itemScope itemType="https://schema.org/Brand">
             <meta itemProp="name" content="Shree Manish Steel Furniture" />
           </div>
-          
+
           <div itemProp="offers" itemScope itemType="https://schema.org/Offer">
             <meta itemProp="url" content={`https://manishsteel.com.np/products/${productId}`} />
             <meta itemProp="priceCurrency" content="NPR" />

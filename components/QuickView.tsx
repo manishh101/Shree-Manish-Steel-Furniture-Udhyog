@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { FaTimes, FaEye } from 'react-icons/fa';
+import { FaTimes, FaEye, FaChevronLeft, FaChevronRight, FaExpand } from 'react-icons/fa';
 import imageService from '@/services/imageService';
+import OptimizedImage from '@/components/common/OptimizedImage';
 
 interface Product {
   _id?: string;
@@ -36,7 +37,17 @@ interface QuickViewProps {
 }
 
 const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant = 'standard' }) => {
-  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
+
+  const [fullScreenView, setFullScreenView] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  // Reset state when product changes
+  useEffect(() => {
+    if (product) {
+      setSelectedImageIndex(0);
+      setFullScreenView(false);
+    }
+  }, [product]);
 
   // Handle modal background click
   const handleModalBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -48,7 +59,6 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
   // Handle view details click
   const handleViewDetails = () => {
     onClose();
-    // Navigation will be handled by the Link component
   };
 
   // Close modal on Escape key
@@ -58,13 +68,12 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
         onClose();
       }
     };
-    
+
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
-      // Prevent body scroll when modal is open
       document.body.style.overflow = 'hidden';
     }
-    
+
     return () => {
       document.removeEventListener('keydown', handleEscape);
       document.body.style.overflow = 'unset';
@@ -108,7 +117,7 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
   const config = getVariantConfig();
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
       onClick={handleModalBackgroundClick}
     >
@@ -124,7 +133,7 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
             <FaTimes className="h-5 w-5" />
           </button>
         </div>
-        
+
         {/* Content */}
         <div className="p-4 md:p-8 overflow-y-auto max-h-[calc(95vh-80px)]">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
@@ -132,74 +141,60 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
             <div className="space-y-4">
               <div className="relative group">
                 <div className="relative w-full h-64 md:h-80 lg:h-96 rounded-xl shadow-md overflow-hidden bg-gray-100 flex items-center justify-center">
-                  <img
-                    key={`quickview-${product._id || product.id}-main`}
-                    src={product.image || (product.images && product.images[0]) || '/images/furniture-1.jpg'}
-                    alt={imageService.getImageAlt(product)}
-                    className="w-full h-full object-contain transition-transform group-hover:scale-105"
-                    onLoad={() => setLoadedImages(prev => ({...prev, [product._id || product.id || '']: true}))}
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/images/furniture-1.jpg';
-                    }}
-                  />
+                  <div
+                    className="w-full h-full cursor-pointer"
+                    onClick={() => setFullScreenView(true)}
+                  >
+                    <OptimizedImage
+                      src={product.images && product.images.length > 0 ? product.images[selectedImageIndex] : (product.image || '/images/furniture-1.jpg')}
+                      alt={imageService.getImageAlt(product)}
+                      className="w-full h-full object-contain transition-transform group-hover:scale-105"
+                      size="large"
+                      category={product.category || (product.subcategory as string)}
+                      priority={true}
+                    />
+                  </div>
                 </div>
-                
+
                 {/* Full Screen View Button */}
                 <button
-                  onClick={() => {
-                    const imgSrc = imageService.getOptimizedImageUrl(
-                      product.image || (product.images && product.images[0]) || '',
-                      { category: product.category, width: 1600, height: 1600 }
-                    );
-                    const newWindow = window.open('', '_blank');
-                    if (newWindow) {
-                      newWindow.document.write(`
-                        <html>
-                          <head><title>${product.name}</title></head>
-                          <body style="margin:0; background:#000; display:flex; align-items:center; justify-content:center; min-height:100vh;">
-                            <img src="${imgSrc}" style="max-width:100%; max-height:100%; object-fit:contain;" alt="${product.name}">
-                          </body>
-                        </html>
-                      `);
-                    }
-                  }}
+                  onClick={() => setFullScreenView(true)}
                   className="absolute top-3 right-3 bg-white/90 hover:bg-white text-gray-700 hover:text-gray-900 p-2 rounded-full shadow-md transition-all opacity-0 group-hover:opacity-100 z-10"
+                  title="View Full Screen"
                 >
-                  <FaEye className="h-4 w-4" />
+                  <FaExpand className="h-4 w-4" />
                 </button>
               </div>
-              
+
               {/* Additional Images Preview (if available) */}
               {product.images && product.images.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto">
+                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300">
                   {product.images.slice(0, 4).map((image, index) => (
-                    <div 
+                    <button
                       key={index}
-                      className="relative w-16 h-16 rounded-lg border-2 border-gray-200 hover:border-primary cursor-pointer transition-colors flex-shrink-0 overflow-hidden"
+                      onClick={() => setSelectedImageIndex(index)}
+                      className={`relative w-16 h-16 rounded-lg border-2 cursor-pointer transition-colors flex-shrink-0 overflow-hidden ${selectedImageIndex === index ? 'border-primary ring-2 ring-primary/20' : 'border-gray-200 hover:border-primary'}`}
                     >
-                      <img
+                      <OptimizedImage
                         src={image}
                         alt={`${product.name} ${index + 1}`}
                         className="w-full h-full object-cover"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/images/furniture-1.jpg';
-                        }}
+                        size="thumbnail"
+                        category={product.category || (product.subcategory as string)}
                       />
-                    </div>
+                    </button>
                   ))}
                 </div>
               )}
             </div>
-            
+
             {/* Enhanced Product Details */}
             <div className="flex flex-col justify-between">
               <div>
                 <h4 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
                   {product.name}
                 </h4>
-                
+
                 {(product.subcategory || product.category) && (
                   <div className="mb-3">
                     <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${config.badgeClass}`}>
@@ -207,11 +202,11 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
                     </span>
                   </div>
                 )}
-                
+
                 <p className="text-gray-600 mb-6 leading-relaxed">
                   {product.description || "High-quality furniture crafted with precision and care."}
                 </p>
-                
+
                 {/* Features */}
                 {product.features && product.features.length > 0 && (
                   <div className="mb-6">
@@ -226,7 +221,7 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
                     </ul>
                   </div>
                 )}
-                
+
                 {/* Variant-specific information */}
                 {variant === 'bestseller' && product.salesCount && product.salesCount > 0 && (
                   <div className="mb-4">
@@ -238,7 +233,7 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
                     </div>
                   </div>
                 )}
-                
+
                 {/* Specifications */}
                 {product.specifications && Array.isArray(product.specifications) && product.specifications.length > 0 && (
                   <div className="mb-4">
@@ -258,7 +253,7 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
                     </div>
                   </div>
                 )}
-                
+
                 {/* Delivery Information */}
                 {product.deliveryInformation && (
                   <div className="mb-4">
@@ -285,24 +280,23 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
                     </div>
                   </div>
                 )}
-                
+
                 {/* Stock status */}
                 {product.inStock !== undefined && (
                   <div className="mb-4">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium text-gray-700">Availability:</span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        product.inStock 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${product.inStock
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                        }`}>
                         {product.inStock ? 'In Stock' : 'Out of Stock'}
                       </span>
                     </div>
                   </div>
                 )}
               </div>
-              
+
               {/* Action buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link
@@ -317,6 +311,59 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
           </div>
         </div>
       </div>
+
+      {/* Full Screen Overlay */}
+      {fullScreenView && (
+        <div
+          className="fixed inset-0 z-[60] bg-black bg-opacity-95 flex items-center justify-center p-4 md:p-10"
+          onClick={() => setFullScreenView(false)}
+        >
+          <button
+            onClick={() => setFullScreenView(false)}
+            className="absolute top-4 right-4 text-white bg-white/20 hover:bg-white/40 rounded-full p-2 transition-colors z-70"
+          >
+            <FaTimes className="h-6 w-6" />
+          </button>
+
+          <div className="relative w-full h-full flex items-center justify-center">
+            <OptimizedImage
+              src={product.images && product.images.length > 0 ? product.images[selectedImageIndex] : (product.image || '/images/furniture-1.jpg')}
+              alt={product.name}
+              className="max-w-full max-h-full border-none shadow-none"
+              size="large"
+              objectFit="contain"
+            />
+          </div>
+
+          {product.images && product.images.length > 1 && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedImageIndex(prev => prev > 0 ? prev - 1 : (product.images?.length || 1) - 1);
+                }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-white/20 hover:bg-white/40 rounded-full p-3 transition-colors z-70"
+              >
+                <FaChevronLeft className="h-6 w-6" />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedImageIndex(prev => prev < (product.images?.length || 1) - 1 ? prev + 1 : 0);
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-white/20 hover:bg-white/40 rounded-full p-3 transition-colors z-70"
+              >
+                <FaChevronRight className="h-6 w-6" />
+              </button>
+
+              {/* Image Counter */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white bg-black/50 px-4 py-2 rounded-full text-sm font-medium z-70">
+                {selectedImageIndex + 1} / {product.images.length}
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };

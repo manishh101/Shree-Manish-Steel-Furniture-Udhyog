@@ -3,16 +3,18 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { 
-  FaSearch, 
-  FaChevronDown, 
-  FaChevronUp, 
-  FaArrowDown, 
-  FaTimes 
+import {
+  FaSearch,
+  FaChevronDown,
+  FaChevronUp,
+  FaArrowDown,
+  FaTimes
 } from 'react-icons/fa';
 import { productAPI, categoryAPI, type Product, type Category } from '../../../services/api';
 import ProductCard from '../../../components/common/ProductCard';
 import { scrollToTop } from '../../../utils/scrollUtils';
+import QuickView from '../../../components/QuickView';
+import useQuickView from '../../../hooks/useQuickView';
 
 // Loading fallback component
 function ProductsPageSkeleton() {
@@ -26,8 +28,8 @@ function ProductsPageSkeleton() {
       <div className="container mx-auto px-4 lg:px-6 py-8">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
           {[...Array(8)].map((_, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden animate-pulse"
             >
               <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300"></div>
@@ -67,7 +69,10 @@ function ProductsPageContent() {
   const [mobileFiltersVisible, setMobileFiltersVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortDrawerVisible, setSortDrawerVisible] = useState(false);
-  
+
+  // Quick View Hook
+  const { quickViewProduct, isQuickViewOpen, openQuickView, closeQuickView } = useQuickView();
+
   const itemsPerPage = 12;
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -99,7 +104,7 @@ function ProductsPageContent() {
       try {
         setLoading(true);
         setError(null);
-        
+
         let response;
         if (selectedCategory === 'all') {
           response = await productAPI.getAll(1, 100);
@@ -108,7 +113,7 @@ function ProductsPageContent() {
             subcategory: selectedSubcategory || undefined
           });
         }
-        
+
         const productData = response.products || response || [];
         setProducts(Array.isArray(productData) ? productData : []);
       } catch (err) {
@@ -119,14 +124,14 @@ function ProductsPageContent() {
         setLoading(false);
       }
     };
-    
+
     loadProducts();
   }, [selectedCategory, selectedSubcategory]);
 
   // Filter and sort products
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = [...products];
-    
+
     // Apply search filter
     if (searchTerm) {
       const lowercaseSearchTerm = searchTerm.toLowerCase();
@@ -135,7 +140,7 @@ function ProductsPageContent() {
         product?.description?.toLowerCase().includes(lowercaseSearchTerm)
       );
     }
-    
+
     // Apply sorting
     if (sortOption !== 'default') {
       if (sortOption === 'price-low-high') {
@@ -150,7 +155,7 @@ function ProductsPageContent() {
         filtered.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
       }
     }
-    
+
     return filtered;
   }, [products, searchTerm, sortOption]);
 
@@ -170,18 +175,18 @@ function ProductsPageContent() {
   const navigateToProducts = useCallback((category: string, subcategory: string | null = null) => {
     let url = '/products';
     const params = new URLSearchParams();
-    
+
     if (category && category !== 'all') {
       params.set('category', category);
       if (subcategory) {
         params.set('subcategory', subcategory);
       }
     }
-    
+
     if (params.toString()) {
       url += `?${params.toString()}`;
     }
-    
+
     router.push(url, { scroll: false });
   }, [router]);
 
@@ -247,7 +252,7 @@ function ProductsPageContent() {
           </div>
         )}
       </header>
-      
+
       {/* Breadcrumb Navigation with Product Count */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-3">
@@ -259,7 +264,7 @@ function ProductsPageContent() {
                 <span className="text-gray-900">Shop</span>
               </div>
             </nav>
-            
+
             <div className="text-sm text-gray-600">
               {loading ? (
                 'Loading products...'
@@ -270,7 +275,7 @@ function ProductsPageContent() {
           </div>
         </div>
       </div>
-      
+
       {/* Mobile Search & Sort Controls */}
       <div className="md:hidden bg-white border-b border-gray-200 px-4 py-2">
         <div className="flex items-center gap-2">
@@ -293,7 +298,7 @@ function ProductsPageContent() {
           </button>
         </div>
       </div>
-      
+
       {/* Sort Drawer */}
       {sortDrawerVisible && (
         <div className="bg-white border-b border-gray-200 shadow-sm">
@@ -305,11 +310,10 @@ function ProductsPageContent() {
               {sortOptions.map(option => (
                 <button
                   key={option.value}
-                  className={`px-4 py-2 rounded-lg text-sm transition-colors ${
-                    sortOption === option.value
+                  className={`px-4 py-2 rounded-lg text-sm transition-colors ${sortOption === option.value
                       ? 'bg-primary text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
+                    }`}
                   onClick={() => {
                     setSortOption(option.value);
                     setSortDrawerVisible(false);
@@ -347,28 +351,27 @@ function ProductsPageContent() {
                   />
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold text-gray-900">Categories</h2>
-                <button 
+                <button
                   className="lg:hidden text-gray-400 hover:text-gray-600 transition-colors"
                   onClick={() => setMobileFiltersVisible(false)}
                 >
                   <FaTimes />
                 </button>
               </div>
-              
+
               <div className="space-y-2">
                 {/* All Products */}
                 <button
-                  className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
-                    selectedCategory === 'all' ? 'bg-primary text-white' : 'hover:bg-gray-50'
-                  }`}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${selectedCategory === 'all' ? 'bg-primary text-white' : 'hover:bg-gray-50'
+                    }`}
                   onClick={() => handleCategoryFilter('all')}
                 >
                   All Products
                 </button>
-                
+
                 {/* Categories */}
                 {Array.isArray(categories) && categories.map(category => {
                   const categoryId = category._id || category.id || '';
@@ -376,16 +379,15 @@ function ProductsPageContent() {
                     <div key={categoryId}>
                       <div className="flex items-center">
                         <button
-                          className={`text-left px-4 py-3 rounded-lg flex-1 transition-colors ${
-                            selectedCategory === categoryId && !selectedSubcategory 
-                              ? 'bg-primary text-white' 
+                          className={`text-left px-4 py-3 rounded-lg flex-1 transition-colors ${selectedCategory === categoryId && !selectedSubcategory
+                              ? 'bg-primary text-white'
                               : 'hover:bg-gray-50'
-                          }`}
+                            }`}
                           onClick={() => handleCategoryFilter(categoryId)}
                         >
                           {category.name}
                         </button>
-                        
+
                         {category.subcategories && category.subcategories.length > 0 && (
                           <button
                             onClick={() => toggleCategoryExpansion(categoryId)}
@@ -399,7 +401,7 @@ function ProductsPageContent() {
                           </button>
                         )}
                       </div>
-                      
+
                       {/* Subcategories */}
                       {category.subcategories && category.subcategories.length > 0 && expandedCategories[categoryId] && (
                         <div className="ml-4 mt-2 space-y-1">
@@ -408,12 +410,11 @@ function ProductsPageContent() {
                             return (
                               <button
                                 key={subId}
-                                className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors ${
-                                  selectedCategory === categoryId && 
-                                  selectedSubcategory === subId
-                                    ? 'bg-primary text-white' 
+                                className={`w-full text-left px-4 py-2 rounded-lg text-sm transition-colors ${selectedCategory === categoryId &&
+                                    selectedSubcategory === subId
+                                    ? 'bg-primary text-white'
                                     : 'hover:bg-gray-50'
-                                }`}
+                                  }`}
                                 onClick={() => handleSubcategoryFilter(categoryId, subId)}
                               >
                                 {subcategory.name}
@@ -426,7 +427,7 @@ function ProductsPageContent() {
                   );
                 })}
               </div>
-              
+
               {/* Clear Filters */}
               <button
                 onClick={() => navigateToProducts('all')}
@@ -444,8 +445,8 @@ function ProductsPageContent() {
             {loading && (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                 {[...Array(8)].map((_, index) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden animate-pulse"
                   >
                     <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300"></div>
@@ -514,12 +515,15 @@ function ProductsPageContent() {
                     {/* Products Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
                       {currentProducts.map((product, index) => (
-                        <div 
+                        <div
                           key={product._id || product.id}
                           className="animate-fadeIn hover:scale-105 transition-transform duration-300"
                           style={{ animationDelay: `${index * 0.05}s` }}
                         >
-                          <ProductCard product={product} />
+                          <ProductCard
+                            product={product}
+                            onQuickView={openQuickView}
+                          />
                         </div>
                       ))}
                     </div>
@@ -533,42 +537,39 @@ function ProductsPageContent() {
                       <button
                         onClick={() => handlePageChange(currentPage - 1)}
                         disabled={currentPage === 1}
-                        className={`px-3 py-2 rounded-md font-medium transition-all duration-200 ${
-                          currentPage === 1
+                        className={`px-3 py-2 rounded-md font-medium transition-all duration-200 ${currentPage === 1
                             ? 'text-gray-400 cursor-not-allowed'
                             : 'text-gray-700 hover:bg-gray-100'
-                        }`}
+                          }`}
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
                         </svg>
                       </button>
-                      
+
                       {[...Array(totalPages)].map((_, index) => {
                         const pageNumber = index + 1;
                         return (
                           <button
                             key={pageNumber}
                             onClick={() => handlePageChange(pageNumber)}
-                            className={`px-3 py-2 rounded-md font-medium transition-all duration-200 ${
-                              currentPage === pageNumber
+                            className={`px-3 py-2 rounded-md font-medium transition-all duration-200 ${currentPage === pageNumber
                                 ? 'bg-primary text-white'
                                 : 'text-gray-700 hover:bg-gray-100'
-                            }`}
+                              }`}
                           >
                             {pageNumber}
                           </button>
                         );
                       })}
-                      
+
                       <button
                         onClick={() => handlePageChange(currentPage + 1)}
                         disabled={currentPage === totalPages}
-                        className={`px-3 py-2 rounded-md font-medium transition-all duration-200 ${
-                          currentPage === totalPages
+                        className={`px-3 py-2 rounded-md font-medium transition-all duration-200 ${currentPage === totalPages
                             ? 'text-gray-400 cursor-not-allowed'
                             : 'text-gray-700 hover:bg-gray-100'
-                        }`}
+                          }`}
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
@@ -596,7 +597,7 @@ function ProductsPageContent() {
                 <FaTimes />
               </button>
             </div>
-            
+
             <div className="space-y-3">
               {sortOptions.map((option) => (
                 <button
@@ -605,11 +606,10 @@ function ProductsPageContent() {
                     setSortOption(option.value);
                     setSortDrawerVisible(false);
                   }}
-                  className={`w-full text-left px-4 py-3 rounded-md transition-colors ${
-                    sortOption === option.value
+                  className={`w-full text-left px-4 py-3 rounded-md transition-colors ${sortOption === option.value
                       ? 'bg-primary text-white'
                       : 'hover:bg-gray-100'
-                  }`}
+                    }`}
                 >
                   {option.label}
                 </button>
@@ -618,6 +618,14 @@ function ProductsPageContent() {
           </div>
         </div>
       )}
+
+      {/* Quick View Modal */}
+      <QuickView
+        product={quickViewProduct}
+        isOpen={isQuickViewOpen}
+        onClose={closeQuickView}
+        variant="standard"
+      />
     </div>
   );
 }
