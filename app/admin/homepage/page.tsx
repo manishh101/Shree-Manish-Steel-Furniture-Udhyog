@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { homepageAPI, HomepageData, HomepageFeature } from '@/services/api';
 import { FaEye, FaSave, FaUndo, FaPlus, FaTrash, FaImage, FaInfoCircle, FaUpload, FaSpinner } from 'react-icons/fa';
 import Link from 'next/link';
+import OptimizedImage from '@/components/common/OptimizedImage';
 
 const initialHomepageData: HomepageData = {
   heroTitle: '',
@@ -303,8 +304,8 @@ const AdminHomepage = () => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${activeTab === tab.id
-                  ? 'border-b-2 border-primary text-primary bg-primary/5'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                ? 'border-b-2 border-primary text-primary bg-primary/5'
+                : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
                 }`}
             >
               <span className="mr-2">{tab.icon}</span>
@@ -415,14 +416,15 @@ const AdminHomepage = () => {
               {homepageData.heroImage && (
                 <div className="space-y-2">
                   <p className="text-sm font-medium text-gray-700">Image Preview:</p>
-                  <div className="flex justify-center bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                  <div className="relative max-w-lg w-full h-64 bg-gray-50 rounded-lg shadow-md border border-gray-200 overflow-hidden">
+                    <OptimizedImage
                       src={homepageData.heroImage}
                       alt="Hero preview"
-                      className="max-w-lg w-full h-64 object-contain rounded-lg shadow-md border border-gray-200"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = '/images/home-page-1.png';
+                      className="w-full h-full"
+                      size="medium"
+                      objectFit="contain"
+                      onError={() => {
+                        handleInputChange('heroImage', '/images/home-page-1.png');
                       }}
                     />
                   </div>

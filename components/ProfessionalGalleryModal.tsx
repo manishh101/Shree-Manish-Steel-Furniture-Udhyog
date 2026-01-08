@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FaTimes, FaChevronLeft, FaChevronRight, FaTh } from 'react-icons/fa';
+import OptimizedImage from '@/components/common/OptimizedImage';
+import imageService from '@/services/imageService';
 
 interface ProfessionalGalleryModalProps {
   isOpen: boolean;
@@ -213,14 +215,16 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
               <p>Unable to load this image</p>
             </div>
           ) : (
-            <img
+            <OptimizedImage
               key={`gallery-main-${currentIndex}`}
               src={currentImageUrl}
               alt={`${productName} - Image ${currentIndex + 1}`}
               onLoad={handleImageLoad}
               onError={() => handleImageError(currentIndex)}
-              className="max-w-full max-h-[70vh] object-contain transition-opacity duration-300"
+              className="max-w-full max-h-[70vh] transition-opacity duration-300"
               style={{ margin: 'auto' }}
+              size="large"
+              objectFit="contain"
             />
           )}
 
@@ -262,15 +266,17 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
                 <button
                   key={index}
                   className={`thumbnail-item flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${index === currentIndex
-                      ? 'border-primary ring-2 ring-primary/50'
-                      : 'border-transparent hover:border-white/30'
+                    ? 'border-primary ring-2 ring-primary/50'
+                    : 'border-transparent hover:border-white/30'
                     }`}
                   onClick={() => handleThumbnailClick(index)}
                 >
-                  <img
+                  <OptimizedImage
                     src={image}
                     alt={`Thumbnail ${index + 1}`}
-                    className="w-full h-full object-contain"
+                    className="w-full h-full"
+                    size="thumbnail"
+                    objectFit="contain"
                   />
                 </button>
               ))}
