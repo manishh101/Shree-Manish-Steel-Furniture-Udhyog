@@ -2,53 +2,55 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { categoryAPI, Category, subcategoryAPI, Subcategory } from '@/services/api';
-import { 
-  FaPencilAlt, 
-  FaTrash, 
-  FaPlusCircle, 
+import {
+  FaPencilAlt,
+  FaTrash,
+  FaPlusCircle,
   FaTimes,
   FaSync,
   FaCheck,
   FaChevronDown,
-  FaChevronUp
+  FaChevronUp,
+  FaGripVertical
 } from 'react-icons/fa';
+import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 
 const AdminCategories = () => {
   const [categories, setCategories] = useState<(Category & { subcategories?: Subcategory[] })[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
-  
+
   // Category Modal State
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [categoryFormData, setCategoryFormData] = useState({ name: '', description: '' });
-  
+  const [categoryFormData, setCategoryFormData] = useState({ name: '', description: '', displayOrder: 0 });
+
   // Subcategory Modal State
   const [isSubcategoryModalOpen, setIsSubcategoryModalOpen] = useState(false);
   const [editingSubcategory, setEditingSubcategory] = useState<Subcategory | null>(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const [subcategoryFormData, setSubcategoryFormData] = useState({ name: '', description: '' });
+  const [subcategoryFormData, setSubcategoryFormData] = useState({ name: '', description: '', displayOrder: 0 });
 
   const loadCategories = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
-      
+
       // Get all categories
       const categoriesData = await categoryAPI.getAll();
-      
+
       // Get all subcategories
       const subcategoriesData = await subcategoryAPI.getAll();
-      
+
       // Merge subcategories into categories
       const categoriesWithSubs = categoriesData.map((category: Category) => ({
         ...category,
-        subcategories: subcategoriesData.filter((sub: Subcategory) => 
-          sub.categoryId === category._id || sub.parentId === category._id
-        )
-      }));
-      
+        subcategories: subcategoriesData
+          .filter((sub: Subcategory) => sub.categoryId === category._id || sub.parentId === category._id)
+          .sort((a: Subcategory, b: Subcategory) => (a.displayOrder || 0) - (b.displayOrder || 0))
+      })).sort((a: Category, b: Category) => (a.displayOrder || 0) - (b.displayOrder || 0));
+
       setCategories(categoriesWithSubs);
     } catch (err) {
       console.error('Error loading categories:', err);
@@ -73,7 +75,7 @@ const AdminCategories = () => {
   // Category Modal Functions
   const openAddCategoryModal = () => {
     setEditingCategory(null);
-    setCategoryFormData({ name: '', description: '' });
+    setCategoryFormData({ name: '', description: '', displayOrder: categories.length });
     setError('');
     setIsCategoryModalOpen(true);
   };
@@ -82,7 +84,8 @@ const AdminCategories = () => {
     setEditingCategory(category);
     setCategoryFormData({
       name: category.name,
-      description: category.description || ''
+      description: category.description || '',
+      displayOrder: category.displayOrder || 0
     });
     setError('');
     setIsCategoryModalOpen(true);
@@ -96,9 +99,11 @@ const AdminCategories = () => {
 
   // Subcategory Modal Functions
   const openAddSubcategoryModal = (categoryId: string) => {
+    const category = categories.find(c => c._id === categoryId);
+    const subCount = category?.subcategories?.length || 0;
     setSelectedCategoryId(categoryId);
     setEditingSubcategory(null);
-    setSubcategoryFormData({ name: '', description: '' });
+    setSubcategoryFormData({ name: '', description: '', displayOrder: subCount });
     setError('');
     setIsSubcategoryModalOpen(true);
   };
@@ -108,7 +113,8 @@ const AdminCategories = () => {
     setEditingSubcategory(subcategory);
     setSubcategoryFormData({
       name: subcategory.name,
-      description: ''
+      description: subcategory.description || '',
+      displayOrder: subcategory.displayOrder || 0
     });
     setError('');
     setIsSubcategoryModalOpen(true);
@@ -203,12 +209,122 @@ const AdminCategories = () => {
     }
   };
 
+  const handleMoveCategory = async (category: Category, direction: 'up' | 'down') => {
+    const currentIndex = categories.findIndex(c => c._id === category._id);
+    if (direction === 'up' && currentIndex === 0) return;
+    if (direction === 'down' && currentIndex === categories.length - 1) return;
+
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    const targetCategory = categories[targetIndex];
+
+    try {
+      setLoading(true);
+      // Swap order
+      await categoryAPI.update(category._id, { displayOrder: targetCategory.displayOrder || targetIndex });
+      await categoryAPI.update(targetCategory._id, { displayOrder: category.displayOrder || currentIndex });
+      await loadCategories();
+    } catch (err) {
+      console.error('Error reordering category:', err);
+      setError('Failed to reorder category');
+      setLoading(false);
+    }
+  };
+
+  const handleMoveSubcategory = async (categoryId: string, subcategory: Subcategory, direction: 'up' | 'down') => {
+    const category = categories.find(c => c._id === categoryId);
+    if (!category || !category.subcategories) return;
+
+    const subs = category.subcategories;
+    const currentIndex = subs.findIndex(s => s._id === subcategory._id);
+    if (direction === 'up' && currentIndex === 0) return;
+    if (direction === 'down' && currentIndex === subs.length - 1) return;
+
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    const targetSub = subs[targetIndex];
+
+    try {
+      setLoading(true);
+      // Swap order
+      await subcategoryAPI.update(subcategory._id, { displayOrder: targetSub.displayOrder || targetIndex });
+      await subcategoryAPI.update(targetSub._id, { displayOrder: subcategory.displayOrder || currentIndex });
+      await loadCategories();
+    } catch (err) {
+      console.error('Error reordering subcategory:', err);
+      setError('Failed to reorder subcategory');
+      setLoading(false);
+    }
+  };
+
+  const handleDragEnd = async (result: DropResult) => {
+    const { destination, source, type } = result;
+
+    if (!destination) return;
+    if (destination.droppableId === source.droppableId && destination.index === source.index) return;
+
+    if (type === 'category') {
+      const newCategories = Array.from(categories);
+      const [removed] = newCategories.splice(source.index, 1);
+      newCategories.splice(destination.index, 0, removed);
+
+      // Update state immediately for UX
+      setCategories(newCategories);
+
+      try {
+        setLoading(true);
+        // Update all categories in the database to ensure order is persisted
+        // Ideally we would have a bulk update API but since we don't, we'll update affected ones
+        // or just the moved one if we're confident in the displayOrder logic
+        // To be safe and simple, let's update EVERY category with its new index as displayOrder
+        const updates = newCategories.map((cat, index) =>
+          categoryAPI.update(cat._id, { displayOrder: index })
+        );
+        await Promise.all(updates);
+        await loadCategories(); // Reload to get fresh data
+      } catch (err) {
+        console.error('Error reordering categories:', err);
+        setError('Failed to reorder categories');
+        await loadCategories(); // Revert state on error
+      } finally {
+        setLoading(false);
+      }
+    } else if (type === 'subcategory') {
+      const categoryId = source.droppableId.replace('sub-', '');
+      const category = categories.find(c => c._id === categoryId);
+      if (!category || !category.subcategories) return;
+
+      const newSubs = Array.from(category.subcategories);
+      const [removed] = newSubs.splice(source.index, 1);
+      newSubs.splice(destination.index, 0, removed);
+
+      // Update local state for UX
+      const newCategories = categories.map(c =>
+        c._id === categoryId ? { ...c, subcategories: newSubs } : c
+      );
+      setCategories(newCategories);
+
+      try {
+        setLoading(true);
+        const updates = newSubs.map((sub, index) =>
+          subcategoryAPI.update(sub._id, { displayOrder: index })
+        );
+        await Promise.all(updates);
+        await loadCategories();
+      } catch (err) {
+        console.error('Error reordering subcategories:', err);
+        setError('Failed to reorder subcategories');
+        await loadCategories();
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
         <h1 className="text-xl sm:text-2xl font-bold text-primary">Manage Categories</h1>
         <div className="flex gap-2">
-          <button 
+          <button
             onClick={loadCategories}
             className="bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center text-sm"
             disabled={loading}
@@ -216,7 +332,7 @@ const AdminCategories = () => {
             <FaSync className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
-          <button 
+          <button
             onClick={openAddCategoryModal}
             className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors flex items-center"
           >
@@ -246,86 +362,136 @@ const AdminCategories = () => {
               No categories found. Add a new category to get started.
             </div>
           ) : (
-            <ul className="divide-y divide-gray-200">
-              {categories.map((category) => (
-                <li key={category._id} className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <button 
-                        onClick={() => toggleCategoryExpansion(category._id)}
-                        className="text-gray-500 hover:text-primary"
-                      >
-                        {expandedCategories[category._id] ? (
-                          <FaChevronUp className="h-5 w-5" />
-                        ) : (
-                          <FaChevronDown className="h-5 w-5" />
-                        )}
-                      </button>
-                      <span className="font-medium text-lg">{category.name}</span>
-                      <span className="text-sm text-gray-500">
-                        ({category.subcategories?.length || 0} subcategories)
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <button 
-                        onClick={() => openAddSubcategoryModal(category._id)}
-                        className="text-primary hover:text-primary/80 p-2"
-                        title="Add Subcategory"
-                      >
-                        <FaPlusCircle className="h-5 w-5" />
-                      </button>
-                      <button 
-                        onClick={() => openEditCategoryModal(category)}
-                        className="text-primary hover:text-primary/80 p-2"
-                        title="Edit Category"
-                      >
-                        <FaPencilAlt className="h-5 w-5" />
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteCategory(category._id)}
-                        className="text-red-600 hover:text-red-800 p-2"
-                        title="Delete Category"
-                      >
-                        <FaTrash className="h-5 w-5" />
-                      </button>
-                    </div>
-                  </div>
-                  
-                  {/* Subcategories */}
-                  {expandedCategories[category._id] && (
-                    <div className="mt-3 ml-6 border-l-2 border-gray-200 pl-4">
-                      {category.subcategories && category.subcategories.length === 0 ? (
-                        <p className="text-sm text-gray-500 italic py-2">No subcategories</p>
-                      ) : (
-                        <ul className="space-y-2">
-                          {category.subcategories?.map((subcategory) => (
-                            <li key={subcategory._id} className="flex items-center justify-between py-2 px-2 hover:bg-gray-50 rounded">
-                              <span className="text-sm">{subcategory.name}</span>
+            <DragDropContext onDragEnd={handleDragEnd}>
+              <Droppable droppableId="categories-list" type="category">
+                {(provided) => (
+                  <ul
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className="divide-y divide-gray-200"
+                  >
+                    {categories.map((category, index) => (
+                      <Draggable key={category._id} draggableId={category._id} index={index}>
+                        {(provided) => (
+                          <li
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            className="p-4 hover:bg-gray-50 transition-colors bg-white"
+                          >
+                            <div className="flex items-center justify-between">
                               <div className="flex items-center space-x-2">
-                                <button 
-                                  onClick={() => openEditSubcategoryModal(category._id, subcategory)}
-                                  className="text-primary hover:text-primary/80 p-1"
-                                  title="Edit Subcategory"
+                                <div {...provided.dragHandleProps} className="p-2 text-gray-400 hover:text-gray-600 cursor-grab active:cursor-grabbing">
+                                  <FaGripVertical />
+                                </div>
+                                <button
+                                  onClick={() => toggleCategoryExpansion(category._id)}
+                                  className="text-gray-500 hover:text-primary"
                                 >
-                                  <FaPencilAlt className="h-4 w-4" />
+                                  {expandedCategories[category._id] ? (
+                                    <FaChevronUp className="h-5 w-5" />
+                                  ) : (
+                                    <FaChevronDown className="h-5 w-5" />
+                                  )}
                                 </button>
-                                <button 
-                                  onClick={() => handleDeleteSubcategory(subcategory._id)}
-                                  className="text-red-600 hover:text-red-800 p-1"
-                                  title="Delete Subcategory"
+                                <span className="font-medium text-lg">{category.name}</span>
+                                <span className="text-sm text-gray-500">
+                                  ({category.subcategories?.length || 0} subcategories)
+                                </span>
+                                <span className="bg-blue-50 text-blue-700 text-xs font-bold px-2 py-1 rounded ml-2">
+                                  Rank: {category.displayOrder || 0}
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <button
+                                  onClick={() => openAddSubcategoryModal(category._id)}
+                                  className="text-primary hover:text-primary/80 p-2"
+                                  title="Add Subcategory"
                                 >
-                                  <FaTrash className="h-4 w-4" />
+                                  <FaPlusCircle className="h-5 w-5" />
+                                </button>
+                                <button
+                                  onClick={() => openEditCategoryModal(category)}
+                                  className="text-primary hover:text-primary/80 p-2"
+                                  title="Edit Category"
+                                >
+                                  <FaPencilAlt className="h-5 w-5" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteCategory(category._id)}
+                                  className="text-red-600 hover:text-red-800 p-2"
+                                  title="Delete Category"
+                                >
+                                  <FaTrash className="h-5 w-5" />
                                 </button>
                               </div>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
+                            </div>
+
+                            {/* Subcategories */}
+                            {expandedCategories[category._id] && (
+                              <div className="mt-3 ml-12 border-l-2 border-gray-200 pl-4">
+                                {category.subcategories && category.subcategories.length === 0 ? (
+                                  <p className="text-sm text-gray-500 italic py-2">No subcategories</p>
+                                ) : (
+                                  <Droppable droppableId={`sub-${category._id}`} type="subcategory">
+                                    {(provided) => (
+                                      <ul
+                                        {...provided.droppableProps}
+                                        ref={provided.innerRef}
+                                        className="space-y-2"
+                                      >
+                                        {category.subcategories?.map((subcategory, subIndex) => (
+                                          <Draggable key={subcategory._id} draggableId={subcategory._id} index={subIndex}>
+                                            {(provided) => (
+                                              <li
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                className="flex items-center justify-between py-2 px-2 hover:bg-gray-100 rounded transition-colors group bg-white border border-transparent hover:border-gray-200"
+                                              >
+                                                <div className="flex items-center">
+                                                  <div {...provided.dragHandleProps} className="p-1 px-2 text-gray-300 group-hover:text-gray-500 cursor-grab active:cursor-grabbing">
+                                                    <FaGripVertical className="h-3 w-3" />
+                                                  </div>
+                                                  <span className="text-sm font-medium">{subcategory.name}</span>
+                                                  <span className="ml-2 text-[10px] bg-gray-200 text-gray-600 px-1.5 rounded">
+                                                    {subcategory.displayOrder || 0}
+                                                  </span>
+                                                </div>
+                                                <div className="flex items-center space-x-1">
+                                                  <button
+                                                    onClick={() => openEditSubcategoryModal(category._id, subcategory)}
+                                                    className="text-primary hover:text-primary/80 p-1"
+                                                    title="Edit Subcategory"
+                                                  >
+                                                    <FaPencilAlt className="h-4 w-4" />
+                                                  </button>
+                                                  <button
+                                                    onClick={() => handleDeleteSubcategory(subcategory._id)}
+                                                    className="text-red-600 hover:text-red-800 p-1"
+                                                    title="Delete Subcategory"
+                                                  >
+                                                    <FaTrash className="h-4 w-4" />
+                                                  </button>
+                                                </div>
+                                              </li>
+                                            )}
+                                          </Draggable>
+                                        ))}
+                                        {provided.placeholder}
+                                      </ul>
+                                    )}
+                                  </Droppable>
+                                )}
+                              </div>
+                            )}
+                          </li>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </ul>
+                )}
+              </Droppable>
+            </DragDropContext>
           )}
         </div>
       )}

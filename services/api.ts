@@ -12,9 +12,9 @@ interface FetchOptions extends RequestInit {
 
 async function fetchAPI<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
   const { params, ...fetchOptions } = options;
-  
+
   let url = `${API_BASE_URL}${endpoint}`;
-  
+
   // Add query parameters
   if (params) {
     const searchParams = new URLSearchParams();
@@ -28,7 +28,7 @@ async function fetchAPI<T>(endpoint: string, options: FetchOptions = {}): Promis
       url += `?${queryString}`;
     }
   }
-  
+
   const response = await fetch(url, {
     ...fetchOptions,
     headers: {
@@ -36,12 +36,12 @@ async function fetchAPI<T>(endpoint: string, options: FetchOptions = {}): Promis
       ...fetchOptions.headers,
     },
   });
-  
+
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: 'An error occurred' }));
     throw new Error(error.message || `HTTP error! status: ${response.status}`);
   }
-  
+
   return response.json();
 }
 
@@ -106,9 +106,11 @@ export interface Subcategory {
   _id: string;
   id?: string;
   name: string;
+  description?: string;
   categoryId?: string;
   parentId?: string;
   category?: string | { _id: string; name: string };
+  displayOrder?: number;
 }
 
 export interface Category {
@@ -117,6 +119,7 @@ export interface Category {
   name: string;
   description?: string;
   image?: string;
+  displayOrder?: number;
   subcategories?: Subcategory[];
 }
 
@@ -166,94 +169,94 @@ export interface CustomOrder {
 
 // Product API
 export const productAPI = {
-  getAll: (page = 1, limit = 100, params: Record<string, unknown> = {}) => 
+  getAll: (page = 1, limit = 100, params: Record<string, unknown> = {}) =>
     fetchAPI<ProductsResponse>('/products', { params: { page, limit, ...params } }),
-    
-  getById: (id: string) => 
+
+  getById: (id: string) =>
     fetchAPI<Product>(`/products/${id}`),
-    
+
   getByCategory: (category: string, options: { subcategory?: string; limit?: number } = {}) =>
-    fetchAPI<ProductsResponse>('/products/filter', { 
-      params: { 
-        category, 
+    fetchAPI<ProductsResponse>('/products/filter', {
+      params: {
+        category,
         // Only include all subcategories if no specific subcategory is selected
         ...(options.subcategory ? { subcategory: options.subcategory } : { includeAllSubcategories: true }),
         limit: options.limit || 100
-      } 
+      }
     }),
 
   getByCategoryAlternative: (category: string, options: { subcategory?: string; limit?: number; timestamp?: number } = {}) =>
-    fetchAPI<ProductsResponse>('/products/filter', { 
-      params: { 
+    fetchAPI<ProductsResponse>('/products/filter', {
+      params: {
         category,
         subcategory: options.subcategory,
         limit: options.limit || 100,
         timestamp: options.timestamp
-      } 
+      }
     }),
 
   getProductsByCategory: (category: string, options: { limit?: number } = {}) =>
-    fetchAPI<ProductsResponse>('/products/filter', { 
-      params: { 
+    fetchAPI<ProductsResponse>('/products/filter', {
+      params: {
         category,
         includeAllSubcategories: true,
         limit: options.limit || 1000
-      } 
+      }
     }),
-    
-  getFeatured: (limit = 6) => 
+
+  getFeatured: (limit = 6) =>
     fetchAPI<{ products: Product[] }>('/products/featured', { params: { limit } }),
-    
-  getMostSelling: (limit = 6) => 
+
+  getMostSelling: (limit = 6) =>
     fetchAPI<{ products: Product[] }>('/products/most-selling', { params: { limit } }),
-    
-  getTopProducts: (limit = 6) => 
+
+  getTopProducts: (limit = 6) =>
     fetchAPI<{ products: Product[] }>('/products/top-products', { params: { limit } }),
-    
-  search: (query: string) => 
+
+  search: (query: string) =>
     fetchAPI<ProductsResponse>('/products', { params: { search: query, limit: 100 } }),
-    
+
   create: (data: Record<string, unknown>) =>
     fetchAPI<Product>('/products', {
       method: 'POST',
       body: JSON.stringify(data),
       headers: getAuthHeader()
     }),
-    
+
   update: (id: string, data: Record<string, unknown>) =>
     fetchAPI<Product>(`/products/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
       headers: getAuthHeader()
     }),
-    
+
   delete: (id: string) =>
     fetchAPI<{ message: string }>(`/products/${id}`, {
       method: 'DELETE',
       headers: getAuthHeader()
     }),
-    
+
   updateFeaturedStatus: (id: string, featured: boolean) =>
     fetchAPI<Product>(`/products/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ featured }),
       headers: getAuthHeader()
     }),
-    
+
   updateMostSellingStatus: (id: string, isMostSelling: boolean) =>
     fetchAPI<Product>(`/products/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ isMostSelling }),
       headers: getAuthHeader()
     }),
-    
+
   updateTopProductStatus: (id: string, isTopProduct: boolean) =>
     fetchAPI<Product>(`/products/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ isTopProduct }),
       headers: getAuthHeader()
     }),
-    
+
   updateCategoryThumbnailStatus: (id: string, usedAsCategoryThumbnail: boolean) =>
     fetchAPI<Product>(`/products/${id}`, {
       method: 'PUT',
@@ -264,26 +267,26 @@ export const productAPI = {
 
 // Category API
 export const categoryAPI = {
-  getAll: (detailed = false) => 
+  getAll: (detailed = false) =>
     fetchAPI<Category[]>('/categories', { params: { detailed } }),
-    
-  getById: (id: string, withSubcategories = false) => 
+
+  getById: (id: string, withSubcategories = false) =>
     fetchAPI<Category>(`/categories/${id}`, { params: { subcategories: withSubcategories } }),
-    
-  create: (data: { name: string; description?: string; image?: string }) =>
+
+  create: (data: { name: string; description?: string; image?: string; displayOrder?: number }) =>
     fetchAPI<Category>('/categories', {
       method: 'POST',
       body: JSON.stringify(data),
       headers: getAuthHeader()
     }),
-    
-  update: (id: string, data: { name?: string; description?: string; image?: string }) =>
+
+  update: (id: string, data: { name?: string; description?: string; image?: string; displayOrder?: number }) =>
     fetchAPI<Category>(`/categories/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
       headers: getAuthHeader()
     }),
-    
+
   delete: (id: string) =>
     fetchAPI<{ message: string }>(`/categories/${id}`, {
       method: 'DELETE',
@@ -293,26 +296,26 @@ export const categoryAPI = {
 
 // Subcategory API
 export const subcategoryAPI = {
-  getAll: () => 
+  getAll: () =>
     fetchAPI<Subcategory[]>('/subcategories'),
-    
-  getByCategoryId: (categoryId: string) => 
+
+  getByCategoryId: (categoryId: string) =>
     fetchAPI<Subcategory[]>('/subcategories', { params: { categoryId } }),
-    
-  create: (data: { name: string; categoryId: string; description?: string }) =>
+
+  create: (data: { name: string; categoryId: string; description?: string; displayOrder?: number }) =>
     fetchAPI<Subcategory>('/subcategories', {
       method: 'POST',
       body: JSON.stringify(data),
       headers: getAuthHeader()
     }),
-    
-  update: (id: string, data: { name?: string; categoryId?: string; description?: string }) =>
+
+  update: (id: string, data: { name?: string; categoryId?: string; description?: string; displayOrder?: number }) =>
     fetchAPI<Subcategory>(`/subcategories/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
       headers: getAuthHeader()
     }),
-    
+
   delete: (id: string) =>
     fetchAPI<{ message: string }>(`/subcategories/${id}`, {
       method: 'DELETE',
@@ -322,30 +325,30 @@ export const subcategoryAPI = {
 
 // Inquiry API
 export const inquiryAPI = {
-  create: (data: Omit<Inquiry, '_id' | 'status' | 'createdAt'>) => 
-    fetchAPI<Inquiry>('/inquiries', { 
-      method: 'POST', 
-      body: JSON.stringify(data) 
+  create: (data: Omit<Inquiry, '_id' | 'status' | 'createdAt'>) =>
+    fetchAPI<Inquiry>('/inquiries', {
+      method: 'POST',
+      body: JSON.stringify(data)
     }),
-    
-  getAll: (page = 1, limit = 10, status?: string, search?: string) => 
-    fetchAPI<InquiriesResponse>('/inquiries', { 
+
+  getAll: (page = 1, limit = 10, status?: string, search?: string) =>
+    fetchAPI<InquiriesResponse>('/inquiries', {
       params: { page, limit, status, search },
       headers: getAuthHeader()
     }),
-    
+
   getById: (id: string) =>
     fetchAPI<Inquiry>(`/inquiries/${id}`, {
       headers: getAuthHeader()
     }),
-    
+
   updateStatus: (id: string, status: string) =>
     fetchAPI<Inquiry>(`/inquiries/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ status }),
       headers: getAuthHeader()
     }),
-    
+
   delete: (id: string) =>
     fetchAPI<{ message: string }>(`/inquiries/${id}`, {
       method: 'DELETE',
@@ -355,30 +358,30 @@ export const inquiryAPI = {
 
 // Custom Order API
 export const customOrderAPI = {
-  create: (data: Omit<CustomOrder, '_id' | 'status' | 'createdAt'>) => 
-    fetchAPI<CustomOrder>('/custom-orders', { 
-      method: 'POST', 
-      body: JSON.stringify(data) 
+  create: (data: Omit<CustomOrder, '_id' | 'status' | 'createdAt'>) =>
+    fetchAPI<CustomOrder>('/custom-orders', {
+      method: 'POST',
+      body: JSON.stringify(data)
     }),
-    
-  getAll: (page = 1, status?: string) => 
-    fetchAPI<{ orders: CustomOrder[]; totalPages: number }>('/custom-orders', { 
+
+  getAll: (page = 1, status?: string) =>
+    fetchAPI<{ orders: CustomOrder[]; totalPages: number }>('/custom-orders', {
       params: { page, status: status !== 'all' ? status : undefined },
       headers: getAuthHeader()
     }),
-    
+
   getById: (id: string) =>
     fetchAPI<CustomOrder>(`/custom-orders/${id}`, {
       headers: getAuthHeader()
     }),
-    
+
   updateStatus: (id: string, status: string) =>
     fetchAPI<CustomOrder>(`/custom-orders/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ status }),
       headers: getAuthHeader()
     }),
-    
+
   delete: (id: string) =>
     fetchAPI<{ message: string }>(`/custom-orders/${id}`, {
       method: 'DELETE',
@@ -427,43 +430,43 @@ export interface AboutContent {
 }
 
 export const aboutAPI = {
-  getContent: () => 
+  getContent: () =>
     fetchAPI<{ success: boolean; data: AboutData }>('/about'),
-  
+
   updateContent: (data: Partial<AboutData>) =>
     fetchAPI<{ success: boolean; data: AboutData; message?: string }>('/about', {
       method: 'PUT',
       body: JSON.stringify(data),
       headers: getAuthHeader()
     }),
-    
+
   updateSection: (section: string, data: Partial<AboutData>) =>
     fetchAPI<{ success: boolean; data: AboutData }>(`/about/section/${section}`, {
       method: 'PUT',
       body: JSON.stringify(data),
       headers: getAuthHeader()
     }),
-    
+
   updateCoreValue: (valueId: string, data: Partial<CoreValue>) =>
     fetchAPI<{ success: boolean }>(`/about/core-value/${valueId}`, {
       method: 'PUT',
       body: JSON.stringify(data),
       headers: getAuthHeader()
     }),
-    
+
   addCoreValue: (data: Partial<CoreValue>) =>
     fetchAPI<{ success: boolean; data: CoreValue }>('/about/core-value', {
       method: 'POST',
       body: JSON.stringify(data),
       headers: getAuthHeader()
     }),
-    
+
   deleteCoreValue: (valueId: string) =>
     fetchAPI<{ success: boolean }>(`/about/core-value/${valueId}`, {
       method: 'DELETE',
       headers: getAuthHeader()
     }),
-    
+
   uploadWorkshopImage: async (formData: FormData) => {
     const response = await fetch(`${API_BASE_URL}/about/workshop-images`, {
       method: 'POST',
@@ -473,7 +476,7 @@ export const aboutAPI = {
     if (!response.ok) throw new Error('Failed to upload image');
     return response.json();
   },
-  
+
   deleteWorkshopImage: (imageUrl: string) =>
     fetchAPI<{ success: boolean }>('/about/workshop-images', {
       method: 'DELETE',
@@ -526,39 +529,39 @@ export interface GalleryConfig {
 
 export const galleryAPI = {
   // Sections
-  getSections: () => 
+  getSections: () =>
     fetchAPI<{ sections: GallerySection[] } | GallerySection[]>('/gallery/sections'),
-    
+
   getSection: (sectionId: string) =>
     fetchAPI<GallerySection>(`/gallery/sections/${sectionId}`),
-    
+
   createSection: (sectionData: Partial<GallerySection>) =>
     fetchAPI<GallerySection>('/gallery/sections', {
       method: 'POST',
       body: JSON.stringify(sectionData),
       headers: getAuthHeader()
     }),
-    
+
   updateSection: (sectionId: string, sectionData: Partial<GallerySection>) =>
     fetchAPI<GallerySection>(`/gallery/sections/${sectionId}`, {
       method: 'PUT',
       body: JSON.stringify(sectionData),
       headers: getAuthHeader()
     }),
-    
+
   deleteSection: (sectionId: string) =>
     fetchAPI<{ message: string }>(`/gallery/sections/${sectionId}`, {
       method: 'DELETE',
       headers: getAuthHeader()
     }),
-    
+
   reorderSections: (sectionIds: string[]) =>
     fetchAPI<{ message: string }>('/gallery/sections/reorder', {
       method: 'PUT',
       body: JSON.stringify({ sectionIds }),
       headers: getAuthHeader()
     }),
-    
+
   // Images within sections
   addImageToSection: async (sectionId: string, imageData: FormData | Partial<GalleryImage>) => {
     if (imageData instanceof FormData) {
@@ -576,31 +579,31 @@ export const galleryAPI = {
       headers: getAuthHeader()
     });
   },
-    
+
   updateImageInSection: (sectionId: string, imageId: string, imageData: Partial<GalleryImage>) =>
     fetchAPI<GalleryImage>(`/gallery/sections/${sectionId}/images/${imageId}`, {
       method: 'PUT',
       body: JSON.stringify(imageData),
       headers: getAuthHeader()
     }),
-    
+
   deleteImageFromSection: (sectionId: string, imageId: string) =>
     fetchAPI<{ message: string }>(`/gallery/sections/${sectionId}/images/${imageId}`, {
       method: 'DELETE',
       headers: getAuthHeader()
     }),
-    
+
   // Config
-  getConfig: () => 
+  getConfig: () =>
     fetchAPI<GalleryConfig>('/gallery/config'),
-    
+
   updateConfig: (config: Partial<GalleryConfig>) =>
     fetchAPI<GalleryConfig>('/gallery/config', {
       method: 'PUT',
       body: JSON.stringify(config),
       headers: getAuthHeader()
     }),
-    
+
   // Upload image
   uploadImage: async (formData: FormData) => {
     const response = await fetch(`${API_BASE_URL}/gallery/upload`, {
@@ -631,9 +634,9 @@ export interface LoginResponse {
 
 export const authAPI = {
   login: async (email: string, password: string) => {
-    const response = await fetchAPI<LoginResponse>('/auth', { 
-      method: 'POST', 
-      body: JSON.stringify({ email, password }) 
+    const response = await fetchAPI<LoginResponse>('/auth', {
+      method: 'POST',
+      body: JSON.stringify({ email, password })
     });
     // Return in a format the login page expects
     return {
@@ -641,8 +644,8 @@ export const authAPI = {
       user: response.data.user
     };
   },
-    
-  getCurrentUser: () => 
+
+  getCurrentUser: () =>
     fetchAPI<{ user: { id: string; phone: string; role: string } }>('/auth', {
       headers: getAuthHeader()
     }),
@@ -650,7 +653,7 @@ export const authAPI = {
 
 // Health Check
 export const healthAPI = {
-  check: () => 
+  check: () =>
     fetchAPI<{ status: string; message: string }>('/health'),
 };
 
@@ -659,14 +662,14 @@ export const searchAPI = {
   /**
    * Search products by query
    */
-  searchProducts: (query: string, options: { limit?: number; page?: number; filters?: Record<string, unknown> } = {}) => 
-    fetchAPI<ProductsResponse>('/products', { 
-      params: { 
+  searchProducts: (query: string, options: { limit?: number; page?: number; filters?: Record<string, unknown> } = {}) =>
+    fetchAPI<ProductsResponse>('/products', {
+      params: {
         search: query,
         limit: options.limit || 50,
         page: options.page || 1,
         ...options.filters
-      } 
+      }
     }),
 
   /**
@@ -679,15 +682,15 @@ export const searchAPI = {
 
     try {
       // Get products that match the query
-      const response = await fetchAPI<ProductsResponse>('/products/filter', { 
-        params: { 
+      const response = await fetchAPI<ProductsResponse>('/products/filter', {
+        params: {
           search: query.trim(),
           limit: limit * 2 // Get more products to generate better suggestions
-        } 
+        }
       });
 
       const products = response?.products || [];
-      
+
       // Extract unique suggestions from product names, categories, and subcategories
       const suggestions = new Set<string>();
       const queryLower = query.toLowerCase().trim();
@@ -715,11 +718,11 @@ export const searchAPI = {
       // Convert to array and limit
       const suggestionsList = Array.from(suggestions).slice(0, limit);
 
-      return { 
-        data: { 
+      return {
+        data: {
           suggestions: suggestionsList,
-          totalProducts: products.length 
-        } 
+          totalProducts: products.length
+        }
       };
     } catch (error) {
       console.error('Error fetching suggestions:', error);
@@ -733,23 +736,23 @@ export const searchAPI = {
   getPopularSearchTerms: async (limit: number = 10): Promise<{ data: { popularTerms: string[]; totalProducts?: number } }> => {
     try {
       // Get a sample of popular products to extract common terms
-      const response = await fetchAPI<ProductsResponse>('/products', { 
-        params: { 
+      const response = await fetchAPI<ProductsResponse>('/products', {
+        params: {
           limit: 100,
           sortBy: 'featured' // Get featured/popular products
-        } 
+        }
       });
 
       const products = response?.products || [];
-      
+
       // Extract common terms
       const termFrequency = new Map<string, number>();
-      
+
       products.forEach(product => {
         // Count terms from product names
         const nameWords = product.name.toLowerCase().split(/\s+/)
           .filter(word => word.length > 2); // Filter out short words
-        
+
         nameWords.forEach(word => {
           termFrequency.set(word, (termFrequency.get(word) || 0) + 1);
         });
@@ -773,11 +776,11 @@ export const searchAPI = {
         .slice(0, limit)
         .map(([term]) => term);
 
-      return { 
-        data: { 
+      return {
+        data: {
           popularTerms,
-          totalProducts: products.length 
-        } 
+          totalProducts: products.length
+        }
       };
     } catch (error) {
       console.error('Error fetching popular terms:', error);
@@ -792,7 +795,7 @@ export const searchAPI = {
 export const calculateSearchScore = (query: string, product: Product): number => {
   const queryLower = query.toLowerCase().trim();
   const searchTerms = queryLower.split(/\s+/).filter(term => term.length > 0);
-  
+
   if (searchTerms.length === 0) return 0;
 
   let score = 0;
@@ -809,19 +812,19 @@ export const calculateSearchScore = (query: string, product: Product): number =>
       score += productName.startsWith(term) ? 100 : 80;
       matchedTerms++;
     }
-    
+
     // Category match (high priority)
     if (productCategory.includes(term)) {
       score += productCategory === term ? 60 : 40;
       matchedTerms++;
     }
-    
+
     // Subcategory match (medium priority)
     if (productSubcategory.includes(term)) {
       score += productSubcategory === term ? 50 : 30;
       matchedTerms++;
     }
-    
+
     // Description match (lower priority)
     if (productDescription.includes(term)) {
       score += 20;
@@ -863,19 +866,19 @@ export const uploadAPI = {
         ...getAuthHeader(),
       },
     });
-    
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Upload failed' }));
       throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
-    
+
     return response.json() as Promise<{ urls: string[] }>;
   },
-  
+
   uploadSingleImage: async (file: File) => {
     const formData = new FormData();
     formData.append('image', file);
-    
+
     const response = await fetch(`${API_BASE_URL}/upload/single`, {
       method: 'POST',
       body: formData,
@@ -883,12 +886,12 @@ export const uploadAPI = {
         ...getAuthHeader(),
       },
     });
-    
+
     if (!response.ok) {
       const error = await response.json().catch(() => ({ message: 'Upload failed' }));
       throw new Error(error.message || `HTTP error! status: ${response.status}`);
     }
-    
+
     return response.json() as Promise<{ url: string }>;
   },
 };
@@ -922,7 +925,7 @@ export const settingsAPI = {
   get: async (): Promise<{ success: boolean; settings: SiteSettings }> => {
     return fetchAPI('/settings');
   },
-  
+
   // Update site settings (admin only)
   update: async (data: Partial<SiteSettings>): Promise<{ success: boolean; settings: SiteSettings; message: string }> => {
     return fetchAPI('/settings', {
@@ -955,12 +958,12 @@ export const servicesAPI = {
       params: activeOnly ? { active: 'true' } : undefined,
     });
   },
-  
+
   // Get single service
   getById: async (id: string): Promise<{ success: boolean; service: Service }> => {
     return fetchAPI(`/services/${id}`);
   },
-  
+
   // Create new service (admin only)
   create: async (data: Omit<Service, '_id' | 'createdAt' | 'updatedAt'>): Promise<{ success: boolean; service: Service; message: string }> => {
     return fetchAPI('/services', {
@@ -971,7 +974,7 @@ export const servicesAPI = {
       },
     });
   },
-  
+
   // Update single service (admin only)
   update: async (id: string, data: Partial<Service>): Promise<{ success: boolean; service: Service; message: string }> => {
     return fetchAPI(`/services/${id}`, {
@@ -982,7 +985,7 @@ export const servicesAPI = {
       },
     });
   },
-  
+
   // Update multiple services at once (admin only)
   updateAll: async (services: Partial<Service>[]): Promise<{ success: boolean; services: Service[]; message: string }> => {
     return fetchAPI('/services', {
@@ -993,7 +996,7 @@ export const servicesAPI = {
       },
     });
   },
-  
+
   // Delete service (admin only)
   delete: async (id: string): Promise<{ success: boolean; message: string }> => {
     return fetchAPI(`/services/${id}`, {
@@ -1051,9 +1054,9 @@ export interface HomepageData {
 }
 
 export const homepageAPI = {
-  getContent: () => 
+  getContent: () =>
     fetchAPI<{ success: boolean; data: HomepageData }>('/homepage'),
-  
+
   updateContent: (data: Partial<HomepageData>) =>
     fetchAPI<{ success: boolean; data: HomepageData; message?: string }>('/homepage', {
       method: 'PUT',
