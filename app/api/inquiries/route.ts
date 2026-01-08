@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Inquiry from '@/models/Inquiry';
 import { getUserFromRequest } from '@/lib/auth';
+import { sendWhatsAppInquiryAlert } from '@/services/notification';
 
 // GET /api/inquiries - Get all inquiries (admin only)
 export async function GET(request: NextRequest) {
   try {
     const user = getUserFromRequest(request);
-    
+
     if (!user || user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -24,11 +25,11 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
 
     const query: any = {};
-    
+
     if (status && status !== 'all') {
       query.status = status;
     }
-    
+
     if (search) {
       query.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -92,6 +93,15 @@ export async function POST(request: NextRequest) {
 
     const inquiry = new Inquiry(data);
     await inquiry.save();
+
+    // Send WhatsApp notification (don't await to avoid delaying the response)
+    sendWhatsAppInquiryAlert({
+      name: data.name,
+      phone: data.phone,
+      email: data.email,
+      message: data.message,
+      category: data.category
+    }).catch(err => console.error('Background WhatsApp notification failed:', err));
 
     return NextResponse.json({
       success: true,
