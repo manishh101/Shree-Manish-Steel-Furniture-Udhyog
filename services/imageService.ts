@@ -2,9 +2,9 @@
  * Production-ready Image Service
  * Handles image optimization, fallbacks, and responsive loading
  */
-import { 
-  productPlaceholderImage, 
-  householdFurniturePlaceholderImage, 
+import {
+  productPlaceholderImage,
+  householdFurniturePlaceholderImage,
   officeProductsPlaceholderImage,
   bedsPlaceholderImage
 } from '../utils/productPlaceholders';
@@ -32,15 +32,15 @@ class ImageService {
   static getCloudinaryUrl(publicId: string, transformations: TransformationOptions = {}): string {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwrrja8cz';
     const baseUrl = `https://res.cloudinary.com/${cloudName}/image/upload`;
-    
+
     const {
       width = 800,
       height = 600,
       quality = 'auto:good',
       format = 'auto',
-      crop = 'fill'
+      crop = 'limit'
     } = transformations;
-    
+
     const transformString = `w_${width},h_${height},q_${quality},f_${format},c_${crop}`;
     return `${baseUrl}/${transformString}/${publicId}`;
   }
@@ -60,7 +60,7 @@ class ImageService {
 
     // Clean and normalize the URL
     const cleanUrl = imageUrl.trim();
-    
+
     // If empty after trim, use placeholder
     if (!cleanUrl) {
       return this.getPlaceholderImage(options.category);
@@ -70,27 +70,27 @@ class ImageService {
     if (this.isCloudinaryUrl(cleanUrl)) {
       return this.fixCloudinaryUrl(cleanUrl, options);
     }
-    
+
     // PRIORITY 2: Local URLs (starting with /) - return as-is
     if (cleanUrl.startsWith('/')) {
       return cleanUrl;
     }
-    
+
     // PRIORITY 3: External URLs - return as-is (don't try to convert)
     if (cleanUrl.startsWith('http://') || cleanUrl.startsWith('https://')) {
       return cleanUrl;
     }
-    
+
     // PRIORITY 4: Relative paths - prepend /
     return `/${cleanUrl}`;
   }
 
   static getApiBaseUrl(): string {
-    return process.env.NEXT_PUBLIC_API_URL || 
-           process.env.NEXT_PUBLIC_API_BASE_URL || 
-           'http://localhost:5000/api';
+    return process.env.NEXT_PUBLIC_API_URL ||
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      'http://localhost:5000/api';
   }
-  
+
   // Helper to identify placeholder images
   static isPlaceholder(url: string | null | undefined): boolean {
     return !!url && url.includes('/placeholders/');
@@ -98,30 +98,30 @@ class ImageService {
 
   static isCloudinaryUrl(url: string | null | undefined): boolean {
     return !!url && (
-      url.includes('res.cloudinary.com') || 
+      url.includes('res.cloudinary.com') ||
       url.includes('cloudinary.com') ||
-      (url.includes('/upload/') && 
-       (url.includes('/v1/') || url.includes('/image/') || url.includes('/video/')))
+      (url.includes('/upload/') &&
+        (url.includes('/v1/') || url.includes('/image/') || url.includes('/video/')))
     );
   }
 
   static enhanceCloudinaryUrl(url: string, options: TransformationOptions = {}): string {
     const { width = 800, height = 600, quality = 'auto:good' } = options;
-    
+
     // If URL already has transformations, return as-is to avoid double transformation
     if (url.includes('/upload/') && (url.includes('w_') || url.includes('c_'))) {
       return url;
     }
-    
+
     // Only add transformations if URL doesn't have them
     if (url.includes('/upload/') && !url.includes('w_')) {
       const transformedUrl = url.replace(
-        '/upload/', 
-        `/upload/w_${width},h_${height},q_${quality},f_auto,c_fill/`
+        '/upload/',
+        `/upload/w_${width},h_${height},q_${quality},f_auto,c_limit/`
       );
       return transformedUrl;
     }
-    
+
     return url;
   }
 
@@ -129,28 +129,28 @@ class ImageService {
   static fixCloudinaryUrl(url: string, options: TransformationOptions = {}): string {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwrrja8cz';
     let fixedUrl = url;
-    
+
     // Fix URLs missing cloud name
     if (fixedUrl.includes('res.cloudinary.com/upload/')) {
       fixedUrl = fixedUrl.replace('res.cloudinary.com/upload/', `res.cloudinary.com/${cloudName}/image/upload/`);
     }
-    
+
     // If already has transformations, return as-is to avoid double transformation
     if (fixedUrl.includes('w_') && fixedUrl.includes('h_') && fixedUrl.includes('q_')) {
       return fixedUrl;
     }
-    
+
     // Add transformations if missing
     const { width = 800, height = 600, quality = 'auto:good' } = options;
-    
+
     if (fixedUrl.includes('/upload/') && !fixedUrl.includes('w_')) {
       const transformedUrl = fixedUrl.replace(
-        '/upload/', 
-        `/upload/w_${width},h_${height},q_${quality},f_auto,c_fill/`
+        '/upload/',
+        `/upload/w_${width},h_${height},q_${quality},f_auto,c_limit/`
       );
       return transformedUrl;
     }
-    
+
     return fixedUrl;
   }
 
@@ -158,10 +158,10 @@ class ImageService {
   static convertToCloudinaryUrl(originalUrl: string, options: TransformationOptions = {}): string {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwrrja8cz';
     const { width = 800, height = 600, quality = 'auto:good' } = options;
-    
+
     // Extract filename or use a generic identifier
     let publicId = 'manish-steel/products/converted-image';
-    
+
     if (originalUrl) {
       // Try to extract meaningful filename
       const urlParts = originalUrl.split('/');
@@ -171,20 +171,20 @@ class ImageService {
         publicId = `manish-steel/products/${nameWithoutExt}`;
       }
     }
-    
+
     // Generate Cloudinary URL
-    const cloudinaryUrl = `https://res.cloudinary.com/${cloudName}/image/upload/w_${width},h_${height},q_${quality},f_auto,c_fill/${publicId}`;
+    const cloudinaryUrl = `https://res.cloudinary.com/${cloudName}/image/upload/w_${width},h_${height},q_${quality},f_auto,c_limit/${publicId}`;
     return cloudinaryUrl;
   }
 
   static ensurePublicAssetUrl(url: string | null | undefined): string {
     if (!url) return '';
-    
+
     // If it's already an absolute URL or a path starting with /, return as is
     if (url.startsWith('http') || url.startsWith('/')) {
       return url;
     }
-    
+
     // Otherwise, ensure it starts with '/'
     return `/${url}`;
   }
@@ -242,14 +242,14 @@ class ImageService {
 
   static getImageAlt(product: Product | null | undefined): string {
     if (!product) return 'Product image';
-    
+
     const name = product.name || 'Product';
     const subcategory = (product as any).subcategory || '';
     const category = product.category || '';
-    
+
     // Prefer subcategory for better SEO specificity
     const categoryLabel = subcategory || category;
-    
+
     return categoryLabel ? `${name} - ${categoryLabel} - Shree Manish Steel Furniture Nepal` : `${name} - Steel Furniture Nepal`;
   }
 }
