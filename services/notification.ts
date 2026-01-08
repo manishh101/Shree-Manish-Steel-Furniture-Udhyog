@@ -33,9 +33,9 @@ export async function sendWhatsAppInquiryAlert(data: WhatsAppPayload) {
       `*Subject:* ${data.category || 'General Inquiry'}\n\n` +
       `*Message:* ${data.message}`;
 
-    // TextMeBot API endpoint
-    // Format: https://api.textmebot.com/send.php?recipient=[RECIPIENT]&apikey=[APIKEY]&text=[TEXT]
-    const url = `https://api.textmebot.com/send.php?recipient=${encodeURIComponent(phoneNumber)}&apikey=${encodeURIComponent(apiKey)}&text=${encodeURIComponent(text)}`;
+    // TextMeBot API endpoint (switching to http as verified by user)
+    // Format: http://api.textmebot.com/send.php?recipient=[RECIPIENT]&apikey=[APIKEY]&text=[TEXT]
+    const url = `http://api.textmebot.com/send.php?recipient=${encodeURIComponent(phoneNumber)}&apikey=${encodeURIComponent(apiKey)}&text=${encodeURIComponent(text)}`;
 
     console.log(`[Notification] Attempting to send WhatsApp alert for inquiry from ${data.name}...`);
 

@@ -94,14 +94,18 @@ export async function POST(request: NextRequest) {
     const inquiry = new Inquiry(data);
     await inquiry.save();
 
-    // Send WhatsApp notification (don't await to avoid delaying the response)
-    sendWhatsAppInquiryAlert({
-      name: data.name,
-      phone: data.phone,
-      email: data.email,
-      message: data.message,
-      category: data.category
-    }).catch(err => console.error('Background WhatsApp notification failed:', err));
+    // Send WhatsApp notification - await it but catch error so it doesn't block success response
+    try {
+      await sendWhatsAppInquiryAlert({
+        name: data.name,
+        phone: data.phone,
+        email: data.email,
+        message: data.message,
+        category: data.category
+      });
+    } catch (err) {
+      console.error('Background WhatsApp notification failed:', err);
+    }
 
     return NextResponse.json({
       success: true,
