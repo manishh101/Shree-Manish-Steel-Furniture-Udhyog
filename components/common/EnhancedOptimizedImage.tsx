@@ -150,8 +150,8 @@ const EnhancedOptimizedImage: React.FC<EnhancedOptimizedImageProps> = ({
     if (enableAvailabilityCheck) {
       const isAvailable = await ImageAvailabilityService.checkImageAvailability(nextUrl);
       if (!isAvailable) {
-        setImageState(prev => ({ 
-          ...prev, 
+        setImageState(prev => ({
+          ...prev,
           attemptedUrls: [...prev.attemptedUrls, nextUrl]
         }));
         // Try the next one
@@ -264,7 +264,7 @@ const EnhancedOptimizedImage: React.FC<EnhancedOptimizedImageProps> = ({
           onLoad={handleLoad}
           onError={handleError}
           className={`
-            object-cover transition-opacity duration-300
+            object-contain transition-opacity duration-300
             ${imageState.loaded ? 'opacity-100' : 'opacity-0'}
           `}
         />

@@ -178,7 +178,7 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
                       <OptimizedImage
                         src={image}
                         alt={`${product.name} ${index + 1}`}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-contain"
                         size="thumbnail"
                         category={product.category || (product.subcategory as string)}
                       />

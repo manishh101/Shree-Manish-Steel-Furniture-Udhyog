@@ -117,7 +117,7 @@ const GalleryCard: React.FC<GalleryCardProps> = ({
           alt={product.alt || product.title || 'Product image'}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-          className={`object-cover transition-all duration-500 ease-out 
+          className={`object-contain transition-all duration-500 ease-out 
             group-hover:scale-105 group-hover:brightness-105 ${!imageLoaded ? 'opacity-0' : 'opacity-100'}`}
           onLoad={() => setImageLoaded(true)}
           onError={() => {

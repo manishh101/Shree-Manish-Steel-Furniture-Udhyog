@@ -159,7 +159,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                     src={img}
                     alt={`Image ${index + 1}`}
                     fill
-                    className="object-cover rounded-md border border-gray-200"
+                    className="object-contain rounded-md border border-gray-200"
                   />
                 </div>
                 <span className="absolute bottom-0 left-0 bg-white/70 text-xs px-1">
@@ -191,7 +191,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
                     src={file.preview}
                     alt={`Preview ${index + 1}`}
                     fill
-                    className="object-cover rounded-md border border-gray-200"
+                    className="object-contain rounded-md border border-gray-200"
                   />
                 </div>
                 <span className="absolute bottom-0 left-0 bg-black/50 text-white text-xs px-1">

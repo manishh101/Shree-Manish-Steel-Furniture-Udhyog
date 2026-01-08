@@ -222,9 +222,8 @@ const AdminAbout = () => {
 
       {/* Status Messages */}
       {message.text && (
-        <div className={`mb-6 p-4 rounded-lg flex items-center gap-2 ${
-          message.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'
-        }`}>
+        <div className={`mb-6 p-4 rounded-lg flex items-center gap-2 ${message.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'
+          }`}>
           <FaInfoCircle />
           {message.text}
         </div>
@@ -245,11 +244,10 @@ const AdminAbout = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
-                activeTab === tab.id
+              className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${activeTab === tab.id
                   ? 'border-b-2 border-primary text-primary bg-primary/5'
                   : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-              }`}
+                }`}
             >
               <span className="mr-2">{tab.icon}</span>
               {tab.label}
@@ -329,7 +327,7 @@ const AdminAbout = () => {
                       src={aboutData.storyImage}
                       alt="Story preview"
                       fill
-                      className="object-cover rounded-lg shadow-md border border-gray-200"
+                      className="object-contain rounded-lg shadow-md border border-gray-200"
                       sizes="(max-width: 768px) 100vw, 448px"
                     />
                   </div>
@@ -429,7 +427,7 @@ const AdminAbout = () => {
               </h2>
               <span className="text-sm text-gray-500">{aboutData.coreValues.length} values</span>
             </div>
-            
+
             <div className="space-y-4">
               {aboutData.coreValues.map((value, index) => (
                 <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
@@ -479,7 +477,7 @@ const AdminAbout = () => {
                 </div>
               ))}
             </div>
-            
+
             <button
               type="button"
               onClick={addCoreValue}
@@ -516,7 +514,7 @@ const AdminAbout = () => {
                   placeholder="Description of your workshop..."
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <FaImage className="inline mr-2" />
@@ -548,7 +546,7 @@ const AdminAbout = () => {
                 >
                   <FaPlus /> Add Image
                 </button>
-                
+
                 {/* Image Previews */}
                 {aboutData.workshopImages.some(img => img) && (
                   <div className="flex flex-wrap gap-3 mt-4">

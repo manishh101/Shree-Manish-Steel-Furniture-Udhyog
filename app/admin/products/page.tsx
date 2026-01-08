@@ -4,10 +4,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { productAPI, Product } from '@/services/api';
 import OptimizedImage from '@/components/common/OptimizedImage';
 import ProductFormEnhanced from '@/components/admin/ProductFormEnhanced';
-import { 
-  FaPencilAlt, 
-  FaTrash, 
-  FaPlusCircle, 
+import {
+  FaPencilAlt,
+  FaTrash,
+  FaPlusCircle,
   FaTimes,
   FaStar,
   FaSync,
@@ -25,11 +25,11 @@ const AdminProducts = () => {
     try {
       setLoading(true);
       setError('');
-      
+
       console.log('🔄 Admin loading products...');
-      
+
       const response = await productAPI.getAll(1, 1000);
-      
+
       // Handle different response structures
       let productsData: Product[] = [];
       if (Array.isArray(response)) {
@@ -37,10 +37,10 @@ const AdminProducts = () => {
       } else if (response?.products && Array.isArray(response.products)) {
         productsData = response.products;
       }
-      
+
       console.log(`✅ Admin loaded ${productsData.length} products`);
       setProducts(productsData);
-      
+
       if (productsData.length === 0) {
         setError('No products found. The database might be empty or there could be a connection issue.');
       }
@@ -102,9 +102,9 @@ const AdminProducts = () => {
       const newFeaturedStatus = !currentFeaturedStatus;
       await productAPI.updateFeaturedStatus(productId, newFeaturedStatus);
       console.log(`Updated featured status for product ${productId} to ${newFeaturedStatus}`);
-      
-      setProducts(prev => prev.map(product => 
-        product._id === productId 
+
+      setProducts(prev => prev.map(product =>
+        product._id === productId
           ? { ...product, featured: newFeaturedStatus }
           : product
       ));
@@ -119,9 +119,9 @@ const AdminProducts = () => {
       const newStatus = !currentStatus;
       await productAPI.updateMostSellingStatus(productId, newStatus);
       console.log(`Updated most selling status for product ${productId} to ${newStatus}`);
-      
-      setProducts(prev => prev.map(product => 
-        product._id === productId 
+
+      setProducts(prev => prev.map(product =>
+        product._id === productId
           ? { ...product, isMostSelling: newStatus }
           : product
       ));
@@ -136,9 +136,9 @@ const AdminProducts = () => {
       const newStatus = !currentStatus;
       await productAPI.updateTopProductStatus(productId, newStatus);
       console.log(`Updated top product status for product ${productId} to ${newStatus}`);
-      
-      setProducts(prev => prev.map(product => 
-        product._id === productId 
+
+      setProducts(prev => prev.map(product =>
+        product._id === productId
           ? { ...product, isTopProduct: newStatus }
           : product
       ));
@@ -153,7 +153,7 @@ const AdminProducts = () => {
       const newStatus = !currentStatus;
       await productAPI.updateCategoryThumbnailStatus(productId, newStatus);
       console.log(`Updated category thumbnail status for product ${productId} to ${newStatus}`);
-      
+
       // Reload products to ensure consistency
       await loadProducts();
     } catch (err) {
@@ -190,14 +190,14 @@ const AdminProducts = () => {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
         <h1 className="text-xl sm:text-2xl font-bold text-primary">Manage Products</h1>
         <div className="flex gap-2 w-full sm:w-auto">
-          <button 
+          <button
             onClick={testConnection}
             className="bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center justify-center text-sm"
             title="Test backend connection"
           >
             🔗 Test API
           </button>
-          <button 
+          <button
             onClick={loadProducts}
             className="bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center justify-center text-sm"
             disabled={loading}
@@ -205,7 +205,7 @@ const AdminProducts = () => {
             <FaSync className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
-          <button 
+          <button
             onClick={openAddModal}
             className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary/90 transition-colors flex items-center justify-center flex-1 sm:flex-none"
           >
@@ -232,10 +232,10 @@ const AdminProducts = () => {
             {products.map((product) => (
               <div key={product._id} className="bg-white shadow rounded-lg p-4">
                 <div className="flex items-start">
-                  <OptimizedImage 
-                    src={product.image || ''} 
+                  <OptimizedImage
+                    src={product.image || ''}
                     alt={product.name}
-                    className="h-16 w-16 rounded-md object-cover mr-3"
+                    className="h-16 w-16 rounded-md object-contain mr-3"
                     size="thumbnail"
                   />
                   <div className="flex-1">
@@ -261,25 +261,24 @@ const AdminProducts = () => {
                       )}
                     </div>
                     <div className="flex space-x-3 mt-2">
-                      <button 
-                        onClick={() => openEditModal(product)} 
+                      <button
+                        onClick={() => openEditModal(product)}
                         className="bg-blue-50 text-blue-600 p-2 rounded-md hover:bg-blue-100"
                       >
                         <FaPencilAlt className="h-4 w-4" />
                       </button>
-                      <button 
-                        onClick={() => handleDelete(product._id)} 
+                      <button
+                        onClick={() => handleDelete(product._id)}
                         className="bg-red-50 text-red-600 p-2 rounded-md hover:bg-red-100"
                       >
                         <FaTrash className="h-4 w-4" />
                       </button>
-                      <button 
-                        onClick={() => handleCategoryThumbnailToggle(product._id, product.usedAsCategoryThumbnail || false)} 
-                        className={`p-2 rounded-md ${
-                          product.usedAsCategoryThumbnail 
-                            ? 'bg-green-50 text-green-600 hover:bg-green-100' 
+                      <button
+                        onClick={() => handleCategoryThumbnailToggle(product._id, product.usedAsCategoryThumbnail || false)}
+                        className={`p-2 rounded-md ${product.usedAsCategoryThumbnail
+                            ? 'bg-green-50 text-green-600 hover:bg-green-100'
                             : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                        }`}
+                          }`}
                         title={product.usedAsCategoryThumbnail ? 'Remove as Category Image' : 'Use as Category Image'}
                       >
                         <FaImage className="h-4 w-4" />
@@ -295,7 +294,7 @@ const AdminProducts = () => {
               </div>
             )}
           </div>
-          
+
           {/* Desktop table view */}
           <div className="hidden lg:block bg-white rounded-lg overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -313,10 +312,10 @@ const AdminProducts = () => {
                 {products.map((product) => (
                   <tr key={product._id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <OptimizedImage 
-                        src={product.image || ''} 
+                      <OptimizedImage
+                        src={product.image || ''}
                         alt={product.name}
-                        className="h-10 w-10 rounded-md object-cover"
+                        className="h-10 w-10 rounded-md object-contain"
                         size="thumbnail"
                       />
                     </td>
@@ -325,14 +324,13 @@ const AdminProducts = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
                         onClick={() => handleFeaturedToggle(product._id, product.featured || false)}
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                          product.featured
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium transition-colors ${product.featured
                             ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
                             : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                        }`}
+                          }`}
                       >
-                        <FaStar 
-                          className={`h-3 w-3 mr-1 ${product.featured ? 'text-yellow-600' : 'text-gray-400'}`} 
+                        <FaStar
+                          className={`h-3 w-3 mr-1 ${product.featured ? 'text-yellow-600' : 'text-gray-400'}`}
                         />
                         {product.featured ? 'Featured' : 'Regular'}
                       </button>
@@ -341,33 +339,30 @@ const AdminProducts = () => {
                       <div className="flex flex-col space-y-1">
                         <button
                           onClick={() => handleMostSellingToggle(product._id, product.isMostSelling || false)}
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full transition-colors ${
-                            product.isMostSelling
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full transition-colors ${product.isMostSelling
                               ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                          }`}
+                            }`}
                           title={product.isMostSelling ? 'Remove from Most Selling' : 'Add to Most Selling'}
                         >
                           {product.isMostSelling ? '✓ Most Selling' : 'Most Selling'}
                         </button>
                         <button
                           onClick={() => handleTopProductToggle(product._id, product.isTopProduct || false)}
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full transition-colors ${
-                            product.isTopProduct
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full transition-colors ${product.isTopProduct
                               ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                          }`}
+                            }`}
                           title={product.isTopProduct ? 'Remove from Top Products' : 'Add to Top Products'}
                         >
                           {product.isTopProduct ? '✓ Top Product' : 'Top Product'}
                         </button>
                         <button
                           onClick={() => handleCategoryThumbnailToggle(product._id, product.usedAsCategoryThumbnail || false)}
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full transition-colors ${
-                            product.usedAsCategoryThumbnail
+                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full transition-colors ${product.usedAsCategoryThumbnail
                               ? 'bg-green-100 text-green-800 hover:bg-green-200'
                               : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                          }`}
+                            }`}
                           title={product.usedAsCategoryThumbnail ? 'Remove as Category Image' : 'Use as Category Image'}
                         >
                           {product.usedAsCategoryThumbnail ? '✓ Category Image' : 'Category Image'}
@@ -389,7 +384,7 @@ const AdminProducts = () => {
                     <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
                       No products found. Add a new product to get started.
                     </td>
-                  </tr> 
+                  </tr>
                 )}
               </tbody>
             </table>
@@ -409,9 +404,9 @@ const AdminProducts = () => {
                 <FaTimes className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
             </div>
-            
+
             <div className="p-4 sm:p-6">
-              <ProductFormEnhanced 
+              <ProductFormEnhanced
                 product={editingProduct}
                 onSave={handleSave}
                 onCancel={closeModal}

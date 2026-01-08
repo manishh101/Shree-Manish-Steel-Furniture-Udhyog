@@ -76,7 +76,7 @@ async function getAboutContent() {
   try {
     await connectDB();
     const aboutData = await About.findOne().lean();
-    
+
     if (aboutData) {
       return {
         heroTitle: aboutData.heroTitle || defaultContent.heroTitle,
@@ -94,7 +94,7 @@ async function getAboutContent() {
         workshopImages: aboutData.workshopImages?.length ? aboutData.workshopImages : defaultContent.workshopImages
       };
     }
-    
+
     return defaultContent;
   } catch (error) {
     console.error('Error fetching about content:', error);
@@ -105,7 +105,7 @@ async function getAboutContent() {
 // Icon component for core values
 function CoreValueIcon({ type }: { type: string }) {
   const iconClass = "h-10 w-10 text-primary";
-  
+
   switch (type?.toLowerCase()) {
     case 'quality':
       return (
@@ -143,7 +143,7 @@ function CoreValueIcon({ type }: { type: string }) {
 
 export default async function AboutPage() {
   const content = await getAboutContent();
-  
+
   return (
     <div className="min-h-screen">
       {/* Enhanced Hero Section */}
@@ -151,7 +151,7 @@ export default async function AboutPage() {
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-48 translate-x-48"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-32 -translate-x-32"></div>
-        
+
         <div className="container mx-auto px-4 relative z-10">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fadeIn">
             {content.heroTitle}
@@ -161,7 +161,7 @@ export default async function AboutPage() {
           </p>
         </div>
       </section>
-      
+
       {/* Enhanced Company Introduction */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
@@ -171,12 +171,12 @@ export default async function AboutPage() {
                 <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl transform rotate-3"></div>
                 {content.storyImage ? (
                   <div className="relative rounded-xl shadow-2xl w-full h-96 transform -rotate-1 hover:rotate-0 transition-transform duration-500 overflow-hidden">
-                    <Image 
-                      src={content.storyImage} 
-                      alt="Our Story" 
+                    <Image
+                      src={content.storyImage}
+                      alt="Our Story"
                       fill
                       sizes="(max-width: 768px) 100vw, 50vw"
-                      className="object-cover"
+                      className="object-contain"
                       priority
                     />
                   </div>
@@ -192,7 +192,7 @@ export default async function AboutPage() {
                 )}
               </div>
             </div>
-            
+
             <div className="lg:w-1/2">
               <div className="space-y-6">
                 <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
@@ -203,7 +203,7 @@ export default async function AboutPage() {
                     {paragraph}
                   </p>
                 ))}
-                
+
                 {/* Stats */}
                 <div className="grid grid-cols-2 gap-6 pt-8">
                   <div className="text-center p-4 bg-primary/5 rounded-xl">
@@ -224,7 +224,7 @@ export default async function AboutPage() {
           </div>
         </div>
       </section>
-      
+
       {/* Enhanced Vision & Mission */}
       <section className="py-20 bg-gradient-to-br from-gray-50 to-primary/5">
         <div className="container mx-auto px-4">
@@ -234,7 +234,7 @@ export default async function AboutPage() {
               Driving our company forward with clear purpose and unwavering commitment to excellence.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Vision */}
             <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 h-full">
@@ -249,7 +249,7 @@ export default async function AboutPage() {
                 {content.vision}
               </p>
             </div>
-            
+
             {/* Mission */}
             <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 h-full">
               <div className="w-20 h-20 bg-gradient-to-br from-accent to-accent/80 rounded-2xl flex items-center justify-center mb-6 transform -rotate-3 hover:rotate-0 transition-transform duration-300">
@@ -265,7 +265,7 @@ export default async function AboutPage() {
           </div>
         </div>
       </section>
-      
+
       {/* Enhanced Core Values */}
       {content.coreValues.length > 0 && (
         <section className="py-20 bg-white">
@@ -276,7 +276,7 @@ export default async function AboutPage() {
                 The principles that guide everything we do and shape our company culture.
               </p>
             </div>
-            
+
             <div className={`grid grid-cols-1 sm:grid-cols-2 ${content.coreValues.length >= 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-' + content.coreValues.length} gap-8`}>
               {content.coreValues.map((value, idx) => (
                 <div key={idx} className="text-center p-6 group hover:bg-gray-50 rounded-2xl transition-colors duration-300">
@@ -293,7 +293,7 @@ export default async function AboutPage() {
           </div>
         </section>
       )}
-      
+
       {/* Workshop Section */}
       {content.workshopImages && content.workshopImages.length > 0 && (
         <section className="py-20 bg-gradient-to-br from-gray-50 to-primary/5">
@@ -304,19 +304,19 @@ export default async function AboutPage() {
                 {content.workshopDescription}
               </p>
             </div>
-            
+
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {content.workshopImages.filter(img => img).map((image, idx) => (
-                <div 
+                <div
                   key={idx}
                   className="relative w-full h-48 md:h-64 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden"
                 >
-                  <Image 
-                    src={image} 
+                  <Image
+                    src={image}
                     alt={`Workshop ${idx + 1}`}
                     fill
                     sizes="(max-width: 768px) 50vw, 33vw"
-                    className="object-cover"
+                    className="object-contain"
                   />
                 </div>
               ))}
@@ -324,7 +324,7 @@ export default async function AboutPage() {
           </div>
         </section>
       )}
-      
+
       {/* Call to Action */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-4">
@@ -335,14 +335,14 @@ export default async function AboutPage() {
                 Experience the quality and craftsmanship that sets us apart. Contact us today to discuss your furniture needs.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link 
-                  href="/contact" 
+                <Link
+                  href="/contact"
                   className="bg-primary text-white px-8 py-3 rounded-lg hover:bg-primary/90 transition-colors font-medium"
                 >
                   Contact Us
                 </Link>
-                <Link 
-                  href="/products" 
+                <Link
+                  href="/products"
                   className="border border-primary text-primary px-8 py-3 rounded-lg hover:bg-primary hover:text-white transition-colors font-medium"
                 >
                   View Products

@@ -3,15 +3,15 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { galleryAPI, categoryAPI, GallerySection, GalleryImage, GalleryConfig, Category } from '@/services/api';
 import Image from 'next/image';
-import { 
-  FaPlus, 
-  FaEdit, 
-  FaTrash, 
-  FaImage, 
-  FaUpload, 
-  FaSave, 
-  FaTimes, 
-  FaEye, 
+import {
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaImage,
+  FaUpload,
+  FaSave,
+  FaTimes,
+  FaEye,
   FaStar,
   FaArrowUp,
   FaArrowDown,
@@ -73,19 +73,19 @@ const AdminGallery = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  
+
   // Gallery data states
   const [sections, setSections] = useState<GallerySection[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [images, setImages] = useState<(GalleryImage & { sectionId?: string; sectionName?: string })[]>([]);
   const [selectedSection, setSelectedSection] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  
+
   // Filter and sort states
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'name' | 'order'>('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  
+
   // Form states
   const [sectionForm, setSectionForm] = useState<SectionForm>({
     name: '',
@@ -138,19 +138,19 @@ const AdminGallery = () => {
   const loadAllData = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       const [sectionsResponse, configResponse, categoriesResponse] = await Promise.all([
         galleryAPI.getSections(),
         galleryAPI.getConfig().catch(() => null),
         categoryAPI.getAll()
       ]);
-      
+
       // Process sections data
-      const sectionsData = Array.isArray(sectionsResponse) 
-        ? sectionsResponse 
+      const sectionsData = Array.isArray(sectionsResponse)
+        ? sectionsResponse
         : (sectionsResponse as { sections?: GallerySection[] })?.sections || [];
       setSections(sectionsData);
-      
+
       // Extract all images from sections
       const allImages = sectionsData.reduce<(GalleryImage & { sectionId?: string; sectionName?: string })[]>((acc, section) => {
         const sectionImages = (section.images || []).map(img => ({
@@ -161,7 +161,7 @@ const AdminGallery = () => {
         return [...acc, ...sectionImages];
       }, []);
       setImages(allImages);
-      
+
       // Process configuration
       if (configResponse) {
         setConfigForm(prev => ({
@@ -169,18 +169,18 @@ const AdminGallery = () => {
           ...(configResponse as unknown as ConfigForm)
         }));
       }
-      
+
       // Process categories
       setCategories(Array.isArray(categoriesResponse) ? categoriesResponse : []);
-      
+
       // Set default selection states
       if (sectionsData.length > 0) {
         setSelectedSection(sectionsData[0]._id || sectionsData[0].id || '');
       }
-      
+
       // Load analytics data
       loadAnalyticsData(sectionsData, allImages);
-      
+
     } catch (error) {
       console.error('Error loading gallery data:', error);
       showToast('Failed to load gallery data', 'error');
@@ -192,19 +192,19 @@ const AdminGallery = () => {
   // Load analytics data
   const loadAnalyticsData = (sectionsData: GallerySection[], imagesData: GalleryImage[]) => {
     const totalVisitors = Math.floor(Math.random() * 1000) + 500;
-    
+
     const popularSections = sectionsData
       .slice(0, Math.min(sectionsData.length, 3))
-      .map((s, index) => ({ 
-        name: s.name, 
+      .map((s, index) => ({
+        name: s.name,
         id: s._id || s.id || '',
-        views: Math.floor(Math.random() * 100) + 100 - (index * 20) 
+        views: Math.floor(Math.random() * 100) + 100 - (index * 20)
       }))
       .sort((a, b) => b.views - a.views);
-    
+
     const featuredSections = sectionsData.filter(s => s.featured).length;
     const featuredImages = imagesData.filter(i => i.featured).length;
-    
+
     setAnalytics({
       totalVisitors,
       popularSections,
@@ -293,7 +293,7 @@ const AdminGallery = () => {
       showToast('Section name is required', 'error');
       return;
     }
-    
+
     try {
       setLoading(true);
       const sectionData = {
@@ -304,7 +304,7 @@ const AdminGallery = () => {
         tags: sectionForm.tags.split(',').map(t => t.trim()).filter(Boolean),
         order: sectionForm.order
       };
-      
+
       if (editingItem && '_id' in editingItem) {
         await galleryAPI.updateSection(editingItem._id, sectionData);
         showToast('Section updated successfully', 'success');
@@ -312,7 +312,7 @@ const AdminGallery = () => {
         await galleryAPI.createSection(sectionData);
         showToast('Section created successfully', 'success');
       }
-      
+
       closeModal();
       loadAllData();
     } catch (error) {
@@ -327,7 +327,7 @@ const AdminGallery = () => {
     if (!confirm('Are you sure you want to delete this section? All images in this section will also be deleted.')) {
       return;
     }
-    
+
     try {
       setLoading(true);
       await galleryAPI.deleteSection(sectionId);
@@ -359,10 +359,10 @@ const AdminGallery = () => {
       showToast('Please select a section first', 'error');
       return;
     }
-    
+
     try {
       setLoading(true);
-      
+
       if (imageForm.file) {
         const formData = new FormData();
         formData.append('image', imageForm.file);
@@ -370,7 +370,7 @@ const AdminGallery = () => {
         formData.append('description', imageForm.description);
         formData.append('tags', imageForm.tags);
         formData.append('featured', String(imageForm.featured));
-        
+
         await galleryAPI.addImageToSection(selectedSection, formData);
         showToast('Image uploaded successfully', 'success');
       } else if (editingItem && '_id' in editingItem) {
@@ -383,7 +383,7 @@ const AdminGallery = () => {
         await galleryAPI.updateImageInSection(selectedSection, editingItem._id, imageData);
         showToast('Image updated successfully', 'success');
       }
-      
+
       closeModal();
       loadAllData();
     } catch (error) {
@@ -398,7 +398,7 @@ const AdminGallery = () => {
     if (!confirm('Are you sure you want to delete this image?')) {
       return;
     }
-    
+
     try {
       setLoading(true);
       await galleryAPI.deleteImageFromSection(sectionId, imageId);
@@ -431,13 +431,13 @@ const AdminGallery = () => {
   const handleMoveSection = async (sectionId: string, direction: 'up' | 'down') => {
     const currentIndex = sections.findIndex(s => (s._id || s.id) === sectionId);
     if (currentIndex === -1) return;
-    
+
     const newIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
     if (newIndex < 0 || newIndex >= sections.length) return;
-    
+
     const newSections = [...sections];
     [newSections[currentIndex], newSections[newIndex]] = [newSections[newIndex], newSections[currentIndex]];
-    
+
     try {
       const sectionIds = newSections.map(s => s._id || s.id || '');
       await galleryAPI.reorderSections(sectionIds);
@@ -452,18 +452,18 @@ const AdminGallery = () => {
   // Filtered and sorted data
   const filteredSections = useMemo(() => {
     let result = [...sections];
-    
+
     if (searchTerm) {
-      result = result.filter(s => 
+      result = result.filter(s =>
         s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         s.description?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-    
+
     if (selectedCategory !== 'all') {
       result = result.filter(s => s.category === selectedCategory);
     }
-    
+
     result.sort((a, b) => {
       const aVal = sortBy === 'name' ? a.name : (a.order || 0);
       const bVal = sortBy === 'name' ? b.name : (b.order || 0);
@@ -472,7 +472,7 @@ const AdminGallery = () => {
       }
       return sortOrder === 'asc' ? Number(aVal) - Number(bVal) : Number(bVal) - Number(aVal);
     });
-    
+
     return result;
   }, [sections, searchTerm, selectedCategory, sortBy, sortOrder]);
 
@@ -498,7 +498,7 @@ const AdminGallery = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="p-3 bg-green-100 rounded-full">
@@ -510,7 +510,7 @@ const AdminGallery = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="p-3 bg-yellow-100 rounded-full">
@@ -522,7 +522,7 @@ const AdminGallery = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <div className="p-3 bg-purple-100 rounded-full">
@@ -768,23 +768,22 @@ const AdminGallery = () => {
       {/* Images Grid/List */}
       {selectedSection ? (
         currentSectionImages.length > 0 ? (
-          <div className={viewMode === 'grid' 
-            ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' 
+          <div className={viewMode === 'grid'
+            ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'
             : 'space-y-4'
           }>
             {currentSectionImages.map(image => (
               <div
                 key={image._id || image.id}
-                className={`bg-white rounded-lg shadow overflow-hidden ${
-                  viewMode === 'list' ? 'flex items-center p-4' : ''
-                }`}
+                className={`bg-white rounded-lg shadow overflow-hidden ${viewMode === 'list' ? 'flex items-center p-4' : ''
+                  }`}
               >
                 <div className={viewMode === 'grid' ? 'aspect-square relative' : 'w-24 h-24 flex-shrink-0 relative'}>
                   <Image
                     src={image.url}
                     alt={image.title || 'Gallery image'}
                     fill
-                    className="object-cover"
+                    className="object-contain"
                     sizes={viewMode === 'grid' ? '(max-width: 768px) 50vw, 33vw' : '96px'}
                   />
                 </div>
@@ -918,7 +917,7 @@ const AdminGallery = () => {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">Image *</label>
-                  <div 
+                  <div
                     onClick={() => fileInputRef.current?.click()}
                     className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer hover:border-primary transition-colors"
                   >
@@ -1116,9 +1115,8 @@ const AdminGallery = () => {
     <div className="container mx-auto px-4 py-8">
       {/* Toast Notification */}
       {toast && (
-        <div className={`fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 ${
-          toast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-        }`}>
+        <div className={`fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 ${toast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+          }`}>
           <FaCheckCircle className="h-5 w-5" />
           {toast.message}
         </div>
@@ -1140,27 +1138,24 @@ const AdminGallery = () => {
       <div className="flex gap-1 mb-6 bg-gray-100 rounded-lg p-1">
         <button
           onClick={() => setActiveTab('dashboard')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-            activeTab === 'dashboard' ? 'bg-white shadow text-primary' : 'text-gray-600 hover:text-gray-900'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${activeTab === 'dashboard' ? 'bg-white shadow text-primary' : 'text-gray-600 hover:text-gray-900'
+            }`}
         >
           <MdDashboard className="h-5 w-5" />
           Dashboard
         </button>
         <button
           onClick={() => setActiveTab('sections')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-            activeTab === 'sections' ? 'bg-white shadow text-primary' : 'text-gray-600 hover:text-gray-900'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${activeTab === 'sections' ? 'bg-white shadow text-primary' : 'text-gray-600 hover:text-gray-900'
+            }`}
         >
           <MdCollections className="h-5 w-5" />
           Sections
         </button>
         <button
           onClick={() => setActiveTab('images')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-            activeTab === 'images' ? 'bg-white shadow text-primary' : 'text-gray-600 hover:text-gray-900'
-          }`}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${activeTab === 'images' ? 'bg-white shadow text-primary' : 'text-gray-600 hover:text-gray-900'
+            }`}
         >
           <MdPhotoLibrary className="h-5 w-5" />
           Images

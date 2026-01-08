@@ -111,7 +111,7 @@ const HomepageSettings: React.FC = () => {
 
       // Get auth token from storage
       const token = localStorage.getItem('token');
-      
+
       const response = await fetch('/api/upload', {
         method: 'POST',
         headers: {
@@ -132,7 +132,7 @@ const HomepageSettings: React.FC = () => {
       setHeroImage(uploadedImageUrl);
       setPreviewImage(null); // Clear preview since we now have the real URL
       setIsUploading(false);
-      
+
       showMessage('Image uploaded successfully! Click "Save Changes" to apply.', true);
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -258,11 +258,10 @@ const HomepageSettings: React.FC = () => {
       {/* Status Message */}
       {saveStatus.show && (
         <div
-          className={`mb-6 p-4 rounded-lg flex items-center ${
-            saveStatus.success
+          className={`mb-6 p-4 rounded-lg flex items-center ${saveStatus.success
               ? 'bg-green-50 border border-green-200 text-green-700'
               : 'bg-red-50 border border-red-200 text-red-700'
-          }`}
+            }`}
         >
           {saveStatus.success ? (
             <CheckCircleIcon className="w-5 h-5 mr-2" />
@@ -285,7 +284,7 @@ const HomepageSettings: React.FC = () => {
                     src={previewImage || heroImage}
                     alt="Homepage Hero"
                     fill
-                    className="object-cover rounded-lg shadow-sm"
+                    className="object-contain rounded-lg shadow-sm"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       if (target.src !== DEFAULT_HERO_IMAGE) {
@@ -431,7 +430,7 @@ const HomepageSettings: React.FC = () => {
                   src={previewImage || heroImage || DEFAULT_HERO_IMAGE}
                   alt="Preview"
                   fill
-                  className="object-cover rounded-lg shadow"
+                  className="object-contain rounded-lg shadow"
                 />
               </div>
             </div>

@@ -76,12 +76,12 @@ interface ProductCardProps {
   className?: string;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ 
-  product, 
-  onQuickView, 
+const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  onQuickView,
   onProductView,
   onProductLike,
-  showCategory = true, 
+  showCategory = true,
   withActions = true,
   variant = 'standard',
   rank = null,
@@ -125,7 +125,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         return img.url || img.src || null;
       }
     }
-    
+
     return null;
   };
 
@@ -194,7 +194,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   return (
     <div className={`product-card bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 border border-gray-100 group h-full flex flex-col ${config.cardClass} ${className}`}>
       {/* Image container - optimized size */}
-      <div className="relative w-full overflow-hidden bg-gray-100" style={{aspectRatio: '4/4'}}>
+      <div className="relative w-full overflow-hidden bg-gray-100" style={{ aspectRatio: '4/4' }}>
         {/* Loading skeleton */}
         {!imageLoaded && (
           <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
@@ -208,16 +208,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
             alt={ImageService.getImageAlt(safeProduct)}
             category={safeProduct.category}
             size="medium"
-            className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-105 ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
+            className={`w-full h-full object-contain transition-all duration-500 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
             onLoad={handleImageLoad}
             onError={handleImageError}
             lazy={variant !== 'featured' && variant !== 'bestseller'}
             priority={variant === 'featured' || variant === 'bestseller'}
           />
         </Link>
-        
+
         {/* Variant badges - positioned in top-right corner */}
         {variant === 'featured' && (
           <div className="absolute top-3 right-3 z-10">
@@ -226,7 +225,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             </span>
           </div>
         )}
-        
+
         {variant === 'bestseller' && (
           <div className="absolute top-3 right-3 z-10">
             <span className="inline-flex items-center gap-1 bg-orange-100/95 text-orange-800 px-2 py-1 rounded-full text-xs font-semibold shadow-sm backdrop-blur-sm">
@@ -234,7 +233,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             </span>
           </div>
         )}
-        
+
         {/* Additional bestseller sales count badge */}
         {variant === 'bestseller' && salesCount && (
           <div className="absolute top-12 right-3 z-10">
@@ -243,7 +242,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             </span>
           </div>
         )}
-        
+
         {/* Quick view overlay */}
         {withActions && !config.simpleLayout && onQuickView && (
           <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
@@ -270,7 +269,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Gallery overlay */}
         {config.simpleLayout && (
-          <div 
+          <div
             className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center cursor-pointer"
             onClick={handleProductClick}
           >
@@ -283,7 +282,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         )}
       </div>
-      
+
       {/* Product info */}
       {config.simpleLayout ? (
         /* Simple layout for gallery */
@@ -300,31 +299,31 @@ const ProductCard: React.FC<ProductCardProps> = ({
       ) : (
         /* Full layout - compact text area like reference */
         <div className="p-3 flex-1 flex flex-col justify-between"
-             style={{minHeight: '80px'}}>
+          style={{ minHeight: '80px' }}>
           {showCategory && !config.hideCategory && (
-            <div style={{marginBottom: '1px'}}>
-              <span className="text-xs text-gray-400 uppercase tracking-wide font-light" style={{fontSize: '9px'}}>
-                {safeProduct.subcategory || 
-                 safeProduct.productType ||
-                 (safeProduct.name?.includes('Wardrobe') ? 'Wardrobe' :
-                  safeProduct.name?.includes('Almirah') ? 'Almirah' :
-                  safeProduct.name?.includes('Table') ? 'Table' :
-                  safeProduct.name?.includes('Chair') ? 'Chair' :
-                  safeProduct.name?.includes('Bed') ? 'Bed' :
-                  safeProduct.name?.includes('Door') ? 'Door' :
-                  'Steel Furniture')}
+            <div style={{ marginBottom: '1px' }}>
+              <span className="text-xs text-gray-400 uppercase tracking-wide font-light" style={{ fontSize: '9px' }}>
+                {safeProduct.subcategory ||
+                  safeProduct.productType ||
+                  (safeProduct.name?.includes('Wardrobe') ? 'Wardrobe' :
+                    safeProduct.name?.includes('Almirah') ? 'Almirah' :
+                      safeProduct.name?.includes('Table') ? 'Table' :
+                        safeProduct.name?.includes('Chair') ? 'Chair' :
+                          safeProduct.name?.includes('Bed') ? 'Bed' :
+                            safeProduct.name?.includes('Door') ? 'Door' :
+                              'Steel Furniture')}
               </span>
             </div>
           )}
-          
+
           <Link href={`/products/${safeProduct._id || safeProduct.id}`} onClick={handleProductClick} className="block">
-            <h3 className="text-sm font-medium text-gray-800 hover:text-primary transition-colors line-clamp-2 leading-tight" style={{marginBottom: '2px'}}>
+            <h3 className="text-sm font-medium text-gray-800 hover:text-primary transition-colors line-clamp-2 leading-tight" style={{ marginBottom: '2px' }}>
               {safeProduct.name || safeProduct.title}
             </h3>
           </Link>
 
           {safeProduct.description && (variant === 'featured' || variant === 'bestseller') && (
-            <p className="text-gray-600 text-sm line-clamp-2" style={{marginBottom: '4px'}}>
+            <p className="text-gray-600 text-sm line-clamp-2" style={{ marginBottom: '4px' }}>
               {safeProduct.description}
             </p>
           )}
@@ -333,7 +332,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           <div className="mt-auto">
             {/* Standard variant button */}
             {variant === 'standard' && (
-              <button 
+              <button
                 onClick={handleProductClick}
                 className={config.buttonClass}
               >
@@ -346,7 +345,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
             {/* Featured variant button */}
             {variant === 'featured' && (
-              <button 
+              <button
                 onClick={handleProductClick}
                 className={config.buttonClass}
               >
@@ -359,7 +358,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
             {/* Bestseller variant button */}
             {variant === 'bestseller' && (
-              <button 
+              <button
                 onClick={handleProductClick}
                 className={config.buttonClass}
               >

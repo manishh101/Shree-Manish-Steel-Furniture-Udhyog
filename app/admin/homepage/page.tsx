@@ -50,37 +50,37 @@ const AdminHomepage = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [activeTab, setActiveTab] = useState('hero');
   const [uploadingImage, setUploadingImage] = useState(false);
-  
+
   // File input refs
   const heroImageInputRef = useRef<HTMLInputElement>(null);
 
   // Image upload function
   const handleImageUpload = async (file: File, fieldName: keyof HomepageData) => {
     if (!file) return;
-    
+
     // Validate file type
     if (!file.type.startsWith('image/')) {
       setMessage({ text: 'Please select an image file', type: 'error' });
       return;
     }
-    
+
     // Validate file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       setMessage({ text: 'Image size should be less than 5MB', type: 'error' });
       return;
     }
-    
+
     setUploadingImage(true);
     setMessage({ text: '', type: '' });
-    
+
     try {
       const formData = new FormData();
       formData.append('image', file);
       formData.append('folder', 'manish-steel/homepage');
-      
+
       // Get auth token from storage
       const token = localStorage.getItem('token');
-      
+
       const response = await fetch('/api/upload', {
         method: 'POST',
         headers: {
@@ -88,9 +88,9 @@ const AdminHomepage = () => {
         },
         body: formData,
       });
-      
+
       const result = await response.json();
-      
+
       if (result.success && result.url) {
         handleInputChange(fieldName, result.url);
         setMessage({ text: 'Image uploaded successfully!', type: 'success' });
@@ -280,9 +280,8 @@ const AdminHomepage = () => {
 
       {/* Status Messages */}
       {message.text && (
-        <div className={`mb-6 p-4 rounded-lg flex items-center gap-2 ${
-          message.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'
-        }`}>
+        <div className={`mb-6 p-4 rounded-lg flex items-center gap-2 ${message.type === 'error' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'
+          }`}>
           <FaInfoCircle />
           {message.text}
         </div>
@@ -303,11 +302,10 @@ const AdminHomepage = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
-                activeTab === tab.id
+              className={`px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${activeTab === tab.id
                   ? 'border-b-2 border-primary text-primary bg-primary/5'
                   : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
-              }`}
+                }`}
             >
               <span className="mr-2">{tab.icon}</span>
               {tab.label}
@@ -324,7 +322,7 @@ const AdminHomepage = () => {
               <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
                 🏠 Hero Section
               </h2>
-              
+
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Hero Title</label>
@@ -363,7 +361,7 @@ const AdminHomepage = () => {
                   <FaImage className="inline mr-2" />
                   Hero Image
                 </label>
-                
+
                 {/* File Upload Section */}
                 <div className="space-y-4">
                   {/* Upload from device */}
@@ -398,7 +396,7 @@ const AdminHomepage = () => {
                     </button>
                     <span className="text-sm text-gray-500 self-center">or</span>
                   </div>
-                  
+
                   {/* URL Input */}
                   <div>
                     <input
@@ -422,8 +420,8 @@ const AdminHomepage = () => {
                     <img
                       src={homepageData.heroImage}
                       alt="Hero preview"
-                      className="max-w-lg w-full h-64 object-cover rounded-lg shadow-md border border-gray-200"
-                      onError={(e) => { 
+                      className="max-w-lg w-full h-64 object-contain rounded-lg shadow-md border border-gray-200"
+                      onError={(e) => {
                         (e.target as HTMLImageElement).src = '/images/home-page-1.png';
                       }}
                     />
@@ -436,7 +434,7 @@ const AdminHomepage = () => {
             {/* Hero Buttons */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
               <h2 className="text-xl font-semibold text-gray-800">Hero Buttons</h2>
-              
+
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
                   <h3 className="font-medium text-gray-700">Primary Button</h3>
@@ -461,7 +459,7 @@ const AdminHomepage = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
                   <h3 className="font-medium text-gray-700">Secondary Button</h3>
                   <div>
@@ -505,7 +503,7 @@ const AdminHomepage = () => {
                   label="Enabled"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Section Title</label>
                 <input
@@ -588,7 +586,7 @@ const AdminHomepage = () => {
                   label="Enabled"
                 />
               </div>
-              
+
               <div className="grid gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Section Title</label>
@@ -706,7 +704,7 @@ const AdminHomepage = () => {
                   placeholder="Contact us today to discuss your furniture needs..."
                 />
               </div>
-              
+
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
                   <h3 className="font-medium text-gray-700">Primary CTA Button</h3>
@@ -731,7 +729,7 @@ const AdminHomepage = () => {
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
                   <h3 className="font-medium text-gray-700">Secondary CTA Button</h3>
                   <div>
@@ -885,7 +883,7 @@ const AdminHomepage = () => {
             <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
               🔍 SEO Settings
             </h2>
-            
+
             <div className="grid gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Meta Title</label>

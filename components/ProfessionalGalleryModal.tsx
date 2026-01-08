@@ -11,23 +11,23 @@ interface ProfessionalGalleryModalProps {
   productName?: string;
 }
 
-const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  images = [], 
-  initialIndex = 0, 
-  productName = 'Product Gallery' 
+const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
+  isOpen,
+  onClose,
+  images = [],
+  initialIndex = 0,
+  productName = 'Product Gallery'
 }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [imageLoadErrors, setImageLoadErrors] = useState<Set<number>>(new Set());
   const [showThumbnails, setShowThumbnails] = useState(true);
   const thumbnailsContainerRef = useRef<HTMLDivElement>(null);
-  
+
   // Touch gesture handling
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
   const minSwipeDistance = 50;
-  
+
   // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
@@ -37,7 +37,7 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
     } else {
       document.body.style.overflow = 'unset';
     }
-    
+
     return () => {
       document.body.style.overflow = 'unset';
     };
@@ -47,7 +47,7 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       if (!isOpen) return;
-      
+
       switch (e.key) {
         case 'Escape':
           onClose();
@@ -73,15 +73,15 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
     if (thumbnailsContainerRef.current) {
       const container = thumbnailsContainerRef.current;
       const thumbnails = container.querySelectorAll('.thumbnail-item');
-      
+
       if (thumbnails[index]) {
         const thumbnail = thumbnails[index] as HTMLElement;
         const containerWidth = container.offsetWidth;
         const thumbnailWidth = thumbnail.offsetWidth;
         const thumbnailLeft = thumbnail.offsetLeft;
-        
+
         const targetScrollLeft = thumbnailLeft - (containerWidth / 2) + (thumbnailWidth / 2);
-        
+
         container.scrollTo({
           left: targetScrollLeft,
           behavior: 'smooth'
@@ -92,9 +92,9 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
 
   const navigateNext = useCallback(() => {
     if (images.length <= 1) return;
-    
+
     setCurrentIndex((prev) => (prev + 1) % images.length);
-    
+
     if (thumbnailsContainerRef.current) {
       const nextIndex = (currentIndex + 1) % images.length;
       scrollToThumbnail(nextIndex);
@@ -103,9 +103,9 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
 
   const navigatePrevious = useCallback(() => {
     if (images.length <= 1) return;
-    
+
     setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
-    
+
     if (thumbnailsContainerRef.current) {
       const prevIndex = (currentIndex - 1 + images.length) % images.length;
       scrollToThumbnail(prevIndex);
@@ -121,7 +121,7 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
   const handleImageError = (index: number) => {
     setImageLoadErrors(prev => new Set(prev).add(index));
   };
-  
+
   // Touch event handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -134,17 +134,17 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
 
   const handleTouchEnd = () => {
     if (!touchStartX.current || !touchEndX.current) return;
-    
+
     const distance = touchStartX.current - touchEndX.current;
     const isLeftSwipe = distance > minSwipeDistance;
     const isRightSwipe = distance < -minSwipeDistance;
-    
+
     if (isLeftSwipe) {
       navigateNext();
     } else if (isRightSwipe) {
       navigatePrevious();
     }
-    
+
     touchStartX.current = null;
     touchEndX.current = null;
   };
@@ -162,11 +162,11 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
   const hasError = imageLoadErrors.has(currentIndex);
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 bg-black/95 flex flex-col"
       onClick={onClose}
     >
-      <div 
+      <div
         className="flex flex-col h-full w-full"
         onClick={(e) => e.stopPropagation()}
       >
@@ -181,14 +181,14 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <button 
+            <button
               className="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
               onClick={() => setShowThumbnails(!showThumbnails)}
               title={`${showThumbnails ? 'Hide' : 'Show'} thumbnails`}
             >
               <FaTh className="w-5 h-5" />
             </button>
-            <button 
+            <button
               className="p-2 rounded-lg text-white/70 hover:text-white hover:bg-white/10 transition-colors"
               onClick={onClose}
               title="Close gallery (ESC)"
@@ -199,7 +199,7 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
         </div>
 
         {/* Main Image Display */}
-        <div 
+        <div
           className="flex-1 relative flex items-center justify-center p-4"
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
@@ -208,7 +208,7 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
           {hasError ? (
             <div className="text-center text-white/70">
               <svg className="w-16 h-16 mx-auto mb-4 text-white/40" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
               </svg>
               <p>Unable to load this image</p>
             </div>
@@ -223,11 +223,11 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
               style={{ margin: 'auto' }}
             />
           )}
-          
+
           {/* Navigation buttons */}
           {images.length > 1 && (
             <>
-              <button 
+              <button
                 className="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -237,7 +237,7 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
               >
                 <FaChevronLeft className="w-6 h-6" />
               </button>
-              <button 
+              <button
                 className="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -250,28 +250,27 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
             </>
           )}
         </div>
-        
+
         {/* Thumbnails */}
         {showThumbnails && images.length > 1 && (
           <div className="bg-black/50 border-t border-white/10 p-4">
-            <div 
+            <div
               className="flex gap-2 overflow-x-auto scrollbar-hide justify-center"
               ref={thumbnailsContainerRef}
             >
               {images.map((image, index) => (
-                <button 
+                <button
                   key={index}
-                  className={`thumbnail-item flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                    index === currentIndex 
-                      ? 'border-primary ring-2 ring-primary/50' 
+                  className={`thumbnail-item flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${index === currentIndex
+                      ? 'border-primary ring-2 ring-primary/50'
                       : 'border-transparent hover:border-white/30'
-                  }`}
+                    }`}
                   onClick={() => handleThumbnailClick(index)}
                 >
                   <img
                     src={image}
                     alt={`Thumbnail ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
                 </button>
               ))}

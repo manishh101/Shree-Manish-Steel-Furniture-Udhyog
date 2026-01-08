@@ -68,14 +68,14 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
     isTopProduct: false,
     featured: false
   });
-  
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [filteredSubcategories, setFilteredSubcategories] = useState<Subcategory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
-  
+
   // Load categories and subcategories
   useEffect(() => {
     const loadData = async () => {
@@ -93,7 +93,7 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
     };
     loadData();
   }, []);
-  
+
   // Filter subcategories when category changes
   useEffect(() => {
     if (formData.categoryId) {
@@ -103,26 +103,26 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
       setFilteredSubcategories([]);
     }
   }, [formData.categoryId, subcategories]);
-  
+
   // Initialize form with product data
   useEffect(() => {
     if (product) {
       // Extract proper category and subcategory IDs
       let categoryId = '';
       let subcategoryId = '';
-      
+
       if (product.categoryId) {
         categoryId = typeof product.categoryId === 'object' ? (product.categoryId as { _id: string })._id : product.categoryId;
       } else if (product.category && typeof product.category === 'object') {
         categoryId = (product.category as { _id: string })._id;
       }
-      
+
       if (product.subcategoryId) {
         subcategoryId = typeof product.subcategoryId === 'object' ? (product.subcategoryId as { _id: string })._id : product.subcategoryId;
       } else if (product.subcategory && typeof product.subcategory === 'object') {
         subcategoryId = (product.subcategory as { _id: string })._id;
       }
-      
+
       const specs = product.specifications;
       let specificationsArray: { label: string; value: string }[] = [];
       if (Array.isArray(specs)) {
@@ -130,7 +130,7 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
       } else if (specs && typeof specs === 'object') {
         specificationsArray = Object.entries(specs).map(([label, value]) => ({ label, value: String(value) }));
       }
-      
+
       const newFormData: FormData = {
         name: product.name || '',
         categoryId: categoryId,
@@ -142,8 +142,8 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
         additionalImageFiles: [null, null, null],
         imagePreviews: {
           main: product.image || '',
-          additional: Array.isArray(product.images) ? 
-            [product.images[0] || '', product.images[1] || '', product.images[2] || ''] : 
+          additional: Array.isArray(product.images) ?
+            [product.images[0] || '', product.images[1] || '', product.images[2] || ''] :
             ['', '', '']
         },
         features: product.features || [],
@@ -154,10 +154,10 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
           availableLocations: product.deliveryInformation?.availableLocations || [],
           specialInstructions: product.deliveryInformation?.specialInstructions || ''
         },
-        dimensions: { 
-          length: String(product.dimensions?.length || ''), 
-          width: String(product.dimensions?.width || ''), 
-          height: String(product.dimensions?.height || '') 
+        dimensions: {
+          length: String(product.dimensions?.length || ''),
+          width: String(product.dimensions?.width || ''),
+          height: String(product.dimensions?.height || '')
         },
         material: product.material || '',
         colors: product.colors || [],
@@ -166,15 +166,15 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
         isTopProduct: product.isTopProduct || false,
         featured: product.featured || false
       };
-      
+
       setFormData(newFormData);
     }
   }, [product]);
-  
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-    
+
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       setFormData(prev => ({
@@ -187,7 +187,7 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
       setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
-  
+
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setFormData(prev => ({
       ...prev,
@@ -211,10 +211,10 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
     } else if (type === 'additional' && index !== null) {
       const newFiles = [...formData.additionalImageFiles];
       newFiles[index] = file;
-      
+
       const newPreviews = [...formData.imagePreviews.additional];
       newPreviews[index] = previewUrl;
-      
+
       setFormData(prev => ({
         ...prev,
         additionalImageFiles: newFiles,
@@ -234,16 +234,16 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
   };
 
   const removeFeature = (index: number) => {
-    setFormData(prev => ({ 
-      ...prev, 
-      features: prev.features.filter((_, i) => i !== index) 
+    setFormData(prev => ({
+      ...prev,
+      features: prev.features.filter((_, i) => i !== index)
     }));
   };
 
   const addSpecification = () => {
-    setFormData(prev => ({ 
-      ...prev, 
-      specifications: [...prev.specifications, { label: '', value: '' }] 
+    setFormData(prev => ({
+      ...prev,
+      specifications: [...prev.specifications, { label: '', value: '' }]
     }));
   };
 
@@ -254,9 +254,9 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
   };
 
   const removeSpecification = (index: number) => {
-    setFormData(prev => ({ 
-      ...prev, 
-      specifications: prev.specifications.filter((_, i) => i !== index) 
+    setFormData(prev => ({
+      ...prev,
+      specifications: prev.specifications.filter((_, i) => i !== index)
     }));
   };
 
@@ -278,20 +278,20 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
     setError('');
     setSuccess('');
     setIsLoading(true);
-    
+
     try {
       if (!formData.name || !formData.description || !formData.categoryId) {
         setError('Please fill all required fields (Name, Description, and Category)');
         setIsLoading(false);
         return;
       }
-      
+
       if (!product && !formData.imageFile && !formData.imagePreviews.main) {
         setError('At least one main image is required for new products.');
         setIsLoading(false);
         return;
       }
-      
+
       const productData: Record<string, unknown> = {
         name: formData.name,
         description: formData.description,
@@ -314,26 +314,26 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
       // Upload images if provided
       if (formData.imageFile || formData.additionalImageFiles.some(file => file !== null)) {
         const uploadFormData = new FormData();
-        
+
         if (formData.imageFile) {
           uploadFormData.append('images', formData.imageFile);
         }
-        
+
         formData.additionalImageFiles.forEach((file) => {
           if (file) {
             uploadFormData.append('images', file);
           }
         });
-        
+
         const uploadResponse = await uploadAPI.uploadImages(uploadFormData);
         const uploadedUrls = uploadResponse.urls || [];
-        
+
         let urlIndex = 0;
         if (formData.imageFile && uploadedUrls[urlIndex]) {
           productData.image = uploadedUrls[urlIndex];
           urlIndex++;
         }
-        
+
         const images: string[] = [];
         formData.additionalImageFiles.forEach((file) => {
           if (file && uploadedUrls[urlIndex]) {
@@ -354,9 +354,9 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
         await productAPI.create(productData);
         setSuccess('Product created successfully');
       }
-      
+
       setTimeout(() => onSave(), 1000);
-      
+
     } catch (err) {
       console.error('Error saving product:', err);
       let errorMessage = 'Failed to save product';
@@ -377,13 +377,13 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
             {error}
           </div>
         )}
-        
+
         {success && (
           <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
             {success}
           </div>
         )}
-        
+
         {/* Basic Information */}
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
@@ -401,7 +401,7 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Category *
@@ -421,7 +421,7 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Subcategory
@@ -441,7 +441,7 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Material
@@ -455,7 +455,7 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
                 placeholder="Steel, Wood, etc."
               />
             </div>
-            
+
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Product Description *
@@ -475,7 +475,7 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
         {/* Image Upload */}
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Images</h3>
-          
+
           <div className="mb-6">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Main Product Image *
@@ -489,11 +489,11 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
               />
               {formData.imagePreviews.main && (
                 <div className="relative w-20 h-20">
-                  <Image 
-                    src={formData.imagePreviews.main} 
-                    alt="Main preview" 
+                  <Image
+                    src={formData.imagePreviews.main}
+                    alt="Main preview"
                     fill
-                    className="object-cover border rounded-md"
+                    className="object-contain border rounded-md"
                     sizes="80px"
                   />
                 </div>
@@ -516,11 +516,11 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
                   />
                   {formData.imagePreviews.additional[index] && (
                     <div className="relative w-full h-32">
-                      <Image 
-                        src={formData.imagePreviews.additional[index]} 
-                        alt={`Additional preview ${index + 1}`} 
+                      <Image
+                        src={formData.imagePreviews.additional[index]}
+                        alt={`Additional preview ${index + 1}`}
                         fill
-                        className="object-cover border rounded-md"
+                        className="object-contain border rounded-md"
                         sizes="(max-width: 768px) 100vw, 300px"
                       />
                     </div>
@@ -702,7 +702,7 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
                 />
               </div>
             </div>
-            
+
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Available Colors
@@ -791,7 +791,7 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
           >
             {isLoading ? 'Saving...' : (product ? 'Update Product' : 'Create Product')}
           </button>
-          
+
           <button
             type="button"
             onClick={onCancel}

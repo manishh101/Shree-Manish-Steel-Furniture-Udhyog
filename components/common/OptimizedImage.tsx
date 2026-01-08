@@ -59,7 +59,7 @@ const getSizes = (size: string): string => {
   }
 };
 
-const OptimizedImage: React.FC<OptimizedImageProps> = ({ 
+const OptimizedImage: React.FC<OptimizedImageProps> = ({
   src,
   alt = 'Product Image',
   className = '',
@@ -74,7 +74,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   onError,
   priority = false,
   fill = true,
-  objectFit = 'cover', // Default to cover, can be changed to 'contain' for galleries
+  objectFit = 'contain', // Default to contain to ensure full image is visible
 }) => {
   const [imageState, setImageState] = useState<ImageState>({
     loaded: false,
@@ -90,12 +90,12 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     if (!src) {
       return ImageService.getCloudinaryPlaceholder(category) || '/images/furniture-1.jpg';
     }
-    
+
     // Add Cloudinary optimizations for Cloudinary URLs
     if (src.includes('res.cloudinary.com') && !src.includes('f_auto')) {
       return src.replace('/upload/', '/upload/f_auto,q_auto,w_auto,c_limit/');
     }
-    
+
     return src;
   };
 
@@ -113,7 +113,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       error: false,
       currentSrc: newSrc
     }));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src]);
 
   // Intersection Observer for lazy loading (only when not using priority)
@@ -131,7 +131,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
           observer.disconnect();
         }
       },
-      { 
+      {
         threshold: 0.1,
         rootMargin: '100px' // Load slightly before coming into view
       }
@@ -142,7 +142,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     }
 
     return () => observer.disconnect();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [size, lazy, category, priority]);
 
   const handleLoad = () => {
@@ -152,32 +152,32 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   const handleError = () => {
     const failedSrc = imageState.currentSrc;
-    
+
     // Check if this was already a local placeholder - if so, don't try another fallback
     const wasAlreadyLocalPlaceholder = failedSrc && (
       failedSrc.startsWith('/images/furniture') ||
       failedSrc.includes('placeholder') ||
       failedSrc === '/images/furniture-1.jpg'
     );
-    
+
     if (wasAlreadyLocalPlaceholder || imageState.error) {
       // Just mark as loaded with error to avoid infinite error loop
-      setImageState(prev => ({ 
-        ...prev, 
+      setImageState(prev => ({
+        ...prev,
         error: true,
         loaded: true
       }));
     } else {
       // Try the local fallback placeholder instead
       const fallbackSrc = getFallbackSrc();
-      setImageState(prev => ({ 
-        ...prev, 
+      setImageState(prev => ({
+        ...prev,
         error: false,
         currentSrc: fallbackSrc,
         loaded: false
       }));
     }
-    
+
     onError?.();
   };
 
@@ -204,7 +204,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const shouldUnoptimize = isRemote;
 
   return (
-    <div 
+    <div
       ref={imgRef}
       className={wrapperClassName}
       style={style}
