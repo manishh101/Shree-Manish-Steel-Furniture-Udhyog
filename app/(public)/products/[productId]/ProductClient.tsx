@@ -96,11 +96,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
           if (typeof img === 'object' && img) return (img as any).url || (img as any).src || null;
           return null;
         })
-        .filter((img): img is string => !!img && typeof img === 'string')
-        .map(img => imageService.getOptimizedImageUrl(img, {
-          width: 800,
-          quality: '90'
-        }));
+        .filter((img): img is string => !!img && typeof img === 'string');
 
       if (validImages.length > 0) {
         images = [...validImages];
@@ -109,22 +105,17 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
 
     // PRIORITY 2: Main product image if not already included in the images array
     if (product?.image && typeof product.image === 'string') {
-      const optimizedMainImage = imageService.getOptimizedImageUrl(product.image, {
-        width: 800,
-        quality: '90'
-      });
+      const mainImage = product.image;
 
       // Check if this image is already in the array
       const isDuplicate = images.some(img => {
-        // Simple URL comparison might not catch Cloudinary transformations
-        // So we normalize URLs for comparison
-        const normalizedImg = img.split('?')[0]; // Remove query parameters
-        const normalizedMain = optimizedMainImage.split('?')[0];
+        const normalizedImg = img.split('?')[0];
+        const normalizedMain = mainImage.split('?')[0];
         return normalizedImg === normalizedMain;
       });
 
       if (!isDuplicate) {
-        images.unshift(optimizedMainImage);
+        images.unshift(mainImage);
       }
     }
 
@@ -638,7 +629,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                     alt={imageService.getImageAlt(product) || "Product Image"}
                     className={`w-full h-full object-contain transition-all duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
                     onLoad={() => setImageLoading(false)}
-                    size="large"
+                    size="medium"
                   />
                 </div>
 
@@ -1091,15 +1082,15 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
             </>
           )}
 
-          {/* Full screen image */}
+          {/* Full screen image container */}
           <div
-            className="max-w-full max-h-full p-4"
+            className="relative w-full h-[80vh] md:h-full max-w-6xl max-h-[90vh] flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
             <OptimizedImage
               src={allImages[selectedImageIndex]}
               alt={imageService.getImageAlt(product) || "Product Image"}
-              className="max-w-full max-h-full object-contain"
+              className="w-full h-full"
               size="large"
               objectFit="contain"
             />

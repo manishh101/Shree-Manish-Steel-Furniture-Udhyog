@@ -325,11 +325,11 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
             <FaTimes className="h-6 w-6" />
           </button>
 
-          <div className="relative w-full h-full flex items-center justify-center">
+          <div className="relative w-full h-[80vh] md:h-full max-w-6xl max-h-[90vh] flex items-center justify-center">
             <OptimizedImage
               src={product.images && product.images.length > 0 ? product.images[selectedImageIndex] : (product.image || '/images/furniture-1.jpg')}
               alt={product.name}
-              className="max-w-full max-h-full border-none shadow-none"
+              className="w-full h-full"
               size="large"
               objectFit="contain"
             />
