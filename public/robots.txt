@@ -10,3 +10,4 @@ Host: https://manishsteel.com.np
 
 # Sitemaps
 Sitemap: https://manishsteel.com.np/sitemap.xml
+Sitemap: https://manishsteel.com.np/image-sitemap.xml
