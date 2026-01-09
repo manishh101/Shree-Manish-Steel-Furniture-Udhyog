@@ -375,4 +375,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   );
 };
 
-export default ProductCard;
+// Memoize ProductCard to prevent unnecessary re-renders in product lists.
+// This optimization is effective because ProductCard is a presentational component
+// whose output is solely determined by its props.
+export default React.memo(ProductCard);
