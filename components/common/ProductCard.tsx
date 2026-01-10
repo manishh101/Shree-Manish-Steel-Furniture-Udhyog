@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FaImages } from 'react-icons/fa';
@@ -375,4 +375,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
   );
 };
 
-export default ProductCard;
+// ⚡ Bolt Optimization:
+// Memoized ProductCard to prevent unnecessary re-renders in product lists.
+// This is crucial on pages like search or category listings where filters
+// or sorting might re-render the parent component, but individual product
+// cards remain unchanged. By memoizing, we avoid costly re-renders
+// for each card, improving UI performance and responsiveness.
+const MemoizedProductCard = memo(ProductCard);
+MemoizedProductCard.displayName = 'ProductCard';
+
+export default MemoizedProductCard;
