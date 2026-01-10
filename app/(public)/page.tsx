@@ -370,7 +370,7 @@ export default function HomePage() {
                     className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl animate-fadeInUp group flex-shrink-0 w-[85vw] md:w-auto snap-center"
                     style={{ animationDelay: `${0.1 + (index * 0.1)}s` }}
                   >
-                    <div className="relative w-full overflow-hidden bg-gray-100" style={{ aspectRatio: '4/3' }}>
+                    <div className="relative w-full overflow-hidden bg-gray-100" style={{ aspectRatio: '1/1' }}>
                       <EnhancedOptimizedImage
                         src={thumbnailUrl || fallbackUrl}
                         alt={`${category.name} Products`}
