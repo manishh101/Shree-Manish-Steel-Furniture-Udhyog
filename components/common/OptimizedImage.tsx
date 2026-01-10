@@ -92,8 +92,14 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     }
 
     // Add Cloudinary optimizations for Cloudinary URLs
-    if (src.includes('res.cloudinary.com') && !src.includes('f_auto')) {
-      return src.replace('/upload/', '/upload/f_auto,q_auto,w_auto,c_limit/');
+    if (src.includes('res.cloudinary.com')) {
+      // If it already has transformations, don't double-transform
+      if (src.includes('/upload/w_') || src.includes('/upload/f_auto')) {
+        return src;
+      }
+
+      const { width } = sizeConfig[size] || sizeConfig.medium;
+      return src.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_limit/`);
     }
 
     return src;
@@ -198,10 +204,11 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   const imageSrc = imageState.currentSrc || getOptimizedSrc();
   const isRemote = imageSrc.startsWith('http');
+  const isCloudinary = imageSrc.includes('res.cloudinary.com');
 
-  // Use unoptimized rendering for any remote URL (including non-Cloudinary)
-  // so admin pages still show images even if the domain is not whitelisted
-  const shouldUnoptimize = isRemote;
+  // Only unoptimize if it's a remote URL that is NOT Cloudinary
+  // This allows Next.js to optimize Cloudinary images since they are whitelisted in next.config.js
+  const shouldUnoptimize = isRemote && !isCloudinary;
 
   return (
     <div

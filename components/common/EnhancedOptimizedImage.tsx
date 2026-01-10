@@ -267,6 +267,7 @@ const EnhancedOptimizedImage: React.FC<EnhancedOptimizedImageProps> = ({
             object-contain transition-opacity duration-300
             ${imageState.loaded ? 'opacity-100' : 'opacity-0'}
           `}
+          unoptimized={imageState.currentSrc.startsWith('http') && !imageState.currentSrc.includes('res.cloudinary.com')}
         />
       )}
 
