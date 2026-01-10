@@ -1,4 +1,6 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import './Category';
+import './Subcategory';
 
 export interface IProduct extends Document {
   name: string;
@@ -164,7 +166,7 @@ ProductSchema.index({ isTopProduct: 1 });
 ProductSchema.index({ usedAsCategoryThumbnail: 1, categoryId: 1 });
 
 // Pre-save middleware to automatically populate category and subcategory names
-ProductSchema.pre('save', async function() {
+ProductSchema.pre('save', async function () {
   // Only populate if the IDs are set but names are not
   if (this.categoryId && !this.category) {
     const Category = mongoose.model('Category');

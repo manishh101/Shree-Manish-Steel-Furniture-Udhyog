@@ -51,7 +51,7 @@ export async function PUT(
 ) {
   try {
     const user = getUserFromRequest(request);
-    
+
     if (!user || user.role !== 'admin') {
       console.log('PUT /api/products/[id] - Unauthorized. User:', user);
       return NextResponse.json(
@@ -65,7 +65,7 @@ export async function PUT(
 
     const data = await request.json();
     console.log('PUT /api/products/[id] - Updating product:', id, 'with data:', data);
-    
+
     // If categoryId or subcategoryId is being updated, fetch the names
     if (data.categoryId) {
       const category = await Category.findById(data.categoryId);
@@ -73,14 +73,14 @@ export async function PUT(
         data.category = category.name;
       }
     }
-    
+
     if (data.subcategoryId) {
       const subcategory = await Subcategory.findById(data.subcategoryId);
       if (subcategory) {
         data.subcategory = subcategory.name;
       }
     }
-    
+
     const product = await Product.findByIdAndUpdate(
       id,
       { $set: data },
@@ -98,6 +98,7 @@ export async function PUT(
     revalidatePath('/products');
     revalidatePath('/');
     revalidatePath('/admin/products');
+    revalidatePath(`/products/${id}`);
     revalidateTag('products', {});
 
     console.log('PUT /api/products/[id] - Product updated successfully:', product._id);
@@ -118,7 +119,7 @@ export async function DELETE(
 ) {
   try {
     const user = getUserFromRequest(request);
-    
+
     if (!user || user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Unauthorized' },
@@ -137,6 +138,12 @@ export async function DELETE(
         { status: 404 }
       );
     }
+
+    revalidatePath('/products');
+    revalidatePath('/');
+    revalidatePath('/admin/products');
+    revalidatePath(`/products/${id}`);
+    revalidateTag('products', {});
 
     return NextResponse.json({ message: 'Product deleted successfully' });
   } catch (error) {
