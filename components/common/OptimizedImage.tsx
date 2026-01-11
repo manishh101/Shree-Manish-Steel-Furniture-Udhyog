@@ -85,7 +85,8 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const [isInView, setIsInView] = useState(!lazy || priority);
 
   // Get optimized image source - prioritize Cloudinary URLs
-  const getOptimizedSrc = (): string => {
+  // Use useMemo to ensure stability across renders
+  const optimizedSrc = React.useMemo(() => {
     // No src provided - use Cloudinary placeholder
     if (!src) {
       return ImageService.getCloudinaryPlaceholder(category) || '/images/furniture-1.jpg';
@@ -99,11 +100,15 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       }
 
       const { width } = sizeConfig[size] || sizeConfig.medium;
+      // Ensure we replace correctly
       return src.replace('/upload/', `/upload/f_auto,q_auto,w_${width},c_limit/`);
     }
 
     return src;
-  };
+  }, [src, category, size]);
+
+  // Backwards compatibility for getOptimizedSrc calls in effects
+  const getOptimizedSrc = () => optimizedSrc;
 
   // Get fallback source - use local placeholder
   const getFallbackSrc = (): string => {
@@ -216,13 +221,6 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       className={wrapperClassName}
       style={style}
     >
-      {/* Loading placeholder - with smoother transition */}
-      {!imageState.loaded && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-50 transition-opacity duration-300 z-10">
-          <FaImage className="w-8 h-8 text-gray-300 animate-pulse" />
-        </div>
-      )}
-
       {/* Main image using Next.js Image component */}
       {imageSrc && imageSrc.trim() !== '' && (
         <Image
@@ -234,12 +232,13 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
           quality={85}
           onLoad={handleLoad}
           onError={handleError}
+          loading={priority ? undefined : 'lazy'}
           className={`
             ${objectFit === 'contain' ? 'object-contain' : objectFit === 'fill' ? 'object-fill' : objectFit === 'none' ? 'object-none' : 'object-cover'}
             transition-all duration-500 ease-out
             ${imageState.loaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}
-            ${imageClassName || className}
-          `}
+            ${imageClassName || ''}
+          `.trim().replace(/\s+/g, ' ')}
           unoptimized={shouldUnoptimize}
         />
       )}

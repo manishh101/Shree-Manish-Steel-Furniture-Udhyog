@@ -40,6 +40,7 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
 
   const [fullScreenView, setFullScreenView] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [touchPosition, setTouchPosition] = useState<{ x: number; y: number } | null>(null);
 
   // Reset state when product changes
   useEffect(() => {
@@ -79,6 +80,44 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
       document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
+
+  // Handle navigation functions
+  const handlePrevImage = () => {
+    if (!product) return;
+    setSelectedImageIndex(prev => prev > 0 ? prev - 1 : (product.images?.length || 1) - 1);
+  };
+
+  const handleNextImage = () => {
+    if (!product) return;
+    setSelectedImageIndex(prev => prev < (product.images?.length || 1) - 1 ? prev + 1 : 0);
+  };
+
+  // Handle touch events for better mobile support
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    setTouchPosition({ x: touch.clientX, y: touch.clientY });
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!touchPosition) return;
+
+    const touch = e.touches[0];
+    const diffX = touchPosition.x - touch.clientX;
+    const diffY = touchPosition.y - touch.clientY;
+
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 30) {
+      if (diffX > 0) {
+        handleNextImage();
+      } else {
+        handlePrevImage();
+      }
+      setTouchPosition(null);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setTouchPosition(null);
+  };
 
   if (!isOpen || !product) {
     return null;
@@ -325,7 +364,12 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
             <FaTimes className="h-6 w-6" />
           </button>
 
-          <div className="relative w-full h-[80vh] md:h-full max-w-6xl max-h-[90vh] flex items-center justify-center">
+          <div
+            className="relative w-full h-[80vh] md:h-full max-w-6xl max-h-[90vh] flex items-center justify-center touch-manipulation"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
             <OptimizedImage
               src={product.images && product.images.length > 0 ? product.images[selectedImageIndex] : (product.image || '/images/furniture-1.jpg')}
               alt={product.name}
@@ -340,7 +384,7 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedImageIndex(prev => prev > 0 ? prev - 1 : (product.images?.length || 1) - 1);
+                  handlePrevImage();
                 }}
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-white/20 hover:bg-white/40 rounded-full p-3 transition-colors z-70"
               >
@@ -349,7 +393,7 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedImageIndex(prev => prev < (product.images?.length || 1) - 1 ? prev + 1 : 0);
+                  handleNextImage();
                 }}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-white/20 hover:bg-white/40 rounded-full p-3 transition-colors z-70"
               >

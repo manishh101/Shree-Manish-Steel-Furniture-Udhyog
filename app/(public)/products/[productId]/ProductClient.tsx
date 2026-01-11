@@ -9,7 +9,8 @@ import {
   FaExpand,
   FaTimes,
   FaShare,
-  FaHeart
+  FaHeart,
+  FaWhatsapp
 } from 'react-icons/fa';
 
 import { productAPI, Product as APIProduct } from '@/services/api';
@@ -222,8 +223,12 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
     const newIndex = selectedImageIndex > 0
       ? selectedImageIndex - 1
       : allImages.length - 1;
-    setImageLoading(true);
-    setSelectedImageIndex(newIndex);
+
+    // Only update if index actually changes (prevents stuck loading state on single image)
+    if (newIndex !== selectedImageIndex) {
+      // Don't set imageLoading(true) here to avoiding flickering/delay
+      setSelectedImageIndex(newIndex);
+    }
   };
 
   // Navigate to next image with animation
@@ -231,8 +236,12 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
     const newIndex = selectedImageIndex < allImages.length - 1
       ? selectedImageIndex + 1
       : 0;
-    setImageLoading(true);
-    setSelectedImageIndex(newIndex);
+
+    // Only update if index actually changes (prevents stuck loading state on single image)
+    if (newIndex !== selectedImageIndex) {
+      // Don't set imageLoading(true) here to avoiding flickering/delay
+      setSelectedImageIndex(newIndex);
+    }
   };
 
   // Enhanced image full screen functionality
@@ -536,7 +545,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
             rel="noopener noreferrer"
             className="flex-2 flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
           >
-            <FaChevronRight className="w-4 h-4 mr-2" />
+            <FaWhatsapp className="w-4 h-4 mr-2" />
             WhatsApp
           </a>
           <Link
@@ -627,9 +636,9 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                   <OptimizedImage
                     src={allImages[selectedImageIndex]}
                     alt={imageService.getImageAlt(product) || "Product Image"}
-                    className={`w-full h-full object-contain transition-all duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
-                    onLoad={() => setImageLoading(false)}
+                    className="w-full h-full object-contain transition-all duration-300"
                     size="medium"
+                    priority={true}
                   />
                 </div>
 
@@ -882,7 +891,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                 rel="noopener noreferrer"
                 className="w-full flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 border border-transparent rounded-lg shadow-sm text-sm sm:text-base font-medium text-white bg-green-600 hover:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99]"
               >
-                <FaChevronRight className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
+                <FaWhatsapp className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
                 Inquire on WhatsApp
               </a>
 
@@ -1084,8 +1093,11 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
 
           {/* Full screen image container */}
           <div
-            className="relative w-full h-[80vh] md:h-full max-w-6xl max-h-[90vh] flex items-center justify-center"
+            className="relative w-full h-[80vh] md:h-full max-w-6xl max-h-[90vh] flex items-center justify-center touch-manipulation"
             onClick={(e) => e.stopPropagation()}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           >
             <OptimizedImage
               src={allImages[selectedImageIndex]}
