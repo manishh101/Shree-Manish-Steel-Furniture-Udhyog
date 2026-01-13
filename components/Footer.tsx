@@ -16,9 +16,9 @@ interface Category {
 const Footer = () => {
   // Use site settings from database
   const { settings, loading: settingsLoading } = useSiteSettings();
-  
+
   const [categories, setCategories] = useState<Category[]>([]);
-  
+
   // Fetch categories using the same logic as CategoryDrawer
   const fetchCategories = async () => {
     try {
@@ -39,12 +39,12 @@ const Footer = () => {
       }
     }
   };
-  
+
   // Fetch categories on mount
   useEffect(() => {
     fetchCategories();
   }, []);
-  
+
   // Social links with defaults
   const socialLinks = {
     whatsapp: settings.social?.whatsapp || 'https://wa.me/9779824336371',
@@ -55,7 +55,7 @@ const Footer = () => {
     twitter: settings.social?.twitter || '',
     youtube: settings.social?.youtube || ''
   };
-  
+
   return (
     <footer className="bg-primary text-white">
       <div className="container mx-auto px-4 py-12">
@@ -63,8 +63,8 @@ const Footer = () => {
           {/* Logo and About */}
           <div className="md:col-span-1">
             <div className="relative h-16 w-40 mb-4">
-              <Image 
-                src="/images/new-logo-1.png" 
+              <Image
+                src="/images/new-logo-1.png"
                 alt={settings.businessName || "Shree Manish Steel Furniture Industry"}
                 fill
                 sizes="160px"
@@ -79,7 +79,7 @@ const Footer = () => {
             <div className="flex flex-wrap gap-4">
               {socialLinks.whatsapp && (
                 <a href={socialLinks.whatsapp} target="_blank" rel="noopener noreferrer" className="text-white hover:text-accent transition-colors" title="WhatsApp">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" /></svg>
                 </a>
               )}
               {socialLinks.facebook && (
@@ -98,22 +98,22 @@ const Footer = () => {
               )}
               {socialLinks.tiktok && (
                 <a href={socialLinks.tiktok} target="_blank" rel="noopener noreferrer" className="text-white hover:text-accent transition-colors" title="TikTok">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" /></svg>
                 </a>
               )}
               {socialLinks.twitter && (
                 <a href={socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-white hover:text-accent transition-colors" title="Twitter">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-.424.728-.666 1.581-.666 2.477 0 1.921.977 3.616 2.468 4.611-.9-.028-1.747-.276-2.488-.688v.065c0 2.68 1.908 4.915 4.438 5.424-.464.126-.95.194-1.455.194-.356 0-.702-.034-1.04-.098.704 2.196 2.747 3.796 5.176 3.841-1.894 1.482-4.276 2.364-6.874 2.364-.447 0-.889-.026-1.325-.077 2.448 1.57 5.357 2.49 8.485 2.49 10.177 0 15.745-8.438 15.745-15.745 0-.24-.005-.478-.015-.714.94-.678 1.757-1.53 2.408-2.5z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-.424.728-.666 1.581-.666 2.477 0 1.921.977 3.616 2.468 4.611-.9-.028-1.747-.276-2.488-.688v.065c0 2.68 1.908 4.915 4.438 5.424-.464.126-.95.194-1.455.194-.356 0-.702-.034-1.04-.098.704 2.196 2.747 3.796 5.176 3.841-1.894 1.482-4.276 2.364-6.874 2.364-.447 0-.889-.026-1.325-.077 2.448 1.57 5.357 2.49 8.485 2.49 10.177 0 15.745-8.438 15.745-15.745 0-.24-.005-.478-.015-.714.94-.678 1.757-1.53 2.408-2.5z" /></svg>
                 </a>
               )}
               {socialLinks.youtube && (
                 <a href={socialLinks.youtube} target="_blank" rel="noopener noreferrer" className="text-white hover:text-accent transition-colors" title="YouTube">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" /></svg>
                 </a>
               )}
             </div>
           </div>
-          
+
           {/* Quick Links */}
           <div>
             <h3 className="text-lg font-bold mb-4">Quick Links</h3>
@@ -135,7 +135,7 @@ const Footer = () => {
               </li>
             </ul>
           </div>
-          
+
           {/* Products */}
           <div>
             <h3 className="text-lg font-bold mb-4">Products</h3>
@@ -143,8 +143,8 @@ const Footer = () => {
               {categories.length > 0 ? (
                 categories.slice(0, 4).map((category) => (
                   <li key={category._id || category.id}>
-                    <Link 
-                      href={`/products?category=${category._id || category.id}`} 
+                    <Link
+                      href={`/products?category=${category._id || category.id}`}
                       className="text-white/80 hover:text-accent transition-colors"
                     >
                       {category.name}
@@ -161,7 +161,7 @@ const Footer = () => {
               </li>
             </ul>
           </div>
-          
+
           {/* Contact Info */}
           <div>
             <h3 className="text-lg font-bold mb-4">Contact Us</h3>
@@ -201,12 +201,23 @@ const Footer = () => {
             </ul>
           </div>
         </div>
-        
+
         <div className="border-t border-white/20 mt-12 pt-8 text-center">
           <p className="text-white/60">
             &copy; {new Date().getFullYear()} {settings.businessName || 'Shree Manish Steel Furniture Industry'}. All rights reserved.
           </p>
-          <div className="mt-2">
+          <p className="text-white/40 text-sm mt-2">
+            design and engineered by{' '}
+            <a
+              href="https://wa.me/9814379071"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-accent transition-colors underline decoration-white/20"
+            >
+              Manish rajbanshi
+            </a>
+          </p>
+          <div className="mt-4">
             <Link href="/login" className="text-white/40 text-sm hover:text-accent transition-colors">Admin Login</Link>
           </div>
         </div>

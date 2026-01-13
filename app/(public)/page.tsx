@@ -74,7 +74,7 @@ export default function HomePage() {
 
   // Homepage content from database
   const [homepageContent, setHomepageContent] = useState<Partial<HomepageData>>(defaultHomepageContent);
-  const [imageKey, setImageKey] = useState(Date.now());
+  const [imageKey, setImageKey] = useState(0);
 
   // Services state - fetch from database
   const [services, setServices] = useState<Service[]>([]);
@@ -256,19 +256,17 @@ export default function HomePage() {
 
 
             {/* Right Image */}
-            <div className="w-full md:w-[52%] lg:w-[55%] animate-fadeIn mt-8 md:mt-0" style={{ animationDelay: '0.3s' }}>
-              <div className="relative w-full h-[320px] sm:h-[380px] md:aspect-[3/2] md:h-auto lg:aspect-[3/2] lg:h-auto xl:aspect-[3/2] xl:h-auto">
+            <div className="w-full md:w-[52%] lg:w-[55%] animate-fadeIn mt-8 md:mt-0" style={{ animationDelay: '0.4s' }}>
+              <div className="relative w-full h-[350px] sm:h-[400px] md:h-[450px] lg:h-[500px] rounded-2xl overflow-hidden shadow-2xl bg-gray-100">
                 <Image
                   key={imageKey}
                   src={(homepageContent.heroImage && homepageContent.heroImage.trim() !== '') ? homepageContent.heroImage : '/images/home-page-1.png'}
                   alt="Manish Steel Furniture Collection"
                   fill
                   priority
-                  quality={85}
-                  className="rounded-2xl shadow-xl"
-                  style={{ objectFit: 'cover' }}
-                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 52vw, 55vw"
-                  unoptimized={homepageContent.heroImage?.includes('cloudinary') ? false : true}
+                  quality={90}
+                  className="object-cover transition-opacity duration-700"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 800px"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     if (!target.src.includes('home-page-1.png')) {
@@ -276,7 +274,10 @@ export default function HomePage() {
                     }
                   }}
                 />
-                <div className="absolute -bottom-2 -right-2 md:-bottom-4 md:-right-4 bg-accent w-16 h-16 md:w-24 md:h-24 rounded-full flex items-center justify-center text-primary font-bold text-xs md:text-lg z-10 shadow-lg">
+                {/* Decorative Elements */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+
+                <div className="absolute -bottom-2 -right-2 md:-bottom-4 md:-right-4 bg-accent w-16 h-16 md:w-24 md:h-24 rounded-full flex items-center justify-center text-primary font-bold text-xs md:text-lg z-10 shadow-lg animate-bounce-slow">
                   New<br />Designs
                 </div>
               </div>
