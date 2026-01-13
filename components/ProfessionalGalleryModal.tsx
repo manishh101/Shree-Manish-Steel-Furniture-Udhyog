@@ -221,7 +221,7 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
               alt={`${productName} - Image ${currentIndex + 1}`}
               onLoad={handleImageLoad}
               onError={() => handleImageError(currentIndex)}
-              className="max-w-full max-h-[70vh] transition-opacity duration-300"
+              className="w-full h-full max-w-full max-h-[70vh] transition-opacity duration-300"
               style={{ margin: 'auto' }}
               size="large"
               objectFit="contain"

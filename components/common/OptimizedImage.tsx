@@ -193,7 +193,8 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   };
 
   // Check if caller provided explicit sizing classes (h-*, w-*)
-  const hasExplicitSize = className && /\b[hw]-\d+|\b[hw]-\[/.test(className);
+  // We check for classes starting with h- or w-, but NOT max-h, min-h, etc.
+  const hasExplicitSize = className && className.split(/\s+/).some(cls => /^[hw]-/.test(cls));
 
   const combinedClassName = `
     relative overflow-hidden bg-gray-100
