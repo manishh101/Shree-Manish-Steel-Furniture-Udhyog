@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, memo } from 'react';
 import Link from 'next/link';
 import { FaArrowRight, FaFire } from 'react-icons/fa';
 import { productAPI } from '@/services/api';
@@ -201,4 +201,7 @@ const CleanMostSellingSection: React.FC = () => {
   );
 };
 
-export default CleanMostSellingSection;
+// Bolt ⚡: Memoizing this component to prevent unnecessary re-renders.
+// As a static component with no props, it's an ideal candidate for this optimization.
+// This improves performance by avoiding costly re-renders when parent components update.
+export default memo(CleanMostSellingSection);
