@@ -12,7 +12,7 @@ export const dynamicParams = true;
 interface PageProps {
   params: Promise<{ productId: string }>;
 }
-
+/*
 // Generate static params for better SEO and performance
 export async function generateStaticParams() {
   try {
@@ -30,6 +30,7 @@ export async function generateStaticParams() {
     return [];
   }
 }
+*/
 
 // Server Component - renders product data for SEO
 export default async function ProductDetailPage({ params }: PageProps) {

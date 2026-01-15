@@ -16,20 +16,41 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
     const category = searchParams.get('category');
     const featured = searchParams.get('featured');
+    const sort = searchParams.get('sort') || 'default';
 
     // Build query
     const query: any = {};
-    
     if (search) {
-      query.$text = { $search: search };
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
     }
-    
     if (category) {
       query.categoryId = category;
     }
-    
     if (featured === 'true') {
       query.featured = true;
+    }
+
+    // Sorting options
+    let sortOption: any = { createdAt: -1 }; // Default sort
+    switch (sort) {
+      case 'price-low-high':
+        sortOption = { price: 1 };
+        break;
+      case 'price-high-low':
+        sortOption = { price: -1 };
+        break;
+      case 'name-a-z':
+        sortOption = { name: 1 };
+        break;
+      case 'name-z-a':
+        sortOption = { name: -1 };
+        break;
+      case 'newest':
+        sortOption = { createdAt: -1 };
+        break;
     }
 
     const skip = (page - 1) * limit;
@@ -38,7 +59,7 @@ export async function GET(request: NextRequest) {
       Product.find(query)
         .populate('categoryId', 'name')
         .populate('subcategoryId', 'name')
-        .sort({ dateAdded: -1 })
+        .sort(sortOption)
         .skip(skip)
         .limit(limit)
         .lean(),

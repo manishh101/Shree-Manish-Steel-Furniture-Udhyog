@@ -169,8 +169,15 @@ export interface CustomOrder {
 
 // Product API
 export const productAPI = {
-  getAll: (page = 1, limit = 100, params: Record<string, unknown> = {}) =>
-    fetchAPI<ProductsResponse>('/products', { params: { page, limit, ...params } }),
+  getAll: (
+    page = 1,
+    limit = 100,
+    params: {
+      search?: string;
+      sort?: string;
+      [key: string]: unknown;
+    } = {}
+  ) => fetchAPI<ProductsResponse>('/products', { params: { page, limit, ...params } }),
 
   getById: (id: string) =>
     fetchAPI<Product>(`/products/${id}`),

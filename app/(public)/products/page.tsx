@@ -98,24 +98,30 @@ function ProductsPageContent() {
     loadCategories();
   }, []);
 
-  // Load products based on selected category
+  // Load products based on selected category, search term, and sort option
   useEffect(() => {
     const loadProducts = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        let response;
-        if (selectedCategory === 'all') {
-          response = await productAPI.getAll(1, 100);
-        } else {
-          response = await productAPI.getByCategory(selectedCategory, {
-            subcategory: selectedSubcategory || undefined
-          });
-        }
+        const params: {
+          sort: string;
+          search: string;
+          category?: string;
+          subcategory?: string;
+        } = {
+          sort: sortOption,
+          search: searchTerm,
+          category: selectedCategory === 'all' ? undefined : selectedCategory,
+          subcategory: selectedSubcategory || undefined
+        };
 
-        const productData = response.products || response || [];
+        const response = await productAPI.getAll(currentPage, itemsPerPage, params);
+
+        const productData = response.products || [];
         setProducts(Array.isArray(productData) ? productData : []);
+        setTotalProducts(response.totalProducts || 0);
       } catch (err) {
         console.error('Error loading products:', err);
         setError(err instanceof Error ? err.message : 'Failed to load products');
@@ -126,50 +132,19 @@ function ProductsPageContent() {
     };
 
     loadProducts();
-  }, [selectedCategory, selectedSubcategory]);
+  }, [selectedCategory, selectedSubcategory, searchTerm, sortOption, currentPage, itemsPerPage]);
 
-  // Filter and sort products
-  const filteredAndSortedProducts = useMemo(() => {
-    let filtered = [...products];
-
-    // Apply search filter
-    if (searchTerm) {
-      const lowercaseSearchTerm = searchTerm.toLowerCase();
-      filtered = filtered.filter(product =>
-        product?.name?.toLowerCase().includes(lowercaseSearchTerm) ||
-        product?.description?.toLowerCase().includes(lowercaseSearchTerm)
-      );
-    }
-
-    // Apply sorting
-    if (sortOption !== 'default') {
-      if (sortOption === 'price-low-high') {
-        filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
-      } else if (sortOption === 'price-high-low') {
-        filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
-      } else if (sortOption === 'name-a-z') {
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-      } else if (sortOption === 'name-z-a') {
-        filtered.sort((a, b) => b.name.localeCompare(a.name));
-      } else if (sortOption === 'newest') {
-        filtered.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-      }
-    }
-
-    return filtered;
-  }, [products, searchTerm, sortOption]);
-
-  // Pagination
-  const totalPages = Math.ceil(filteredAndSortedProducts.length / itemsPerPage);
-  const currentProducts = filteredAndSortedProducts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  // Pagination is now handled by the API, so we just display the products
+  const currentProducts = products;
+  // Assuming the API returns total pages; otherwise, you might need to calculate it
+  // For this example, let's pretend the API gives us the total number of products
+  const [totalProducts, setTotalProducts] = useState(0);
+  const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedCategory, selectedSubcategory, sortOption]);
+  }, [searchTerm, selectedCategory, selectedSubcategory, sortOption, itemsPerPage]);
 
   // Navigation utility
   const navigateToProducts = useCallback((category: string, subcategory: string | null = null) => {
@@ -269,7 +244,7 @@ function ProductsPageContent() {
               {loading ? (
                 'Loading products...'
               ) : (
-                `Showing ${Math.min((currentPage - 1) * itemsPerPage + 1, filteredAndSortedProducts.length)}–${Math.min(currentPage * itemsPerPage, filteredAndSortedProducts.length)} of ${filteredAndSortedProducts.length} results`
+                `Showing ${Math.min((currentPage - 1) * itemsPerPage + 1, totalProducts)}–${Math.min(currentPage * itemsPerPage, totalProducts)} of ${totalProducts} results`
               )}
             </div>
           </div>
@@ -480,7 +455,7 @@ function ProductsPageContent() {
             {/* Products Grid */}
             {!loading && !error && (
               <>
-                {filteredAndSortedProducts.length === 0 ? (
+                {totalProducts === 0 ? (
                   <div className="text-center py-20">
                     <div className="text-gray-400 mb-6">
                       <FaSearch className="h-20 w-20 mx-auto opacity-50" />
