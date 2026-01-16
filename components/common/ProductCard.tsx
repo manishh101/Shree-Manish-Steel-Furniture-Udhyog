@@ -76,7 +76,13 @@ interface ProductCardProps {
   className?: string;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({
+import { memo } from 'react';
+
+// ⚡ Bolt: Using React.memo to prevent unnecessary re-renders of the ProductCard.
+// This is a high-impact optimization for lists, as it stops cards from re-rendering
+// when their props haven't changed, which is common during sorting or filtering operations
+// that don't affect every item in the list.
+const ProductCard: React.FC<ProductCardProps> = memo(({
   product,
   onQuickView,
   onProductView,
@@ -373,6 +379,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
       )}
     </div>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;
