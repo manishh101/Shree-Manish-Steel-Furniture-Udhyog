@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { FaArrowRight, FaFire } from 'react-icons/fa';
-import { productAPI } from '@/services/api';
 import ProductCard from './common/ProductCard';
 import QuickView from './QuickView';
 import { useQuickView } from '@/hooks/useQuickView';
@@ -21,121 +20,12 @@ interface Product {
   [key: string]: unknown;
 }
 
-const CleanMostSellingSection: React.FC = () => {
-  const [bestSellingProducts, setBestSellingProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+interface CleanMostSellingSectionProps {
+  bestSellingProducts: Product[];
+}
+
+const CleanMostSellingSection: React.FC<CleanMostSellingSectionProps> = ({ bestSellingProducts }) => {
   const { quickViewProduct, isQuickViewOpen, openQuickView, closeQuickView } = useQuickView();
-
-  useEffect(() => {
-    fetchBestSellingProducts();
-  }, []);
-
-  const fetchBestSellingProducts = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      console.log('Fetching most selling products from API...');
-      
-      // Use the correct API method for most selling products
-      const response = await productAPI.getMostSelling(6);
-      
-      console.log('Most selling products API response:', response);
-      
-      if (response) {
-        const products = response.products || [];
-        console.log('Setting most selling products:', products.length, 'products');
-        setBestSellingProducts(products);
-      } else {
-        console.warn('No most selling products data received');
-        setBestSellingProducts([]);
-      }
-      
-    } catch (err) {
-      console.error('Error fetching most selling products:', err);
-      // Use fallback sample products when API fails - using local images
-      const fallbackProducts: Product[] = [
-        {
-          _id: 'bestseller-1',
-          name: 'Premium Steel Wardrobe',
-          category: 'Wardrobe',
-          image: '/images/furniture-1.jpg',
-          price: 28000,
-          soldCount: 145
-        },
-        {
-          _id: 'bestseller-2',
-          name: 'Executive Office Table',
-          category: 'Table',
-          image: '/images/furniture-2.jpg',
-          price: 18000,
-          soldCount: 132
-        },
-        {
-          _id: 'bestseller-3',
-          name: 'Modern Steel Almirah',
-          category: 'Almirah',
-          image: '/images/furniture-1.jpg',
-          price: 20000,
-          soldCount: 98
-        },
-        {
-          _id: 'bestseller-4',
-          name: 'Ergonomic Study Chair',
-          category: 'Chair',
-          image: '/images/furniture-2.jpg',
-          price: 10000,
-          soldCount: 87
-        },
-        {
-          _id: 'bestseller-5',
-          name: 'King Size Bed Frame',
-          category: 'Bed',
-          image: '/images/furniture-1.jpg',
-          price: 25000,
-          soldCount: 76
-        },
-        {
-          _id: 'bestseller-6',
-          name: 'Designer Kitchen Cabinet',
-          category: 'Cabinet',
-          image: '/images/furniture-2.jpg',
-          price: 15000,
-          soldCount: 65
-        }
-      ];
-      setBestSellingProducts(fallbackProducts);
-      setError(null); // Clear error since we have fallback data
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading most selling products...</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (error) {
-    return (
-      <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center">
-            <p className="text-red-600">{error}</p>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   if (!bestSellingProducts || bestSellingProducts.length === 0) {
     return (

@@ -3,8 +3,10 @@
  * Centralized API calls using fetch
  */
 
-// Use Next.js API routes (relative URL)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+// Use absolute URL for server-side fetching, otherwise use relative URL for client-side
+const API_BASE_URL = typeof window === 'undefined'
+  ? `${process.env.NEXT_PUBLIC_APP_URL}/api`
+  : '/api';
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, string | number | boolean | undefined>;
