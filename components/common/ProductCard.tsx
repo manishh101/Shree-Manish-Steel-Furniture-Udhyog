@@ -76,7 +76,8 @@ interface ProductCardProps {
   className?: string;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({
+// Memoize ProductCard to prevent unnecessary re-renders in product grids.
+const ProductCard: React.FC<ProductCardProps> = React.memo(({
   product,
   onQuickView,
   onProductView,
@@ -373,6 +374,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
       )}
     </div>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;
