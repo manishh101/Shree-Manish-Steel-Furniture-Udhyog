@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 interface Product {
   _id?: string;
@@ -40,13 +40,13 @@ interface UseQuickViewReturn {
 export const useQuickView = (): UseQuickViewReturn => {
   const [quickViewProduct, setQuickViewProduct] = useState<Product | null>(null);
 
-  const openQuickView = (product: Product) => {
+  const openQuickView = useCallback((product: Product) => {
     setQuickViewProduct(product);
-  };
+  }, []);
 
-  const closeQuickView = () => {
+  const closeQuickView = useCallback(() => {
     setQuickViewProduct(null);
-  };
+  }, []);
 
   const isQuickViewOpen = !!quickViewProduct;
 
