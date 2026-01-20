@@ -203,4 +203,12 @@ const GalleryCard: React.FC<GalleryCardProps> = ({
   );
 };
 
-export default GalleryCard;
+// --- Performance Optimization: Start ---
+// Memoized GalleryCard to prevent unnecessary re-renders.
+// This is crucial for performance in galleries where parent components might update frequently.
+// For this optimization to be effective, ensure the `onClick` prop is memoized using `useCallback` in the parent component.
+const MemoizedGalleryCard = React.memo(GalleryCard);
+MemoizedGalleryCard.displayName = 'GalleryCard'; // Keep display name for easier debugging
+
+export default MemoizedGalleryCard;
+// --- Performance Optimization: End ---
