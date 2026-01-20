@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 
 interface OptimizedImageProps {
   src: string;
@@ -45,10 +45,14 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const [imgSrc, setImgSrc] = useState(src);
   const [hasError, setHasError] = useState(false);
 
-  // Optimize Cloudinary URLs
-  const optimizedSrc = imgSrc.includes('res.cloudinary.com') && !hasError
-    ? imgSrc.replace('/upload/', `/upload/${cloudinaryOptimizations}/`)
-    : imgSrc;
+  // Memoize the optimized Cloudinary URL to prevent re-computation on every render
+  const optimizedSrc = useMemo(() => {
+    // Performance: Only apply optimizations if it's a Cloudinary URL and no error has occurred
+    if (imgSrc.includes('res.cloudinary.com') && !hasError) {
+      return imgSrc.replace('/upload/', `/upload/${cloudinaryOptimizations}/`);
+    }
+    return imgSrc;
+  }, [imgSrc, hasError, cloudinaryOptimizations]);
 
   const handleError = () => {
     if (!hasError && imgSrc !== fallbackSrc) {
