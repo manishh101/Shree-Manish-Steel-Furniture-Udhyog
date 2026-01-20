@@ -23,6 +23,11 @@ interface OptimizedImageProps {
  * - q_auto: Automatic quality
  * - w_auto: Responsive width
  * - c_limit: Limit size without cropping
+ *
+ * ⚡ Bolt Optimization:
+ * - Added `loading="lazy"` to defer loading of off-screen images, improving
+ *   initial page load performance. Images marked as `priority` will still
+ *   load eagerly.
  */
 const OptimizedImage: React.FC<OptimizedImageProps> = ({
   src,
@@ -58,6 +63,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     className,
     quality,
     onError: handleError,
+    loading: (priority ? 'eager' : 'lazy') as 'lazy' | 'eager',
     ...(fill ? { fill: true, sizes } : { width, height }),
     ...(priority && { priority: true }),
   };
