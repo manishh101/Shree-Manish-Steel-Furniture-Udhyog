@@ -375,4 +375,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
   );
 };
 
-export default ProductCard;
+// Memoize the ProductCard to prevent unnecessary re-renders when props are stable.
+// This is particularly effective in lists where parent components might re-render,
+// but the product data for individual cards remains the same.
+// The `onQuickView` function from the `useQuickView` hook is memoized with `useCallback`
+// to ensure it has a stable reference, making this optimization more effective.
+export default React.memo(ProductCard);
