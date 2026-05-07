@@ -235,15 +235,10 @@ function ProductsPageContent() {
       {/* Clean Header Section */}
       <header className="bg-white border-b border-gray-200">
         <div className="container mx-auto py-6">
-          <h1 className="text-3xl font-bold text-gray-900 text-center">SHOP</h1>
-          {selectedCategory !== 'all' && getCategoryById(selectedCategory) && (
-            <div className="text-center text-gray-600 text-sm mt-2">
-              {getCategoryById(selectedCategory)?.name}
-              {selectedSubcategory && (
-                <> &middot; {selectedSubcategory}</>
-              )}
-            </div>
-          )}
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 text-center uppercase tracking-wider mb-2">PRODUCT CATALOGUE</h1>
+          <p className="text-center text-gray-600 text-xs md:text-sm max-w-2xl mx-auto">
+            Discover our range of high-quality products tailored just for you.
+          </p>
         </div>
         {error && (
           <div className="container mx-auto py-2 text-red-700 bg-red-50 border-t border-red-200 text-sm flex items-center gap-2">

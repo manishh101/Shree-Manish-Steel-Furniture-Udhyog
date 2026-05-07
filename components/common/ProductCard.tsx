@@ -49,6 +49,11 @@ interface SafeProduct {
   discount: number | null;
   featured: boolean;
   salesCount: number | null;
+  dimensions?: {
+    length?: number;
+    width?: number;
+    height?: number;
+  };
   // Allow additional properties for flexibility
   [key: string]: unknown;
 }
@@ -93,7 +98,7 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
 
-  // Handle image loading - Hooks must be called before any early returns
+  // Handle image loading
   const handleImageLoad = useCallback(() => {
     setImageLoaded(true);
   }, []);
@@ -109,7 +114,7 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
     return null;
   }
 
-  // Get the main product image - prioritize Cloudinary URLs
+  // Get the main product image
   const getMainProductImage = (): string | null => {
     const potentialImages: (string | ProductImage | null | undefined)[] = [
       product.src,
@@ -146,7 +151,7 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
     ...product
   };
 
-  // Handle product link click with scroll to top
+  // Handle product link click
   const handleProductClick = (e: React.MouseEvent) => {
     e.preventDefault();
     if (onProductView) {
@@ -161,21 +166,9 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
     }
   };
 
-  // Get variant-specific classes and configurations
+  // Get variant-specific classes
   const getVariantConfig = (): VariantConfig => {
     switch (variant) {
-      case 'featured':
-        return {
-          cardClass: 'hover:shadow-lg hover:-translate-y-1',
-          buttonClass: 'bg-primary text-white px-3 py-1.5 rounded-md hover:bg-primary/80 transition-colors flex items-center gap-1.5 text-xs',
-          buttonText: 'View Details'
-        };
-      case 'bestseller':
-        return {
-          cardClass: 'hover:shadow-lg hover:-translate-y-2 border-2 border-transparent hover:border-orange-200',
-          buttonClass: 'bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1.5 rounded-md hover:from-orange-600 hover:to-red-600 transition-all duration-300 flex items-center gap-1.5 text-xs font-semibold transform hover:scale-105',
-          buttonText: 'View Details'
-        };
       case 'gallery':
         return {
           cardClass: 'hover:shadow-lg hover:border-primary/20 cursor-pointer',
@@ -183,8 +176,8 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
         };
       default:
         return {
-          cardClass: 'hover:shadow-lg',
-          buttonClass: 'text-gray-500 font-medium hover:text-primary/80 flex items-center group text-xs',
+          cardClass: 'hover:shadow-md hover:-translate-y-1',
+          buttonClass: '',
           buttonText: 'View Details'
         };
     }
@@ -193,13 +186,13 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
   const config = getVariantConfig();
 
   return (
-    <div className={`product-card bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-300 border border-gray-100 group h-full flex flex-col ${config.cardClass} ${className}`}>
-      {/* Image container - optimized size */}
-      <div className="relative w-full overflow-hidden bg-gray-100" style={{ aspectRatio: '4/4' }}>
+    <div className={`product-card bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 border border-gray-100 group h-full flex flex-col ${config.cardClass} ${className}`}>
+      {/* Image container - taller aspect ratio like reference */}
+      <div className="relative w-full overflow-hidden bg-gray-50" style={{ aspectRatio: '3/4' }}>
         {/* Loading skeleton */}
         {!imageLoaded && (
-          <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-            <div className="w-16 h-16 bg-gray-300 rounded-full"></div>
+          <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center">
+            <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
           </div>
         )}
 
@@ -209,7 +202,7 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
             alt={ImageService.getImageAlt(safeProduct)}
             category={safeProduct.category}
             size="medium"
-            className={`w-full h-full object-contain transition-all duration-500 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'
+            className={`w-full h-full object-contain p-4 transition-all duration-500 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'
               }`}
             onLoad={handleImageLoad}
             onError={handleImageError}
@@ -218,68 +211,26 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
           />
         </Link>
 
-        {/* Variant badges - positioned in top-right corner */}
-        {variant === 'featured' && (
-          <div className="absolute top-3 right-3 z-10">
-            <span className="inline-flex items-center gap-1 bg-yellow-100/95 text-yellow-800 px-2 py-1 rounded-full text-xs font-semibold shadow-sm backdrop-blur-sm">
-              ⭐ Featured Product
-            </span>
-          </div>
-        )}
-
-        {variant === 'bestseller' && (
-          <div className="absolute top-3 right-3 z-10">
-            <span className="inline-flex items-center gap-1 bg-orange-100/95 text-orange-800 px-2 py-1 rounded-full text-xs font-semibold shadow-sm backdrop-blur-sm">
-              🔥 Best Seller
-            </span>
-          </div>
-        )}
-
-        {/* Additional bestseller sales count badge */}
-        {variant === 'bestseller' && salesCount && (
-          <div className="absolute top-12 right-3 z-10">
-            <span className="inline-flex items-center gap-1 bg-green-100/95 text-green-800 px-2 py-1 rounded-full text-xs font-semibold shadow-sm backdrop-blur-sm">
-              {salesCount}+ sold
-            </span>
-          </div>
-        )}
-
-        {/* Quick view overlay */}
-        {withActions && !config.simpleLayout && onQuickView && (
-          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center">
-            <div className="space-y-3 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  onQuickView(safeProduct);
-                }}
-                className="bg-white text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-50 shadow-lg font-medium transition-colors w-full"
-              >
-                Quick View
-              </button>
-              <Link
-                href={`/products/${safeProduct._id || safeProduct.id}`}
-                onClick={handleProductClick}
-                className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 shadow-lg font-medium transition-colors text-center block"
-              >
-                View Details
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {/* Gallery overlay */}
-        {config.simpleLayout && (
-          <div
-            className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center cursor-pointer"
-            onClick={handleProductClick}
+        {/* Wishlist Heart Icon */}
+        <div className="absolute top-3 right-3 z-20">
+          <button 
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (onProductLike) onProductLike(safeProduct._id || safeProduct.id);
+            }}
+            className="p-1.5 rounded-full bg-white/90 hover:bg-white text-gray-400 hover:text-red-500 shadow-sm transition-all duration-300"
           >
-            <div className="text-white text-center pointer-events-none transform -translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-              <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-lg border border-white/30">
-                <FaImages className="mx-auto mb-1 text-lg" />
-                <span className="font-medium text-sm">View Images</span>
-              </div>
-            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Badge Overlay */}
+        {safeProduct.isNew && (
+          <div className="absolute top-3 left-3 z-10">
+            <span className="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded uppercase">New</span>
           </div>
         )}
       </div>
@@ -287,88 +238,37 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
       {/* Product info */}
       {config.simpleLayout ? (
         /* Simple layout for gallery */
-        <div className="p-4">
-          <h4 className="font-semibold text-gray-900 line-clamp-2 leading-tight">
+        <div className="p-4 text-center">
+          <h4 className="font-semibold text-gray-900 line-clamp-1 leading-tight">
             {safeProduct.name}
           </h4>
           {(safeProduct.subcategory || safeProduct.category) && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-xs text-gray-500 mt-1 uppercase tracking-wider">
               {safeProduct.subcategory || safeProduct.category}
             </p>
           )}
         </div>
       ) : (
-        /* Full layout - compact text area like reference */
-        <div className="p-3 flex-1 flex flex-col justify-between"
-          style={{ minHeight: '80px' }}>
-          {showCategory && !config.hideCategory && (
-            <div style={{ marginBottom: '1px' }}>
-              <span className="text-xs text-gray-400 uppercase tracking-wide font-light" style={{ fontSize: '9px' }}>
-                {safeProduct.subcategory ||
-                  safeProduct.productType ||
-                  (safeProduct.name?.includes('Wardrobe') ? 'Wardrobe' :
-                    safeProduct.name?.includes('Almirah') ? 'Almirah' :
-                      safeProduct.name?.includes('Table') ? 'Table' :
-                        safeProduct.name?.includes('Chair') ? 'Chair' :
-                          safeProduct.name?.includes('Bed') ? 'Bed' :
-                            safeProduct.name?.includes('Door') ? 'Door' :
-                              'Steel Furniture')}
-              </span>
-            </div>
-          )}
-
-          <Link href={`/products/${safeProduct._id || safeProduct.id}`} onClick={handleProductClick} className="block">
-            <h3 className="text-sm font-medium text-gray-800 hover:text-primary transition-colors line-clamp-2 leading-tight" style={{ marginBottom: '2px' }}>
+        /* Full layout - centered text like Triveni */
+        <div className="p-4 flex-1 flex flex-col items-center justify-center text-center bg-white border-t border-gray-50">
+          <div className="mb-1.5">
+            <h3 className="text-xs md:text-sm font-bold text-gray-800 uppercase tracking-tight line-clamp-2 leading-tight group-hover:text-primary transition-colors px-1">
               {safeProduct.name || safeProduct.title}
             </h3>
-          </Link>
+          </div>
 
-          {safeProduct.description && (variant === 'featured' || variant === 'bestseller') && (
-            <p className="text-gray-600 text-sm line-clamp-2" style={{ marginBottom: '4px' }}>
-              {safeProduct.description}
-            </p>
-          )}
-
-          {/* Button container - pushed to bottom */}
-          <div className="mt-auto">
-            {/* Standard variant button */}
-            {variant === 'standard' && (
-              <button
-                onClick={handleProductClick}
-                className={config.buttonClass}
-              >
-                {config.buttonText}
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 transform transition-transform group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            )}
-
-            {/* Featured variant button */}
-            {variant === 'featured' && (
-              <button
-                onClick={handleProductClick}
-                className={config.buttonClass}
-              >
-                {config.buttonText}
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 ml-1 transform transition-transform group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            )}
-
-            {/* Bestseller variant button */}
-            {variant === 'bestseller' && (
-              <button
-                onClick={handleProductClick}
-                className={config.buttonClass}
-              >
-                {config.buttonText}
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 ml-1 transform transition-transform group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
-            )}
+          <div className="flex flex-col items-center gap-1.5">
+            {/* Dimensions with ruler icon */}
+            <div className="flex items-center gap-1.5 text-gray-400">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-50">
+                <path d="M21 16H3V8H21V16ZM3 16V18M21 16V18M7 16V14M11 16V12M15 16V14M19 16V14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              <span className="text-[10px] font-medium">
+                {safeProduct.dimensions && (safeProduct.dimensions.length || safeProduct.dimensions.width || safeProduct.dimensions.height) 
+                  ? `${safeProduct.dimensions.length || 0}x${safeProduct.dimensions.width || 0}x${safeProduct.dimensions.height || 0} mm`
+                  : 'Standard Size'}
+              </span>
+            </div>
           </div>
         </div>
       )}
@@ -378,9 +278,4 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
 
 ProductCard.displayName = 'ProductCard';
 
-// Memoize the ProductCard to prevent unnecessary re-renders when props are stable.
-// This is particularly effective in lists where parent components might re-render,
-// but the product data for individual cards remains the same.
-// The `onQuickView` function from the `useQuickView` hook is memoized with `useCallback`
-// to ensure it has a stable reference, making this optimization more effective.
 export default React.memo(ProductCard);
