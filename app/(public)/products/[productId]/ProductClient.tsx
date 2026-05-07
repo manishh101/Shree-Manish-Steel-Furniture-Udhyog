@@ -574,7 +574,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-[0.95fr_1.05fr] xl:grid-cols-[0.92fr_1.08fr] gap-6 lg:gap-10">
           {/* LEFT: Image Gallery with Vertical Thumbnails */}
           <div className="flex flex-col lg:flex-row gap-4 lg:items-stretch">
             {/* Vertical Thumbnail Strip (Desktop) */}
