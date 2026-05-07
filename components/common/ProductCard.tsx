@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FaImages } from 'react-icons/fa';
+import { FaImages, FaEye, FaShoppingCart, FaHeart } from 'react-icons/fa';
 import { scrollToTop } from '../../utils/scrollUtils';
 import ImageService from '../../services/imageService';
 import OptimizedImage from './OptimizedImage';
@@ -186,7 +186,10 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
   const config = getVariantConfig();
 
   return (
-    <div className={`product-card bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 border border-gray-100 group h-full flex flex-col ${config.cardClass} ${className}`}>
+    <div 
+      onClick={handleProductClick}
+      className={`product-card bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 border border-gray-100 group h-full flex flex-col cursor-pointer ${config.cardClass} ${className}`}
+    >
       {/* Image container - taller aspect ratio like reference */}
       <div className="relative w-full overflow-hidden bg-gray-50" style={{ aspectRatio: '3/4' }}>
         {/* Loading skeleton */}
@@ -196,7 +199,7 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
           </div>
         )}
 
-        <Link href={`/products/${safeProduct._id || safeProduct.id}`} onClick={handleProductClick} className="block w-full h-full">
+        <div className="block w-full h-full">
           <OptimizedImage
             src={safeProduct.image}
             alt={ImageService.getImageAlt(safeProduct)}
@@ -209,7 +212,33 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
             lazy={variant !== 'featured' && variant !== 'bestseller'}
             priority={variant === 'featured' || variant === 'bestseller'}
           />
-        </Link>
+        </div>
+
+        {/* Hover Overlay with Quick View and Add to Cart */}
+        <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/5 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              if (onQuickView) onQuickView(safeProduct);
+            }}
+            className="w-12 h-12 flex items-center justify-center rounded-full bg-white shadow-lg text-gray-700 hover:bg-primary hover:text-white transition-all duration-300 transform translate-y-4 group-hover:translate-y-0"
+            title="Quick View"
+          >
+            <FaEye className="text-xl" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              // Logic for add to cart could go here
+            }}
+            className="w-12 h-12 flex items-center justify-center rounded-full bg-white shadow-lg text-gray-700 hover:bg-primary hover:text-white transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 delay-75"
+            title="Add to Cart"
+          >
+            <FaShoppingCart className="text-xl" />
+          </button>
+        </div>
 
         {/* Wishlist Heart Icon */}
         <div className="absolute top-3 right-3 z-20">
@@ -219,11 +248,9 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
               e.stopPropagation();
               if (onProductLike) onProductLike(safeProduct._id || safeProduct.id);
             }}
-            className="w-8 h-8 flex items-center justify-center rounded-full bg-white shadow-md hover:bg-gray-50 text-gray-400 hover:text-red-500 transition-all duration-300 group/wishlist"
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/90 backdrop-blur-sm shadow-md hover:bg-white text-gray-600 hover:text-red-500 transition-all duration-300 group/wishlist"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transition-transform group-hover/wishlist:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-            </svg>
+            <FaHeart className="text-sm transition-transform group-hover/wishlist:scale-110" />
           </button>
         </div>
 
