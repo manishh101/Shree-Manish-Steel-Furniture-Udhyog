@@ -308,7 +308,7 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
         categoryId: formData.categoryId,
         subcategoryId: formData.subcategoryId || undefined,
         features: formData.features.filter(f => f.trim() !== ''),
-        specifications: formData.specifications.filter(s => s.label.trim() !== '' && s.value.trim() !== ''),
+        specifications: formData.specifications,
         deliveryInformation: formData.deliveryInformation,
         dimensions: formData.dimensions,
         material: formData.material,
