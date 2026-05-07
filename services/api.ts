@@ -72,7 +72,18 @@ export interface Product {
   usedAsCategoryThumbnail?: boolean;
   salesCount?: number;
   inStock?: boolean;
-  specifications?: Record<string, string> | Array<{ label: string; value: string }>;
+  inStock?: boolean;
+  specifications?: {
+    material?: string;
+    dimensions?: string;
+    guarantee?: string;
+    modelType?: string;
+    modelWidth?: string;
+    hangers?: string;
+    noOfDoors?: string;
+    typeOfPaint?: string;
+    brand?: string;
+  };
   features?: string[];
   material?: string;
   finish?: string;
@@ -89,6 +100,7 @@ export interface Product {
     availableLocations?: string[];
     specialInstructions?: string;
   };
+  manufacturerDetails?: string;
   createdAt?: string;
   updatedAt?: string;
   [key: string]: unknown; // Index signature for additional properties

@@ -11,9 +11,16 @@ export interface IProduct extends Document {
   subcategory?: string;
   features: string[];
   specifications: {
-    label: string;
-    value: string;
-  }[];
+    material?: string;
+    dimensions?: string;
+    guarantee?: string;
+    modelType?: string;
+    modelWidth?: string;
+    hangers?: string;
+    noOfDoors?: string;
+    typeOfPaint?: string;
+    brand?: string;
+  };
   deliveryInformation: {
     estimatedDelivery: string;
     shippingCost: string;
@@ -39,6 +46,7 @@ export interface IProduct extends Document {
   rating: number;
   reviewCount: number;
   stock: number;
+  manufacturerDetails?: string;
 }
 
 const ProductSchema = new Schema<IProduct>({
@@ -68,16 +76,17 @@ const ProductSchema = new Schema<IProduct>({
   features: [{
     type: String
   }],
-  specifications: [{
-    label: {
-      type: String,
-      required: true
-    },
-    value: {
-      type: String,
-      required: true
-    }
-  }],
+  specifications: {
+    material: { type: String, default: "" },
+    dimensions: { type: String, default: "" },
+    guarantee: { type: String, default: "" },
+    modelType: { type: String, default: "" },
+    modelWidth: { type: String, default: "" },
+    hangers: { type: String, default: "" },
+    noOfDoors: { type: String, default: "" },
+    typeOfPaint: { type: String, default: "" },
+    brand: { type: String, default: "" }
+  },
   deliveryInformation: {
     estimatedDelivery: {
       type: String,
@@ -149,6 +158,10 @@ const ProductSchema = new Schema<IProduct>({
   stock: {
     type: Number,
     default: 100
+  },
+  manufacturerDetails: {
+    type: String,
+    default: ""
   }
 });
 

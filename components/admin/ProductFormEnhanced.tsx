@@ -19,7 +19,17 @@ interface FormData {
     additional: string[];
   };
   features: string[];
-  specifications: { label: string; value: string }[];
+  specifications: {
+    material: string;
+    dimensions: string;
+    guarantee: string;
+    modelType: string;
+    modelWidth: string;
+    hangers: string;
+    noOfDoors: string;
+    typeOfPaint: string;
+    brand: string;
+  };
   deliveryInformation: {
     estimatedDelivery: string;
     shippingCost: string;
@@ -33,6 +43,7 @@ interface FormData {
   isMostSelling: boolean;
   isTopProduct: boolean;
   featured: boolean;
+  manufacturerDetails: string;
 }
 
 interface ProductFormEnhancedProps {
@@ -53,7 +64,17 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
     additionalImageFiles: [null, null, null],
     imagePreviews: { main: '', additional: ['', '', ''] },
     features: [],
-    specifications: [],
+    specifications: {
+      material: '',
+      dimensions: '',
+      guarantee: '',
+      modelType: '',
+      modelWidth: '',
+      hangers: '',
+      noOfDoors: '',
+      typeOfPaint: '',
+      brand: ''
+    },
     deliveryInformation: {
       estimatedDelivery: '7-10 business days',
       shippingCost: 'Free shipping',
@@ -66,7 +87,8 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
     isAvailable: true,
     isMostSelling: false,
     isTopProduct: false,
-    featured: false
+    featured: false,
+    manufacturerDetails: ''
   });
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -124,12 +146,17 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
       }
 
       const specs = product.specifications;
-      let specificationsArray: { label: string; value: string }[] = [];
-      if (Array.isArray(specs)) {
-        specificationsArray = specs as { label: string; value: string }[];
-      } else if (specs && typeof specs === 'object') {
-        specificationsArray = Object.entries(specs).map(([label, value]) => ({ label, value: String(value) }));
-      }
+      const specificationsData = {
+        material: specs?.material || '',
+        dimensions: specs?.dimensions || '',
+        guarantee: specs?.guarantee || '',
+        modelType: specs?.modelType || '',
+        modelWidth: specs?.modelWidth || '',
+        hangers: specs?.hangers || '',
+        noOfDoors: specs?.noOfDoors || '',
+        typeOfPaint: specs?.typeOfPaint || '',
+        brand: specs?.brand || ''
+      };
 
       const newFormData: FormData = {
         name: product.name || '',
@@ -147,7 +174,7 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
             ['', '', '']
         },
         features: product.features || [],
-        specifications: specificationsArray,
+        specifications: specificationsData,
         deliveryInformation: {
           estimatedDelivery: product.deliveryInformation?.estimatedDelivery || '7-10 business days',
           shippingCost: product.deliveryInformation?.shippingCost || 'Free shipping',
@@ -164,7 +191,8 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
         isAvailable: product.isAvailable !== undefined ? product.isAvailable : true,
         isMostSelling: product.isMostSelling || false,
         isTopProduct: product.isTopProduct || false,
-        featured: product.featured || false
+        featured: product.featured || false,
+        manufacturerDetails: product.manufacturerDetails || ''
       };
 
       setFormData(newFormData);
@@ -240,25 +268,7 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
     }));
   };
 
-  const addSpecification = () => {
-    setFormData(prev => ({
-      ...prev,
-      specifications: [...prev.specifications, { label: '', value: '' }]
-    }));
-  };
 
-  const updateSpecification = (index: number, field: 'label' | 'value', value: string) => {
-    const updated = [...formData.specifications];
-    updated[index][field] = value;
-    setFormData(prev => ({ ...prev, specifications: updated }));
-  };
-
-  const removeSpecification = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      specifications: prev.specifications.filter((_, i) => i !== index)
-    }));
-  };
 
   const handleDeliveryLocationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const locations = e.target.value.split(',').map(item => item.trim()).filter(Boolean);
@@ -307,6 +317,7 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
         isMostSelling: formData.isMostSelling,
         isTopProduct: formData.isTopProduct,
         featured: formData.featured,
+        manufacturerDetails: formData.manufacturerDetails,
         image: formData.image || '',
         images: [] as string[]
       };
@@ -567,42 +578,106 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
         {/* Specifications */}
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Specifications</h3>
-          <div className="space-y-3">
-            {formData.specifications.map((spec, index) => (
-              <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <input
-                  type="text"
-                  value={spec.label}
-                  onChange={(e) => updateSpecification(index, 'label', e.target.value)}
-                  className="border border-gray-300 rounded-md px-3 py-2"
-                  placeholder="Specification Label"
-                />
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="text"
-                    value={spec.value}
-                    onChange={(e) => updateSpecification(index, 'value', e.target.value)}
-                    className="flex-1 border border-gray-300 rounded-md px-3 py-2"
-                    placeholder="Specification Value"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeSpecification(index)}
-                    className="p-2 text-red-600 hover:text-red-800"
-                  >
-                    <FaTimes className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={addSpecification}
-              className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
-            >
-              <FaPlus className="h-5 w-5" />
-              <span>Add Specification</span>
-            </button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Material</label>
+              <input
+                type="text"
+                name="specifications.material"
+                value={formData.specifications.material}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g. C.R. SHEET"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Dimension (MM)</label>
+              <input
+                type="text"
+                name="specifications.dimensions"
+                value={formData.specifications.dimensions}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g. 1630x915x530"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Guarantee</label>
+              <input
+                type="text"
+                name="specifications.guarantee"
+                value={formData.specifications.guarantee}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g. 10 Years on Paint & Locks"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Model Type</label>
+              <input
+                type="text"
+                name="specifications.modelType"
+                value={formData.specifications.modelType}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g. OFFICE MODEL"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Model Width</label>
+              <input
+                type="text"
+                name="specifications.modelWidth"
+                value={formData.specifications.modelWidth}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g. 36"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Hangers</label>
+              <input
+                type="text"
+                name="specifications.hangers"
+                value={formData.specifications.hangers}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g. NO HANGERS"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">No. of Doors</label>
+              <input
+                type="text"
+                name="specifications.noOfDoors"
+                value={formData.specifications.noOfDoors}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g. 2"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Type of Paint</label>
+              <input
+                type="text"
+                name="specifications.typeOfPaint"
+                value={formData.specifications.typeOfPaint}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g. Powder Coated"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Brand</label>
+              <input
+                type="text"
+                name="specifications.brand"
+                value={formData.specifications.brand}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="e.g. Shree Manish Steel"
+              />
+            </div>
           </div>
         </div>
 

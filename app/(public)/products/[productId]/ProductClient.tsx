@@ -13,6 +13,7 @@ import {
   FaTimes,
   FaShare,
   FaHeart,
+  FaRegHeart,
   FaWhatsapp
 } from 'react-icons/fa';
 
@@ -713,44 +714,39 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                   <FaHeart size={24} />
                 </button>
               </div>
-            </div>
-
-            {/* Product Description */}
+            </div>            {/* Product Description */}
             {product.description && (
               <div className="mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Product Description</h3>
+                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-2">DESCRIPTION</h3>
                 <p className="text-gray-600 leading-relaxed text-sm md:text-base">
                   {product.description}
                 </p>
               </div>
             )}
 
-            {/* Key Features */}
-            {product.features && product.features.length > 0 && (
-              <div className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3">Key features:</h3>
-                <ul className="list-disc list-inside space-y-2 text-gray-600 text-sm md:text-base ml-1">
-                  {product.features.map((feature, index) => (
-                    <li key={index} className="pl-1">{feature}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
+            <div className="border-b border-gray-100 mb-6"></div>
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 mb-8">
               <a
                 href={`https://wa.me/9779824336371?text=I'm interested in ${encodeURIComponent(product.name)} (ID: ${product._id}). Please provide more information.`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center px-5 py-3 rounded-lg text-sm font-semibold text-white bg-green-600 hover:bg-green-700 transition-all shadow-sm"
+                className="flex-[1.2] flex items-center justify-center px-4 py-3 rounded-lg text-sm font-semibold text-white bg-green-600 hover:bg-green-700 transition-all shadow-sm"
               >
                 <FaWhatsapp className="w-5 h-5 mr-2" />
                 WhatsApp Enquiry
               </a>
+              
+              <button
+                className="flex-1 flex items-center justify-center px-4 py-3 rounded-lg text-sm font-semibold text-white bg-[#5b626e] hover:bg-[#4a4f59] transition-all shadow-sm"
+              >
+                <FaRegHeart className="w-4 h-4 mr-2" />
+                Add Wishlist
+              </button>
+
               <Link
                 href="/custom-order"
-                className="flex-1 flex items-center justify-center px-5 py-3 rounded-lg text-sm font-semibold text-white bg-primary hover:bg-primary-dark transition-all shadow-sm"
+                className="flex-1 flex items-center justify-center px-4 py-3 rounded-lg text-sm font-semibold text-white bg-primary hover:bg-primary-dark transition-all shadow-sm"
               >
                 ✉ Enquiry
               </Link>
@@ -759,124 +755,97 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
             {/* Additional Details Accordions */}
             <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-100">
               {/* Specifications */}
-              <details className="group">
+              <details className="group" open>
                 <summary className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors">
                   <h3 className="text-base font-semibold text-gray-900">Product Specification</h3>
                   <FaChevronRight className="text-gray-400 rotate-90 group-open:-rotate-90 transition-transform text-xs" />
                 </summary>
                 <div className="p-4 pt-0 text-gray-600">
-                  {(() => {
-                    const specs = product.specifications;
-                    if (!specs) {
-                      return (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                          <div className="flex flex-col space-y-1">
-                            <span className="text-gray-500">Material</span>
-                            <span className="font-medium text-gray-900">{product.material || "Steel"}</span>
-                          </div>
-                          <div className="flex flex-col space-y-1">
-                            <span className="text-gray-500">Dimensions</span>
-                            <span className="font-medium text-gray-900">
-                              {product.dimensions && (product.dimensions.length || product.dimensions.width || product.dimensions.height)
-                                ? `${product.dimensions.length || 'N/A'} × ${product.dimensions.width || 'N/A'} × ${product.dimensions.height || 'N/A'} cm`
-                                : "Contact for details"}
-                            </span>
-                          </div>
-                          <div className="flex flex-col space-y-1">
-                            <span className="text-gray-500">Finish</span>
-                            <span className="font-medium text-gray-900">{product.finish || "Premium"}</span>
-                          </div>
-                          <div className="flex flex-col space-y-1">
-                            <span className="text-gray-500">Weight</span>
-                            <span className="font-medium text-gray-900">{product.weight || "Varies by model"}</span>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    if (Array.isArray(specs)) {
-                      return (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                          {specs.map((item, i) => (
-                            <div key={i} className="flex flex-col space-y-1">
-                              <span className="text-gray-500">{item.label}</span>
-                              <span className="font-medium text-gray-900">{item.value}</span>
-                            </div>
-                          ))}
-                        </div>
-                      );
-                    }
-
-                    if (typeof specs === 'object') {
-                      return (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                          {Object.entries(specs).map(([key, value]) => (
-                            <div key={key} className="flex flex-col space-y-1">
-                              <span className="text-gray-500 capitalize">
-                                {key.replace(/([A-Z])/g, ' $1').trim().replace(/_/g, ' ')}
-                              </span>
-                              <span className="font-medium text-gray-900">{String(value)}</span>
-                            </div>
-                          ))}
-                        </div>
-                      );
-                    }
-
-                    return <div>{String(specs)}</div>;
-                  })()}
+                  <div className="grid grid-cols-1 gap-y-3 text-sm">
+                    <div className="flex justify-between border-b border-gray-50 pb-2">
+                      <span className="text-gray-500 w-1/2">Material:</span>
+                      <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.material || "C.R. SHEET"}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-50 pb-2">
+                      <span className="text-gray-500 w-1/2">Dimension (MM):</span>
+                      <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.dimensions || "Contact for details"}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-50 pb-2">
+                      <span className="text-gray-500 w-1/2">Guarantee:</span>
+                      <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.guarantee || "10 Years"}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-50 pb-2">
+                      <span className="text-gray-500 w-1/2">Model Type:</span>
+                      <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.modelType || "Premium"}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-50 pb-2">
+                      <span className="text-gray-500 w-1/2">Model Width:</span>
+                      <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.modelWidth || "Standard"}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-50 pb-2">
+                      <span className="text-gray-500 w-1/2">Hangers:</span>
+                      <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.hangers || "Available"}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-50 pb-2">
+                      <span className="text-gray-500 w-1/2">No. of Doors:</span>
+                      <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.noOfDoors || "Varies"}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-50 pb-2">
+                      <span className="text-gray-500 w-1/2">Type of Paint:</span>
+                      <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.typeOfPaint || "Powder Coated"}</span>
+                    </div>
+                    <div className="flex justify-between border-b border-gray-50 pb-2">
+                      <span className="text-gray-500 w-1/2">Brand:</span>
+                      <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.brand || "Shree Manish Steel"}</span>
+                    </div>
+                  </div>
                 </div>
               </details>
 
-              {/* Delivery Information */}
+              {/* Key Features */}
               <details className="group">
                 <summary className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors">
-                  <h3 className="text-base font-semibold text-gray-900">Delivery Information</h3>
+                  <h3 className="text-base font-semibold text-gray-900">Key Features</h3>
                   <FaChevronRight className="text-gray-400 rotate-90 group-open:-rotate-90 transition-transform text-xs" />
                 </summary>
                 <div className="p-4 pt-0 text-gray-600 text-sm">
-                  {product.deliveryInformation ? (
-                    <div className="space-y-2">
-                      {product.deliveryInformation.estimatedDelivery && (
-                        <div className="flex items-start">
-                          <span className="flex-shrink-0 w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center text-primary mr-3 mt-0.5 text-xs">•</span>
-                          <div><span className="font-medium">Estimated Delivery: </span><span>{product.deliveryInformation.estimatedDelivery}</span></div>
-                        </div>
-                      )}
-                      {product.deliveryInformation.shippingCost && (
-                        <div className="flex items-start">
-                          <span className="flex-shrink-0 w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center text-primary mr-3 mt-0.5 text-xs">•</span>
-                          <div><span className="font-medium">Shipping: </span><span>{product.deliveryInformation.shippingCost}</span></div>
-                        </div>
-                      )}
-                      {product.deliveryInformation.availableLocations && product.deliveryInformation.availableLocations.length > 0 && (
-                        <div className="flex items-start">
-                          <span className="flex-shrink-0 w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center text-primary mr-3 mt-0.5 text-xs">•</span>
-                          <div><span className="font-medium">Locations: </span><span>{product.deliveryInformation.availableLocations.join(', ')}</span></div>
-                        </div>
-                      )}
-                      {product.deliveryInformation.specialInstructions && (
-                        <div className="flex items-start">
-                          <span className="flex-shrink-0 w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center text-primary mr-3 mt-0.5 text-xs">•</span>
-                          <div><span className="font-medium">Note: </span><span>{product.deliveryInformation.specialInstructions}</span></div>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <ul className="space-y-2">
-                      <li className="flex items-start">
-                        <span className="flex-shrink-0 w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center text-primary mr-3 mt-0.5 text-xs">•</span>
-                        <span>Free delivery within Biratnagar, Dharan, Itahari</span>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="flex-shrink-0 w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center text-primary mr-3 mt-0.5 text-xs">•</span>
-                        <span>Installation services available</span>
-                      </li>
-                      <li className="flex items-start">
-                        <span className="flex-shrink-0 w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center text-primary mr-3 mt-0.5 text-xs">•</span>
-                        <span>Contact us for shipping to other locations</span>
-                      </li>
+                  {product.features && product.features.length > 0 ? (
+                    <ul className="list-disc list-inside space-y-2">
+                      {product.features.map((feature, index) => (
+                        <li key={index}>{feature}</li>
+                      ))}
                     </ul>
+                  ) : (
+                    <p>No key features listed.</p>
                   )}
+                </div>
+              </details>
+
+              {/* Manufacturer Details */}
+              <details className="group">
+                <summary className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <h3 className="text-base font-semibold text-gray-900">Manufacturer Details</h3>
+                  <FaChevronRight className="text-gray-400 rotate-90 group-open:-rotate-90 transition-transform text-xs" />
+                </summary>
+                <div className="p-4 pt-0 text-gray-600 text-sm">
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="flex flex-col sm:flex-row sm:justify-between">
+                      <span className="text-gray-500">Name:</span>
+                      <span className="font-medium text-gray-900 sm:text-right">Shree Manish Steel Furniture Udhyog</span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row sm:justify-between">
+                      <span className="text-gray-500">Address:</span>
+                      <span className="font-medium text-gray-900 sm:text-right">Biratnagar, Morang</span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row sm:justify-between">
+                      <span className="text-gray-500">Email:</span>
+                      <span className="font-medium text-gray-900 sm:text-right">shreemanishfurniture@gmail.com</span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row sm:justify-between">
+                      <span className="text-gray-500">Country of Origin:</span>
+                      <span className="font-medium text-gray-900 sm:text-right">Nepal</span>
+                    </div>
+                  </div>
                 </div>
               </details>
             </div>
