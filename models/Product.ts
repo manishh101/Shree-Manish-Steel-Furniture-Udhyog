@@ -198,6 +198,11 @@ ProductSchema.pre('save', async function () {
   }
 });
 
-const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
+// Clear the model if it exists to ensure schema updates are picked up (important for dev hot-reloads)
+if (mongoose.models.Product) {
+  delete mongoose.models.Product;
+}
+
+const Product: Model<IProduct> = mongoose.model<IProduct>('Product', ProductSchema);
 
 export default Product;

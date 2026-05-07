@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       image: data.image,
       images: data.images || [],
       features: data.features || [],
-      specifications: data.specifications || [],
+      specifications: data.specifications || {},
       deliveryInformation: data.deliveryInformation || {},
       dimensions: data.dimensions || {},
       material: data.material || '',
