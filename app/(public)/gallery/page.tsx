@@ -402,7 +402,7 @@ const GalleryPage = () => {
       <section 
         className="bg-white py-3 sm:py-5 border-b border-gray-200 sticky top-0 z-20 shadow-sm backdrop-blur-sm bg-white/95"
       >
-        <div className="container mx-auto px-3 sm:px-5">
+        <div className="container mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-center gap-3 md:gap-5">
             {/* Mobile Filter Label */}
             <div className="w-full flex items-center justify-between mb-2 md:hidden">
@@ -540,7 +540,7 @@ const GalleryPage = () => {
 
       {/* Products Gallery Display */}
       <section id="gallery-products-section" className="py-8 sm:py-12 lg:py-16">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto">
           {loading ? (
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {Array.from({ length: 8 }).map((_, index) => (
@@ -611,8 +611,8 @@ const GalleryPage = () => {
       <section className="pt-12 sm:pt-16 pb-14 sm:pb-20 relative">
         <div className="absolute inset-0 bg-primary/5"></div>
         
-        <div className="container mx-auto px-4 sm:px-6 relative z-10">
-          <div className="max-w-5xl mx-auto">
+        <div className="container mx-auto sm:px-6 relative z-10">
+          <div className="container mx-auto">
             {/* Stats Section */}
             <div className="bg-white rounded-xl shadow-xl p-6 sm:p-8 md:p-10 mb-10 border border-gray-100">
               <div className="text-center mb-8">
@@ -773,7 +773,7 @@ const GalleryPage = () => {
                 <div className="w-16 h-1 bg-accent mx-auto rounded-full mb-4"></div>
               </div>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5 max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-5 container mx-auto">
                 <button 
                   onClick={() => handleFilterClick('all')}
                   className="group"

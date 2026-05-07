@@ -365,7 +365,7 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
           </button>
 
           <div
-            className="relative w-full h-[80vh] md:h-full max-w-6xl max-h-[90vh] flex items-center justify-center touch-manipulation"
+            className="relative w-full h-[80vh] md:h-full max-w-[1400px] max-h-[90vh] flex items-center justify-center touch-manipulation"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}

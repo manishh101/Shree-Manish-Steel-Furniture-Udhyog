@@ -108,7 +108,7 @@ const Header = forwardRef<{ toggleMobileMenu: () => void }, HeaderProps>(
         }`}
         style={mounted && isMenuOpen ? { transition: 'none' } : undefined}
       >
-        <div className="container mx-auto px-4 md:px-6">
+        <div className="container mx-auto">
           {/* Mobile Layout */}
           <div className="md:hidden flex items-center justify-between py-3">
             {/* Left: Mobile Menu Button */}

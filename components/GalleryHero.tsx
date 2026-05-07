@@ -99,7 +99,7 @@ const GalleryHero: React.FC<GalleryHeroProps> = ({
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/5"></div>
       </div>
 
-      <div className="container mx-auto px-4 py-16 sm:py-20 md:py-24 xl:py-28 relative z-10">
+      <div className="container mx-auto py-16 sm:py-20 md:py-24 xl:py-28 relative z-10">
         {/* Header Content with Enhanced Visual Hierarchy */}
         <div className="max-w-3xl mx-auto text-white">
           <motion.div

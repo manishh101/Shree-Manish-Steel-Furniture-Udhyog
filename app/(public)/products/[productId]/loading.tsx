@@ -5,7 +5,7 @@ export default function Loading() {
       <div className="bg-gray-200 h-64 md:h-80" />
       
       {/* Content skeleton */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto py-8">
         <div className="grid md:grid-cols-2 gap-8">
           {/* Image skeleton */}
           <div className="bg-gray-200 aspect-square rounded-lg" />

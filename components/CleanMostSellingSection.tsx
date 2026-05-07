@@ -115,7 +115,7 @@ const CleanMostSellingSection: React.FC = () => {
   if (loading) {
     return (
       <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading most selling products...</p>
@@ -128,7 +128,7 @@ const CleanMostSellingSection: React.FC = () => {
   if (error) {
     return (
       <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto">
           <div className="text-center">
             <p className="text-red-600">{error}</p>
           </div>
@@ -140,7 +140,7 @@ const CleanMostSellingSection: React.FC = () => {
   if (!bestSellingProducts || bestSellingProducts.length === 0) {
     return (
       <section className="py-16 bg-gradient-to-br from-gray-50 to-white">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto">
           <div className="text-center">
             <p className="text-gray-600">No most selling products available at the moment.</p>
           </div>
@@ -151,7 +151,7 @@ const CleanMostSellingSection: React.FC = () => {
 
   return (
     <section className="py-12 md:py-16 bg-gradient-to-br from-gray-50 to-white">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto">
         {/* Section Header */}
         <div className="text-center mb-8 md:mb-10">
           <h4 className="text-xs md:text-sm font-medium tracking-widest uppercase text-gray-500 mb-2">Best Sellers</h4>

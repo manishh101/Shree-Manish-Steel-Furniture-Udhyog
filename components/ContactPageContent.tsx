@@ -24,7 +24,7 @@ const ContactPageContent = () => {
   if (loading) {
     return (
       <div className="py-16 bg-background">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto">
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
           </div>
@@ -37,7 +37,7 @@ const ContactPageContent = () => {
     <>
       {/* Contact Section */}
       <section className="py-16 bg-background">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Contact Form */}
             <div>
@@ -163,7 +163,7 @@ const ContactPageContent = () => {
       
       {/* Enhanced Map Section */}
       <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto">
           <h2 className="section-title text-center mb-8">Visit Our Showroom</h2>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

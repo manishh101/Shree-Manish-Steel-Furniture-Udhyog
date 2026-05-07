@@ -11,7 +11,7 @@ function SearchPageSkeleton() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="container mx-auto px-4 md:px-6 py-6">
+        <div className="container mx-auto py-6">
           <div className="animate-pulse">
             <div className="h-4 bg-gray-200 rounded w-32 mb-2"></div>
             <div className="h-8 bg-gray-200 rounded w-64 mb-4"></div>
@@ -19,7 +19,7 @@ function SearchPageSkeleton() {
           </div>
         </div>
       </div>
-      <div className="container mx-auto px-4 md:px-6 py-8">
+      <div className="container mx-auto py-8">
         <div className="flex justify-center items-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
@@ -171,7 +171,7 @@ function SearchPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Search Header */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="container mx-auto px-4 md:px-6 py-6">
+        <div className="container mx-auto py-6">
           {/* Page Title and Breadcrumb */}
           <div className="mb-4">
             <nav className="text-sm text-gray-600 mb-2">
@@ -262,7 +262,7 @@ function SearchPage() {
       </div>
 
       {/* Search Results Content */}
-      <div className="container mx-auto px-4 md:px-6 py-8">
+      <div className="container mx-auto py-8">
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
             <p className="font-medium">Error</p>

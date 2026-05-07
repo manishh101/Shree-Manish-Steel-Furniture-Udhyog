@@ -557,7 +557,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+      <div className="container mx-auto sm:px-6 lg:px-8">
         {/* Breadcrumb - Enhanced for better visibility */}
         <div className="mb-4 sm:mb-6">
           <div className="flex items-center flex-wrap space-x-2 text-sm text-gray-600">
@@ -1093,7 +1093,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
 
           {/* Full screen image container */}
           <div
-            className="relative w-full h-[80vh] md:h-full max-w-6xl max-h-[90vh] flex items-center justify-center touch-manipulation"
+            className="relative w-full h-[80vh] md:h-full max-w-[1400px] max-h-[90vh] flex items-center justify-center touch-manipulation"
             onClick={(e) => e.stopPropagation()}
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}

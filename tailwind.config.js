@@ -6,6 +6,24 @@ module.exports = {
     "./lib/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    container: {
+      center: true,
+      padding: {
+        DEFAULT: '5rem',
+        sm: '5rem',
+        md: '10rem',
+        lg: '16rem',
+        xl: '16rem',
+        '2xl': '16rem',
+      },
+      screens: {
+        sm: '100%',
+        md: '100%',
+        lg: '100%',
+        xl: '100%',
+        '2xl': '100%',
+      }
+    },
     extend: {
       colors: {
         primary: '#0057A3',  // Deep Blue from logo

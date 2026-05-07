@@ -3,13 +3,13 @@ export default function ProductsLoading() {
     <div className="min-h-screen bg-gray-50">
       {/* Header skeleton */}
       <header className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 py-6">
+        <div className="container mx-auto py-6">
           <div className="h-10 w-32 bg-gray-200 rounded mx-auto animate-pulse" />
         </div>
       </header>
       
       {/* Content */}
-      <div className="container mx-auto px-4 lg:px-6 py-8">
+      <div className="container mx-auto py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar skeleton */}
           <div className="w-full lg:w-80">
