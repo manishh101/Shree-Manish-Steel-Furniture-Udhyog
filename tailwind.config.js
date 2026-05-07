@@ -9,12 +9,12 @@ module.exports = {
     container: {
       center: true,
       padding: {
-        DEFAULT: '5rem',
-        sm: '5rem',
-        md: '10rem',
-        lg: '16rem',
-        xl: '16rem',
-        '2xl': '16rem',
+        DEFAULT: '1.5rem',
+        sm: '2rem',
+        md: '3rem',
+        lg: '4rem',
+        xl: '4rem',
+        '2xl': '4rem',
       },
       screens: {
         sm: '100%',

@@ -219,7 +219,7 @@ export default function HomePage() {
     <div>
       {/* Hero Section */}
       <section className="min-h-[85vh] flex items-center justify-center bg-background py-8">
-        <div className="container mx-auto">
+        <div className="content-container">
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-10">
             {/* Left Content */}
             <div className="md:w-[48%] lg:w-[45%] mb-10 md:mb-0 animate-fadeIn">
@@ -289,7 +289,7 @@ export default function HomePage() {
       {/* Features Section */}
       {homepageContent.featuresEnabled !== false && (
         <section className="py-12 md:py-16 bg-primary text-white">
-          <div className="container mx-auto">
+          <div className="content-container">
             <ScrollAnimator animation="fadeUp">
               <div className="text-center mb-10 md:mb-12">
                 <h4 className="text-xs md:text-sm font-medium tracking-widest uppercase text-white/70 mb-2">Our Promise</h4>
@@ -321,7 +321,7 @@ export default function HomePage() {
 
       {/* Category Display Section */}
       <section className="py-12 md:py-16 bg-white">
-        <div className="container mx-auto">
+        <div className="content-container">
           <div className="text-center mb-8 md:mb-10">
             <h4 className="text-xs md:text-sm font-medium tracking-widest uppercase text-gray-500 mb-2">Explore Categories</h4>
             <h2 className="text-xl md:text-2xl lg:text-3xl font-bold text-primary animate-fadeIn">
@@ -344,7 +344,7 @@ export default function HomePage() {
 
           {/* Categories Grid */}
           {loading ? (
-            <div className="flex md:grid overflow-x-auto md:overflow-x-visible gap-8 md:grid-cols-2 lg:grid-cols-3 snap-x snap-mandatory md:snap-none pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
+            <div className="flex md:grid overflow-x-auto md:overflow-x-visible gap-2 md:grid-cols-2 lg:grid-cols-3 snap-x snap-mandatory md:snap-none pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
               {[1, 2, 3].map((index) => (
                 <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden flex-shrink-0 w-[85vw] md:w-auto snap-center">
                   <div className="aspect-[4/3] bg-gray-200 animate-pulse"></div>
@@ -357,7 +357,7 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <div className="flex md:grid overflow-x-auto md:overflow-x-visible gap-8 md:grid-cols-2 lg:grid-cols-3 snap-x snap-mandatory md:snap-none pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
+            <div className="flex md:grid overflow-x-auto md:overflow-x-visible gap-2 md:grid-cols-2 lg:grid-cols-3 snap-x snap-mandatory md:snap-none pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
               {categories.map((category, index) => {
                 const categoryId = category._id || category.id || '';
                 const thumbnailUrl = categoryThumbnails[categoryId];
@@ -434,7 +434,7 @@ export default function HomePage() {
       {/* Call to Action */}
       {homepageContent.ctaEnabled !== false && (
         <section className="py-16 bg-primary text-white">
-          <div className="container mx-auto text-center">
+          <div className="content-container text-center">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold mb-6 animate-fadeIn">{homepageContent.ctaTitle || 'Ready to Transform Your Space?'}</h2>
             <p className="text-base md:text-lg lg:text-xl mb-8 animate-fadeIn" style={{ animationDelay: '0.2s' }}>
               {homepageContent.ctaDescription || 'Contact us today to discuss your furniture needs or visit our showroom to see our products in person.'}
@@ -462,7 +462,7 @@ export default function HomePage() {
       {/* Our Services Section */}
       {homepageContent.servicesEnabled !== false && (
         <section className="py-16 bg-white">
-          <div className="container mx-auto">
+          <div className="content-container">
             <div className="text-center mb-12">
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-primary mb-4">{homepageContent.servicesTitle || 'Our Services'}</h2>
               <p className="text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto">
@@ -470,7 +470,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
               {servicesLoading ? (
                 <div className="col-span-full text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
@@ -497,7 +497,7 @@ export default function HomePage() {
       {/* Why Choose Us - Simplified */}
       {homepageContent.whyChooseUsEnabled !== false && (
         <section className="py-16 bg-gray-50">
-          <div className="container mx-auto">
+          <div className="content-container">
             <div className="max-w-4xl mx-auto text-center">
               <h2 className="text-2xl md:text-3xl font-bold text-primary mb-6">
                 {homepageContent.whyChooseUsTitle || "Nepal's Leading Steel Furniture Manufacturer"}
@@ -507,7 +507,7 @@ export default function HomePage() {
                 {homepageContent.whyChooseUsDescription || 'Trusted by thousands of customers across Nepal for premium quality steel furniture at affordable prices.'}
               </p>
 
-              <div className="grid md:grid-cols-3 gap-8">
+              <div className="grid md:grid-cols-3 gap-2">
                 {(homepageContent.whyChooseUsItems && homepageContent.whyChooseUsItems.length > 0) ? (
                   homepageContent.whyChooseUsItems.map((item, index) => (
                     <div key={index} className="bg-white p-6 rounded-lg shadow-sm">
@@ -554,7 +554,7 @@ export default function HomePage() {
       {/* Our Location Section */}
       {homepageContent.locationEnabled !== false && (
         <section className="py-16 bg-white">
-          <div className="container mx-auto">
+          <div className="content-container">
             <div className="text-center mb-12">
               <h2 className="text-2xl md:text-3xl font-bold text-primary mb-4">{homepageContent.locationTitle || 'Visit Our Showroom'}</h2>
               <p className="text-base md:text-lg text-gray-600 max-w-xl mx-auto">
@@ -562,7 +562,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-2">
               {/* Contact Information */}
               <div className="bg-white p-6 rounded-lg shadow-sm">
                 <h3 className="text-xl font-semibold text-gray-900 mb-4">Contact Information</h3>
@@ -637,7 +637,7 @@ export default function HomePage() {
             <div className="absolute transform -rotate-12 -left-10 top-10 text-9xl font-bold text-primary">&quot;</div>
             <div className="absolute transform rotate-12 -right-10 bottom-10 text-9xl font-bold text-primary">&quot;</div>
           </div>
-          <div className="container mx-auto relative z-10">
+          <div className="content-container relative z-10">
             <div className="text-center mb-16">
               <h2 className="text-2xl md:text-3xl font-bold text-primary text-center mb-3 animate-fadeIn">{homepageContent.testimonialsTitle || 'What Our Customers Say'}</h2>
               <p className="text-sm md:text-base text-gray-600 max-w-2xl mx-auto">{homepageContent.testimonialsSubtitle || 'Discover why our customers trust us with their furniture needs.'}</p>
@@ -657,7 +657,7 @@ export default function HomePage() {
               </button>
 
               {/* Testimonial Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {visibleTestimonials.map((testimonial, index) => (
                   <div
                     key={testimonial.id}

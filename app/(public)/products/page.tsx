@@ -234,7 +234,7 @@ function ProductsPageContent() {
     <div className="min-h-screen bg-gray-50">
       {/* Clean Header Section */}
       <header className="bg-white border-b border-gray-200">
-        <div className="container mx-auto py-6">
+        <div className="content-container py-6">
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900 text-center uppercase tracking-wider mb-2">PRODUCT CATALOGUE</h1>
           <p className="text-center text-gray-600 text-xs md:text-sm max-w-2xl mx-auto">
             Discover our range of high-quality products tailored just for you.
@@ -250,13 +250,13 @@ function ProductsPageContent() {
 
       {/* Breadcrumb Navigation with Product Count */}
       <div className="bg-white border-b border-gray-200">
-        <div className="container mx-auto py-3">
+        <div className="content-container py-3">
           <div className="flex justify-between items-center">
             <nav>
               <div className="flex items-center text-sm text-gray-600">
                 <Link href="/" className="hover:text-primary transition-colors">Home</Link>
                 <span className="mx-2">/</span>
-                <span className="text-gray-900">Shop</span>
+                <span className="text-gray-900">Product Catalogue</span>
               </div>
             </nav>
 
@@ -297,7 +297,7 @@ function ProductsPageContent() {
       {/* Sort Drawer */}
       {sortDrawerVisible && (
         <div className="bg-white border-b border-gray-200 shadow-sm">
-          <div className="container mx-auto py-4">
+          <div className="content-container py-4">
             <div className="flex flex-wrap items-center gap-3">
               <span className="font-medium text-gray-700 flex items-center">
                 <FaArrowDown className="mr-2" /> Sort by:
@@ -328,7 +328,7 @@ function ProductsPageContent() {
         </div>
       )}
 
-      <div className="container mx-auto py-8">
+      <div className="content-container py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <div className={`w-full lg:w-80 ${mobileFiltersVisible ? 'block' : 'hidden lg:block'}`}>
@@ -508,7 +508,7 @@ function ProductsPageContent() {
                 ) : (
                   <>
                     {/* Products Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                       {currentProducts.map((product, index) => (
                         <div
                           key={product._id || product.id}

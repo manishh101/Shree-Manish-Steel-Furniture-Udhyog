@@ -144,7 +144,7 @@ const CleanTopProductsSection: React.FC = () => {
 
   return (
     <section className="py-12 md:py-16 bg-white">
-      <div className="container mx-auto">
+      <div className="content-container">
         {/* Section Header */}
         <div className="text-center mb-8 md:mb-10">
           <h4 className="text-xs md:text-sm font-medium tracking-widest uppercase text-gray-500 mb-2">Featured Products</h4>
@@ -158,7 +158,7 @@ const CleanTopProductsSection: React.FC = () => {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6 mb-8 md:mb-10">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 mb-8 md:mb-10">
           {topProducts.map((product) => (
             <ProductCard
               key={product._id || product.id}
