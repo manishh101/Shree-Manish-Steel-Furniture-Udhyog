@@ -557,197 +557,200 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
         </div>
       </div>
 
-      <div className="container mx-auto sm:px-6 lg:px-8">
-        {/* Breadcrumb - Enhanced for better visibility */}
+      <div className="max-w-[1500px] mx-auto px-6 sm:px-10 md:px-12 lg:px-14 xl:px-16">
+        {/* Breadcrumb */}
         <div className="mb-4 sm:mb-6">
           <div className="flex items-center flex-wrap space-x-2 text-sm text-gray-600">
-            <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
-            <span className="text-gray-400">/</span>
-            <Link href="/products" onClick={handleBackToProducts} className="hover:text-blue-600 transition-colors">Products</Link>
-            <span className="text-gray-400">/</span>
-            <span className="text-blue-600 font-medium truncate max-w-[200px] sm:max-w-xs">{product.name}</span>
+            <Link href="/" className="hover:text-primary transition-colors">Home</Link>
+            <span className="text-gray-400">›</span>
+            <Link href="/products" onClick={handleBackToProducts} className="hover:text-primary transition-colors">Product</Link>
+            <span className="text-gray-400">›</span>
+            <span className="text-primary font-semibold truncate max-w-[250px] sm:max-w-md uppercase">{product.name}</span>
           </div>
         </div>
 
-        {/* Product category & quick actions */}
-        <div className="flex flex-wrap items-center justify-between mb-4 bg-white rounded-lg shadow-sm px-4 py-3 border border-gray-100">
-          <div className="flex items-center space-x-2">
-            <div className="text-xs sm:text-sm px-2 py-1 bg-gray-100 rounded-full text-gray-700">
-              {categoryName}
-            </div>
-            {product.stock !== 0 && (
-              <div className="text-xs sm:text-sm px-2 py-1 bg-green-100 rounded-full text-green-700">
-                In Stock
-              </div>
-            )}
-          </div>
-
-          <div className="flex items-center space-x-3 mt-2 sm:mt-0">
-            <button
-              className="text-gray-500 hover:text-blue-600 p-2 rounded-full hover:bg-gray-100 transition-colors"
-              aria-label="Add to wishlist"
-            >
-              <FaHeart size={16} />
-            </button>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-          {/* Product Images Section - Simplified and more user friendly */}
-          <div className="space-y-6">
-            {/* Main Product Image Viewer */}
-            <div
-              className="relative rounded-lg overflow-hidden bg-white shadow-md"
-              ref={imageContainerRef}
-            >
-              {/* Main image display area with touch support */}
-              <div
-                className="relative w-full aspect-square bg-gray-50 flex items-center justify-center touch-manipulation"
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-              >
-                {/* Previous button - always visible on mobile */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
+          {/* LEFT: Image Gallery with Vertical Thumbnails */}
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Vertical Thumbnail Strip (Desktop) */}
+            {allImages.length > 1 && (
+              <div className="hidden lg:flex flex-col items-center gap-2 w-20 shrink-0">
+                {/* Up Arrow */}
                 <button
                   onClick={handlePrevImage}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-md z-10 opacity-75 hover:opacity-100 transition-all duration-200"
-                  aria-label="Previous image"
+                  className="w-full flex items-center justify-center py-1 text-gray-400 hover:text-primary transition-colors"
+                  aria-label="Previous thumbnail"
                 >
-                  <FaChevronLeft className="text-gray-700 text-xl" />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
                 </button>
-
-                {/* Next button - always visible on mobile */}
+                {allImages.slice(0, 5).map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedImageIndex(idx)}
+                    className={`w-16 h-16 rounded-md border-2 overflow-hidden bg-white transition-all duration-200 ${selectedImageIndex === idx ? 'border-primary ring-1 ring-primary' : 'border-gray-200 hover:border-primary/50'}`}
+                    aria-label={`View product image ${idx + 1}`}
+                  >
+                    <OptimizedImage src={img} alt={`View ${idx + 1}`} className="w-full h-full object-contain p-1" size="thumbnail" />
+                  </button>
+                ))}
+                {/* Down Arrow */}
                 <button
                   onClick={handleNextImage}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center shadow-md z-10 opacity-75 hover:opacity-100 transition-all duration-200"
-                  aria-label="Next image"
+                  className="w-full flex items-center justify-center py-1 text-gray-400 hover:text-primary transition-colors"
+                  aria-label="Next thumbnail"
                 >
-                  <FaChevronRight className="text-gray-700 text-xl" />
-                </button>
-
-                {imageLoading && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-50 bg-opacity-80 z-20">
-                    <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-opacity-40 border-t-blue-600"></div>
-                  </div>
-                )}
-
-                {/* Main product image */}
-                <div onClick={handleImageZoom} className="w-full h-full cursor-pointer">
-                  <OptimizedImage
-                    src={allImages[selectedImageIndex]}
-                    alt={imageService.getImageAlt(product) || "Product Image"}
-                    className="w-full h-full object-contain transition-all duration-300"
-                    size="medium"
-                    priority={true}
-                  />
-                </div>
-
-                {/* Enlarge button - positioned in bottom left corner */}
-                <button
-                  onClick={handleImageZoom}
-                  className="absolute bottom-4 left-4 bg-black bg-opacity-60 hover:bg-opacity-80 rounded-full w-10 h-10 flex items-center justify-center shadow-md transition-all duration-200 z-10"
-                  aria-label="View full screen"
-                >
-                  <FaExpand className="text-white text-sm" />
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                 </button>
               </div>
-            </div>
-            {/* Enhanced Thumbnail Container - larger, more professional */}
-            {allImages.length > 1 && (
-              <div className="flex justify-center">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 bg-white rounded-xl shadow-md border border-gray-100 p-2">
-                  {allImages.slice(0, 4).map((img, idx) => (
+            )}
+
+            {/* Main Image + Mobile Thumbnails */}
+            <div className="flex-1 space-y-4">
+              {/* Main Product Image */}
+              <div className="relative rounded-lg overflow-hidden bg-white shadow-sm border border-gray-100" ref={imageContainerRef}>
+                <div
+                  className="relative w-full aspect-square bg-gray-50 flex items-center justify-center touch-manipulation"
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                >
+                  {/* Nav arrows on image (mobile + desktop) */}
+                  <button onClick={handlePrevImage} className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 rounded-full w-9 h-9 flex items-center justify-center shadow z-10 opacity-70 hover:opacity-100 transition-all" aria-label="Previous image">
+                    <FaChevronLeft className="text-gray-600" />
+                  </button>
+                  <button onClick={handleNextImage} className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/80 rounded-full w-9 h-9 flex items-center justify-center shadow z-10 opacity-70 hover:opacity-100 transition-all" aria-label="Next image">
+                    <FaChevronRight className="text-gray-600" />
+                  </button>
+
+                  {imageLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-gray-50/80 z-20">
+                      <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary/30 border-t-primary"></div>
+                    </div>
+                  )}
+
+                  <div onClick={handleImageZoom} className="w-full h-full cursor-pointer p-6">
+                    <OptimizedImage
+                      src={allImages[selectedImageIndex]}
+                      alt={imageService.getImageAlt(product) || "Product Image"}
+                      className="w-full h-full object-contain transition-all duration-300"
+                      size="medium"
+                      priority={true}
+                    />
+                  </div>
+
+                  <button onClick={handleImageZoom} className="absolute bottom-3 right-3 bg-black/50 hover:bg-black/70 rounded-full w-9 h-9 flex items-center justify-center text-white transition-all z-10" aria-label="View full screen">
+                    <FaExpand className="text-xs" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Horizontal Thumbnails (Mobile Only) */}
+              {allImages.length > 1 && (
+                <div className="flex lg:hidden gap-2 overflow-x-auto pb-2">
+                  {allImages.slice(0, 5).map((img, idx) => (
                     <button
                       key={idx}
                       onClick={() => setSelectedImageIndex(idx)}
-                      className={`w-32 h-32 rounded-xl border-2 transition-all duration-200 bg-gray-50 shadow-sm hover:shadow-lg ${selectedImageIndex === idx ? 'border-blue-600 ring-2 ring-blue-600' : 'border-gray-200 hover:border-blue-600'}`}
+                      className={`w-16 h-16 shrink-0 rounded-md border-2 overflow-hidden bg-white ${selectedImageIndex === idx ? 'border-primary ring-1 ring-primary' : 'border-gray-200'}`}
                       aria-label={`View product image ${idx + 1}`}
                     >
-                      <div className="w-full h-full overflow-hidden rounded-xl relative bg-white">
-                        <OptimizedImage
-                          src={img}
-                          alt={`Product view ${idx + 1}`}
-                          className="w-full h-full object-contain"
-                          size="thumbnail"
-                        />
-                      </div>
+                      <OptimizedImage src={img} alt={`View ${idx + 1}`} className="w-full h-full object-contain p-1" size="thumbnail" />
                     </button>
                   ))}
                 </div>
-              </div>
-            )}
-          </div>
-
-          {/* Product Details Section - Enhanced for better UX */}
-          <div className="space-y-6 flex flex-col">
-            {/* Product header - Always first */}
-            <div className="order-1">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2 leading-tight">
-                    {product.name}
-                  </h1>
-
-                  {/* Category and subcategory breadcrumb */}
-                  <div className="flex items-center text-sm text-gray-500 mb-4">
-                    <span>{categoryName}</span>
-                    {subcategoryName && (
-                      <>
-                        <span className="mx-2">›</span>
-                        <span>{subcategoryName}</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Share button */}
-                <button
-                  onClick={handleShare}
-                  className="ml-4 p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                  title="Share this product"
-                >
-                  <FaShare size={16} />
-                </button>
-              </div>
-
-              {/* Product description */}
-              {product.description && (
-                <div className="mb-6">
-                  <p className="text-gray-600 leading-relaxed text-base">
-                    {product.description}
-                  </p>
-                </div>
               )}
 
-              {/* Features list */}
-              {product.features && product.features.length > 0 && (
-                <div className="mb-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">Key Features</h3>
-                  <ul className="space-y-2">
-                    {product.features.map((feature, index) => (
-                      <li key={index} className="flex items-start">
-                        <span className="flex-shrink-0 w-5 h-5 bg-blue-600 bg-opacity-10 rounded-full flex items-center justify-center text-blue-600 mr-3 mt-0.5">
-                          ✓
-                        </span>
-                        <span className="text-gray-700">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+              {/* Feature Badges Below Image */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-4">
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                    </div>
+                    <span className="text-[10px] sm:text-xs text-gray-600 font-medium leading-tight">Quality Guaranteed</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>
+                    </div>
+                    <span className="text-[10px] sm:text-xs text-gray-600 font-medium leading-tight">Premium Paint</span>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" /></svg>
+                    </div>
+                    <span className="text-[10px] sm:text-xs text-gray-600 font-medium leading-tight">Free Delivery*</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT: Product Details */}
+          <div className="space-y-5">
+            {/* Product Name + Share/Wishlist */}
+            <div>
+              <div className="flex items-start justify-between">
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight flex-1">
+                  {product.name}
+                </h1>
+                <div className="flex items-center gap-2 ml-4 shrink-0">
+                  <button onClick={handleShare} className="p-2 text-gray-400 hover:text-primary rounded-full hover:bg-gray-100 transition-colors" title="Share"><FaShare size={16} /></button>
+                  <button className="p-2 text-gray-400 hover:text-red-500 rounded-full hover:bg-gray-100 transition-colors" aria-label="Wishlist"><FaHeart size={16} /></button>
+                </div>
+              </div>
+              {/* Category breadcrumb */}
+              <div className="flex items-center text-sm text-gray-500 mt-2">
+                <span>{categoryName}</span>
+                {subcategoryName && (<><span className="mx-2">›</span><span>{subcategoryName}</span></>)}
+              </div>
+            </div>
+
+            {/* Description */}
+            {product.description && (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-800 uppercase tracking-wider mb-2">Description</h3>
+                <p className="text-gray-600 leading-relaxed text-sm">{product.description}</p>
+              </div>
+            )}
+
+            {/* In Stock Badge */}
+            <div className="flex items-center gap-3">
+              {product.stock !== 0 && (
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 bg-green-500 rounded-full inline-block"></span>
+                  <span className="text-green-600 font-semibold text-sm">In Stock</span>
                 </div>
               )}
             </div>
 
-            {/* Additional Product Information - Accordion Style - Mobile First */}
-            <div className="order-2 bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-              <div className="divide-y divide-gray-100">
-                {/* Specifications Section */}
-                <details className="group">
-                  <summary className="flex items-center justify-between p-4 cursor-pointer">
-                    <h3 className="text-lg font-medium text-gray-800">Specifications</h3>
-                    <span className="ml-2 text-gray-500 group-open:rotate-180 transition-transform">
-                      <FaChevronRight className="rotate-90 group-open:-rotate-90 transition-transform" />
-                    </span>
-                  </summary>
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <a
+                href={`https://wa.me/9779824336371?text=I'm interested in ${encodeURIComponent(product.name)} (ID: ${product._id}). Please provide more information.`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center px-5 py-3 rounded-lg text-sm font-semibold text-white bg-green-600 hover:bg-green-700 transition-all shadow-sm"
+              >
+                <FaWhatsapp className="w-4 h-4 mr-2" />
+                WhatsApp Enquiry
+              </a>
+              <Link
+                href="/custom-order"
+                className="flex-1 flex items-center justify-center px-5 py-3 rounded-lg text-sm font-semibold text-white bg-primary hover:bg-primary-dark transition-all shadow-sm"
+              >
+                ✉ Enquiry
+              </Link>
+            </div>
+
+            {/* Product Specification Accordion (open by default) */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden divide-y divide-gray-100">
+              {/* Specifications */}
+              <details className="group" open>
+                <summary className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <h3 className="text-base font-semibold text-gray-900">Product Specification</h3>
+                  <FaChevronRight className="text-gray-400 rotate-90 group-open:-rotate-90 transition-transform text-xs" />
+                </summary>
                   <div className="p-4 pt-0 text-gray-600">
                     {(() => {
                       const specs = product.specifications;
@@ -811,105 +814,88 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                   </div>
                 </details>
 
-                {/* Delivery Information Section */}
+              {/* Key Features */}
+              {product.features && product.features.length > 0 && (
                 <details className="group">
-                  <summary className="flex items-center justify-between p-4 cursor-pointer">
-                    <h3 className="text-lg font-medium text-gray-800">Delivery Information</h3>
-                    <span className="ml-2 text-gray-500 group-open:rotate-180 transition-transform">
-                      <FaChevronRight className="rotate-90 group-open:-rotate-90 transition-transform" />
-                    </span>
+                  <summary className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                    <h3 className="text-base font-semibold text-gray-900">Key Features</h3>
+                    <FaChevronRight className="text-gray-400 rotate-90 group-open:-rotate-90 transition-transform text-xs" />
                   </summary>
-                  <div className="p-4 pt-0 text-gray-600">
-                    {product.deliveryInformation ? (
-                      <div className="space-y-3">
-                        {product.deliveryInformation.estimatedDelivery && (
-                          <div className="flex items-start">
-                            <span className="flex-shrink-0 w-5 h-5 bg-blue-600 bg-opacity-10 rounded-full flex items-center justify-center text-blue-600 mr-3 mt-0.5">•</span>
-                            <div>
-                              <span className="font-medium">Estimated Delivery: </span>
-                              <span>{product.deliveryInformation.estimatedDelivery}</span>
-                            </div>
-                          </div>
-                        )}
-                        {product.deliveryInformation.shippingCost && (
-                          <div className="flex items-start">
-                            <span className="flex-shrink-0 w-5 h-5 bg-blue-600 bg-opacity-10 rounded-full flex items-center justify-center text-blue-600 mr-3 mt-0.5">•</span>
-                            <div>
-                              <span className="font-medium">Shipping Cost: </span>
-                              <span>{product.deliveryInformation.shippingCost}</span>
-                            </div>
-                          </div>
-                        )}
-                        {product.deliveryInformation.availableLocations && product.deliveryInformation.availableLocations.length > 0 && (
-                          <div className="flex items-start">
-                            <span className="flex-shrink-0 w-5 h-5 bg-blue-600 bg-opacity-10 rounded-full flex items-center justify-center text-blue-600 mr-3 mt-0.5">•</span>
-                            <div>
-                              <span className="font-medium">Available Locations: </span>
-                              <span>{product.deliveryInformation.availableLocations.join(', ')}</span>
-                            </div>
-                          </div>
-                        )}
-                        {product.deliveryInformation.specialInstructions && (
-                          <div className="flex items-start">
-                            <span className="flex-shrink-0 w-5 h-5 bg-blue-600 bg-opacity-10 rounded-full flex items-center justify-center text-blue-600 mr-3 mt-0.5">•</span>
-                            <div>
-                              <span className="font-medium">Special Instructions: </span>
-                              <span>{product.deliveryInformation.specialInstructions}</span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div>
-                        <p className="mb-3">Delivery options and timeframes may vary based on your location and product availability.</p>
-                        <ul className="space-y-2">
-                          <li className="flex items-start">
-                            <span className="flex-shrink-0 w-5 h-5 bg-blue-600 bg-opacity-10 rounded-full flex items-center justify-center text-blue-600 mr-3 mt-0.5">•</span>
-                            <span>Free delivery within Kathmandu Valley</span>
-                          </li>
-                          <li className="flex items-start">
-                            <span className="flex-shrink-0 w-5 h-5 bg-blue-600 bg-opacity-10 rounded-full flex items-center justify-center text-blue-600 mr-3 mt-0.5">•</span>
-                            <span>Installation services available</span>
-                          </li>
-                          <li className="flex items-start">
-                            <span className="flex-shrink-0 w-5 h-5 bg-blue-600 bg-opacity-10 rounded-full flex items-center justify-center text-blue-600 mr-3 mt-0.5">•</span>
-                            <span>Contact us for shipping to other locations</span>
-                          </li>
-                        </ul>
-                      </div>
-                    )}
+                  <div className="p-4 pt-0">
+                    <ul className="space-y-2">
+                      {product.features.map((feature, index) => (
+                        <li key={index} className="flex items-start">
+                          <span className="flex-shrink-0 w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center text-primary mr-3 mt-0.5 text-xs">✓</span>
+                          <span className="text-gray-600 text-sm">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </details>
-              </div>
+              )}
+
+              {/* Delivery Information */}
+              <details className="group">
+                <summary className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <h3 className="text-base font-semibold text-gray-900">Delivery Information</h3>
+                  <FaChevronRight className="text-gray-400 rotate-90 group-open:-rotate-90 transition-transform text-xs" />
+                </summary>
+                <div className="p-4 pt-0 text-gray-600 text-sm">
+                  {product.deliveryInformation ? (
+                    <div className="space-y-2">
+                      {product.deliveryInformation.estimatedDelivery && (
+                        <div className="flex items-start">
+                          <span className="flex-shrink-0 w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center text-primary mr-3 mt-0.5 text-xs">•</span>
+                          <div><span className="font-medium">Estimated Delivery: </span><span>{product.deliveryInformation.estimatedDelivery}</span></div>
+                        </div>
+                      )}
+                      {product.deliveryInformation.shippingCost && (
+                        <div className="flex items-start">
+                          <span className="flex-shrink-0 w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center text-primary mr-3 mt-0.5 text-xs">•</span>
+                          <div><span className="font-medium">Shipping: </span><span>{product.deliveryInformation.shippingCost}</span></div>
+                        </div>
+                      )}
+                      {product.deliveryInformation.availableLocations && product.deliveryInformation.availableLocations.length > 0 && (
+                        <div className="flex items-start">
+                          <span className="flex-shrink-0 w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center text-primary mr-3 mt-0.5 text-xs">•</span>
+                          <div><span className="font-medium">Locations: </span><span>{product.deliveryInformation.availableLocations.join(', ')}</span></div>
+                        </div>
+                      )}
+                      {product.deliveryInformation.specialInstructions && (
+                        <div className="flex items-start">
+                          <span className="flex-shrink-0 w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center text-primary mr-3 mt-0.5 text-xs">•</span>
+                          <div><span className="font-medium">Note: </span><span>{product.deliveryInformation.specialInstructions}</span></div>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <ul className="space-y-2">
+                      <li className="flex items-start">
+                        <span className="flex-shrink-0 w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center text-primary mr-3 mt-0.5 text-xs">•</span>
+                        <span>Free delivery within Biratnagar, Dharan, Itahari</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="flex-shrink-0 w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center text-primary mr-3 mt-0.5 text-xs">•</span>
+                        <span>Installation services available</span>
+                      </li>
+                      <li className="flex items-start">
+                        <span className="flex-shrink-0 w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center text-primary mr-3 mt-0.5 text-xs">•</span>
+                        <span>Contact us for shipping to other locations</span>
+                      </li>
+                    </ul>
+                  )}
+                </div>
+              </details>
             </div>
 
-            {/* Action Buttons - Visible on all devices */}
-            <div className="flex flex-col gap-3 pt-6 order-3">
-              <a
-                href={`https://wa.me/9779824336371?text=I'm interested in ${encodeURIComponent(product.name)} (ID: ${product._id}). Please provide more information.`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full flex items-center justify-center px-4 sm:px-6 py-3 sm:py-4 border border-transparent rounded-lg shadow-sm text-sm sm:text-base font-medium text-white bg-green-600 hover:bg-green-700 active:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200 transform hover:scale-[1.01] active:scale-[0.99]"
+            {/* Back to Products link */}
+            <div className="pt-2">
+              <Link
+                href="/products"
+                className="inline-flex items-center text-sm text-gray-500 hover:text-primary transition-colors"
               >
-                <FaWhatsapp className="w-4 h-4 sm:w-5 sm:h-5 mr-2 sm:mr-3" />
-                Inquire on WhatsApp
-              </a>
-
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Link
-                  href="/products"
-                  className="flex-1 flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 border border-gray-300 rounded-lg shadow-sm text-sm sm:text-base font-medium text-gray-700 bg-white hover:bg-gray-50 active:bg-gray-100 transition-all duration-200"
-                >
-                  Back to Products
-                </Link>
-
-                <Link
-                  href="/custom-order"
-                  className="flex-1 flex items-center justify-center px-4 sm:px-6 py-2 sm:py-3 border border-blue-600 rounded-lg shadow-sm text-sm sm:text-base font-medium text-blue-600 hover:bg-blue-50 active:bg-blue-100 transition-all duration-200"
-                >
-                  Request Customization
-                </Link>
-              </div>
+                ← Back to all products
+              </Link>
             </div>
           </div>
         </div>
