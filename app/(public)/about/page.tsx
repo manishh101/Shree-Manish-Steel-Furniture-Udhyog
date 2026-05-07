@@ -152,7 +152,7 @@ export default async function AboutPage() {
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-48 translate-x-48"></div>
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-white/5 rounded-full translate-y-32 -translate-x-32"></div>
 
-        <div className="container mx-auto relative z-10">
+        <div className="container mx-auto px-8 md:px-16 lg:px-24 relative z-10">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fadeIn">
             {content.heroTitle}
           </h1>
@@ -164,8 +164,8 @@ export default async function AboutPage() {
 
       {/* Enhanced Company Introduction */}
       <section className="py-20 bg-white">
-        <div className="container mx-auto">
-          <div className="flex flex-col lg:flex-row items-center gap-12">
+        <div className="container mx-auto px-8 md:px-16 lg:px-24">
+          <div className="flex flex-col lg:flex-row items-center gap-16 md:gap-20">
             <div className="lg:w-1/2">
               <div className="relative">
                 <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 to-accent/20 rounded-2xl transform rotate-3"></div>
@@ -227,7 +227,7 @@ export default async function AboutPage() {
 
       {/* Enhanced Vision & Mission */}
       <section className="py-20 bg-gradient-to-br from-gray-50 to-primary/5">
-        <div className="container mx-auto">
+        <div className="container mx-auto px-8 md:px-16 lg:px-24">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Vision & Mission</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
@@ -235,7 +235,7 @@ export default async function AboutPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16">
             {/* Vision */}
             <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 border border-gray-100 h-full">
               <div className="w-20 h-20 bg-gradient-to-br from-primary to-primary/80 rounded-2xl flex items-center justify-center mb-6 transform rotate-3 hover:rotate-0 transition-transform duration-300">
@@ -269,7 +269,7 @@ export default async function AboutPage() {
       {/* Enhanced Core Values */}
       {content.coreValues.length > 0 && (
         <section className="py-20 bg-white">
-          <div className="container mx-auto">
+          <div className="container mx-auto px-8 md:px-16 lg:px-24">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Core Values</h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
@@ -277,7 +277,7 @@ export default async function AboutPage() {
               </p>
             </div>
 
-            <div className={`grid grid-cols-1 sm:grid-cols-2 ${content.coreValues.length >= 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-' + content.coreValues.length} gap-8`}>
+            <div className={`grid grid-cols-1 sm:grid-cols-2 ${content.coreValues.length >= 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-' + content.coreValues.length} gap-10 md:gap-12`}>
               {content.coreValues.map((value, idx) => (
                 <div key={idx} className="text-center p-6 group hover:bg-gray-50 rounded-2xl transition-colors duration-300">
                   <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-accent/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -297,7 +297,7 @@ export default async function AboutPage() {
       {/* Workshop Section */}
       {content.workshopImages && content.workshopImages.length > 0 && (
         <section className="py-20 bg-gradient-to-br from-gray-50 to-primary/5">
-          <div className="container mx-auto">
+          <div className="container mx-auto px-8 md:px-16 lg:px-24">
             <div className="text-center mb-16">
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{content.workshopTitle}</h2>
               <p className="text-gray-600 max-w-2xl mx-auto">
@@ -327,7 +327,7 @@ export default async function AboutPage() {
 
       {/* Call to Action */}
       <section className="py-20 bg-white">
-        <div className="container mx-auto">
+        <div className="container mx-auto px-8 md:px-16 lg:px-24">
           <div className="text-center">
             <div className="bg-gradient-to-br from-primary/5 to-accent/5 p-8 rounded-2xl max-w-2xl mx-auto">
               <h3 className="text-2xl font-bold text-gray-900 mb-4">Ready to Work With Us?</h3>

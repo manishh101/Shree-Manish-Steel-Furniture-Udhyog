@@ -35,14 +35,14 @@ const CleanMostSellingSection: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       console.log('Fetching most selling products from API...');
-      
+
       // Use the correct API method for most selling products
       const response = await productAPI.getMostSelling(8);
-      
+
       console.log('Most selling products API response:', response);
-      
+
       if (response) {
         const products = response.products || [];
         console.log('Setting most selling products:', products.length, 'products');
@@ -51,7 +51,7 @@ const CleanMostSellingSection: React.FC = () => {
         console.warn('No most selling products data received');
         setBestSellingProducts([]);
       }
-      
+
     } catch (err) {
       console.error('Error fetching most selling products:', err);
       // Use fallback sample products when API fails - using local images
