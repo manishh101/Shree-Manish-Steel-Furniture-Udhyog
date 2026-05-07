@@ -39,7 +39,7 @@ const CleanMostSellingSection: React.FC = () => {
       console.log('Fetching most selling products from API...');
       
       // Use the correct API method for most selling products
-      const response = await productAPI.getMostSelling(6);
+      const response = await productAPI.getMostSelling(8);
       
       console.log('Most selling products API response:', response);
       
@@ -165,7 +165,7 @@ const CleanMostSellingSection: React.FC = () => {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 md:gap-6 mb-8 md:mb-10">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6 mb-8 md:mb-10">
           {bestSellingProducts.map((product) => (
             <ProductCard
               key={product._id || product.id}
