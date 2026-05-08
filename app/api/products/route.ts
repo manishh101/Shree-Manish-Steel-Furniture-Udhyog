@@ -133,6 +133,7 @@ export async function POST(request: NextRequest) {
       isMostSelling: data.isMostSelling || false,
       isTopProduct: data.isTopProduct || false,
       featured: data.featured || false,
+      manufacturerDetails: data.manufacturerDetails,
     });
     
     await product.save();

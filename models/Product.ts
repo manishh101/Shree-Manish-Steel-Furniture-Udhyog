@@ -46,7 +46,12 @@ export interface IProduct extends Document {
   rating: number;
   reviewCount: number;
   stock: number;
-  manufacturerDetails?: string;
+  manufacturerDetails?: {
+    name?: string;
+    address?: string;
+    email?: string;
+    countryOfOrigin?: string;
+  } | string;
 }
 
 const ProductSchema = new Schema<IProduct>({
@@ -160,8 +165,13 @@ const ProductSchema = new Schema<IProduct>({
     default: 100
   },
   manufacturerDetails: {
-    type: String,
-    default: ""
+    type: Schema.Types.Mixed,
+    default: {
+      name: "Shree Manish Steel Furniture Udhyog",
+      address: "Biratnagar, Morang",
+      email: "shreemanishfurniture@gmail.com",
+      countryOfOrigin: "Nepal"
+    }
   }
 });
 

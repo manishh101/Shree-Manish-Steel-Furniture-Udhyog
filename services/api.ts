@@ -72,7 +72,6 @@ export interface Product {
   usedAsCategoryThumbnail?: boolean;
   salesCount?: number;
   inStock?: boolean;
-  inStock?: boolean;
   specifications?: {
     material?: string;
     dimensions?: string;
@@ -100,7 +99,12 @@ export interface Product {
     availableLocations?: string[];
     specialInstructions?: string;
   };
-  manufacturerDetails?: string;
+  manufacturerDetails?: {
+    name?: string;
+    address?: string;
+    email?: string;
+    countryOfOrigin?: string;
+  } | string;
   createdAt?: string;
   updatedAt?: string;
   [key: string]: unknown; // Index signature for additional properties

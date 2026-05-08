@@ -394,18 +394,29 @@ const AdminProducts = () => {
 
       {/* Add/Edit Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-start z-50 p-2 sm:p-4 overflow-y-auto">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-5xl my-2">
-            <div className="flex justify-between items-center p-4 sm:p-6 border-b sticky top-0 bg-white z-10">
-              <h2 className="text-lg sm:text-xl font-bold text-primary">
-                {editingProduct ? 'Edit Product' : 'Add New Product'}
-              </h2>
-              <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
-                <FaTimes className="h-5 w-5 sm:h-6 sm:w-6" />
-              </button>
-            </div>
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/65 px-2 py-3 backdrop-blur-sm sm:px-4 sm:py-6">
+          <div className="mx-auto flex min-h-full w-full max-w-7xl items-start justify-center">
+            <div className="w-full overflow-hidden rounded-lg bg-slate-50 shadow-2xl ring-1 ring-black/10">
+              <div className="sticky top-0 z-30 border-b border-slate-200 bg-white">
+                <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6">
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold uppercase tracking-wide text-primary">
+                      Product Catalog
+                    </p>
+                    <h2 className="truncate text-lg font-bold text-slate-950 sm:text-xl">
+                      {editingProduct ? 'Edit Product' : 'Add New Product'}
+                    </h2>
+                  </div>
+                  <button
+                    onClick={closeModal}
+                    className="flex h-10 w-10 flex-none items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+                    aria-label="Close product form"
+                  >
+                    <FaTimes className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
 
-            <div className="p-4 sm:p-6">
               <ProductFormEnhanced
                 product={editingProduct}
                 onSave={handleSave}

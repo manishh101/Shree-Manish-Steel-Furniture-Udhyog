@@ -29,6 +29,44 @@ import { defaultProductImages } from '@/utils/productPlaceholders';
 // Only used as last-resort fallbacks when database images are not available
 const defaultImages = defaultProductImages;
 
+const defaultManufacturerDetails = {
+  name: 'Shree Manish Steel Furniture Udhyog',
+  address: 'Biratnagar, Morang',
+  email: 'shreemanishfurniture@gmail.com',
+  countryOfOrigin: 'Nepal'
+};
+
+const normalizeManufacturerDetails = (details: APIProduct['manufacturerDetails']) => {
+  if (!details) {
+    return defaultManufacturerDetails;
+  }
+
+  if (typeof details === 'string') {
+    const trimmed = details.trim();
+
+    if (!trimmed) {
+      return defaultManufacturerDetails;
+    }
+
+    try {
+      return {
+        ...defaultManufacturerDetails,
+        ...(JSON.parse(trimmed) as Partial<typeof defaultManufacturerDetails>)
+      };
+    } catch {
+      return {
+        ...defaultManufacturerDetails,
+        name: trimmed
+      };
+    }
+  }
+
+  return {
+    ...defaultManufacturerDetails,
+    ...details
+  };
+};
+
 interface Product extends APIProduct {
   stock?: number;
   sku?: string;
@@ -533,6 +571,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
 
   const categoryName = typeof product.category === 'string' ? product.category : 'Furniture';
   const subcategoryName = typeof product.subcategory === 'string' ? product.subcategory : undefined;
+  const manufacturerDetails = normalizeManufacturerDetails(product.manufacturerDetails);
 
   return (
     <div className="bg-gray-50 min-h-screen mobile-viewport mobile-scroll-smooth py-4 sm:py-6 lg:py-8 pb-20 sm:pb-8">
@@ -831,19 +870,19 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                   <div className="grid grid-cols-1 gap-3">
                     <div className="flex flex-col sm:flex-row sm:justify-between">
                       <span className="text-gray-500">Name:</span>
-                      <span className="font-medium text-gray-900 sm:text-right">Shree Manish Steel Furniture Udhyog</span>
+                      <span className="font-medium text-gray-900 sm:text-right">{manufacturerDetails.name}</span>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:justify-between">
                       <span className="text-gray-500">Address:</span>
-                      <span className="font-medium text-gray-900 sm:text-right">Biratnagar, Morang</span>
+                      <span className="font-medium text-gray-900 sm:text-right">{manufacturerDetails.address}</span>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:justify-between">
                       <span className="text-gray-500">Email:</span>
-                      <span className="font-medium text-gray-900 sm:text-right">shreemanishfurniture@gmail.com</span>
+                      <span className="font-medium text-gray-900 sm:text-right">{manufacturerDetails.email}</span>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:justify-between">
                       <span className="text-gray-500">Country of Origin:</span>
-                      <span className="font-medium text-gray-900 sm:text-right">Nepal</span>
+                      <span className="font-medium text-gray-900 sm:text-right">{manufacturerDetails.countryOfOrigin}</span>
                     </div>
                   </div>
                 </div>

@@ -2,8 +2,34 @@
 
 import React, { useState, useEffect } from 'react';
 import { productAPI, categoryAPI, subcategoryAPI, uploadAPI, Product, Category, Subcategory } from '@/services/api';
-import { FaTimes, FaPlus, FaImage } from 'react-icons/fa';
+import {
+  FaBoxOpen,
+  FaCamera,
+  FaCheck,
+  FaCheckCircle,
+  FaCloudUploadAlt,
+  FaCubes,
+  FaFileAlt,
+  FaImage,
+  FaInfoCircle,
+  FaIndustry,
+  FaLayerGroup,
+  FaPaintBrush,
+  FaPlus,
+  FaRulerCombined,
+  FaSave,
+  FaStar,
+  FaTags,
+  FaTimes
+} from 'react-icons/fa';
 import Image from 'next/image';
+
+interface ManufacturerDetails {
+  name: string;
+  address: string;
+  email: string;
+  countryOfOrigin: string;
+}
 
 interface FormData {
   name: string;
@@ -30,20 +56,13 @@ interface FormData {
     typeOfPaint: string;
     brand: string;
   };
-  deliveryInformation: {
-    estimatedDelivery: string;
-    shippingCost: string;
-    availableLocations: string[];
-    specialInstructions: string;
-  };
   dimensions: { length: string; width: string; height: string };
   material: string;
-  colors: string[];
   isAvailable: boolean;
   isMostSelling: boolean;
   isTopProduct: boolean;
   featured: boolean;
-  manufacturerDetails: string;
+  manufacturerDetails: ManufacturerDetails;
 }
 
 interface ProductFormEnhancedProps {
@@ -51,6 +70,101 @@ interface ProductFormEnhancedProps {
   onSave: () => void;
   onCancel: () => void;
 }
+
+const inputClass = 'w-full rounded-lg border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-sm transition focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-500';
+const labelClass = 'mb-1.5 block text-sm font-semibold text-slate-700';
+
+const defaultManufacturerDetails: ManufacturerDetails = {
+  name: 'Shree Manish Steel Furniture Udhyog',
+  address: 'Biratnagar, Morang',
+  email: 'shreemanishfurniture@gmail.com',
+  countryOfOrigin: 'Nepal'
+};
+
+const normalizeManufacturerDetails = (details: Product['manufacturerDetails']): ManufacturerDetails => {
+  if (!details) {
+    return defaultManufacturerDetails;
+  }
+
+  if (typeof details === 'string') {
+    const trimmed = details.trim();
+
+    if (!trimmed) {
+      return defaultManufacturerDetails;
+    }
+
+    try {
+      const parsed = JSON.parse(trimmed) as Partial<ManufacturerDetails>;
+      return {
+        ...defaultManufacturerDetails,
+        ...parsed
+      };
+    } catch {
+      return {
+        ...defaultManufacturerDetails,
+        name: trimmed
+      };
+    }
+  }
+
+  return {
+    ...defaultManufacturerDetails,
+    ...details
+  };
+};
+
+interface FormSectionProps {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+}
+
+const FormSection: React.FC<FormSectionProps> = ({ title, icon, children, className = '' }) => (
+  <section className={`overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm ${className}`}>
+    <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50 px-5 py-4">
+      <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-light text-primary">
+        {icon}
+      </span>
+      <h3 className="text-base font-bold text-slate-900">{title}</h3>
+    </div>
+    <div className="p-5">
+      {children}
+    </div>
+  </section>
+);
+
+interface ToggleCardProps {
+  id: string;
+  name: keyof FormData;
+  checked: boolean;
+  title: string;
+  icon: React.ReactNode;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+const ToggleCard: React.FC<ToggleCardProps> = ({ id, name, checked, title, icon, onChange }) => (
+  <label
+    htmlFor={id}
+    className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition ${checked
+      ? 'border-primary bg-primary-light text-primary shadow-sm'
+      : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300 hover:bg-slate-50'
+      }`}
+  >
+    <input
+      type="checkbox"
+      id={id}
+      name={name}
+      checked={checked}
+      onChange={onChange}
+      className="sr-only"
+    />
+    <span className={`flex h-10 w-10 items-center justify-center rounded-lg ${checked ? 'bg-white text-primary' : 'bg-slate-100 text-slate-500'}`}>
+      {checked ? <FaCheck className="h-4 w-4" /> : icon}
+    </span>
+    <span className="text-sm font-semibold">{title}</span>
+  </label>
+);
 
 const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSave, onCancel }) => {
   const [formData, setFormData] = useState<FormData>({
@@ -75,20 +189,13 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
       typeOfPaint: '',
       brand: ''
     },
-    deliveryInformation: {
-      estimatedDelivery: '7-10 business days',
-      shippingCost: 'Free shipping',
-      availableLocations: [],
-      specialInstructions: ''
-    },
     dimensions: { length: '', width: '', height: '' },
     material: '',
-    colors: [],
     isAvailable: true,
     isMostSelling: false,
     isTopProduct: false,
     featured: false,
-    manufacturerDetails: ''
+    manufacturerDetails: defaultManufacturerDetails
   });
 
   const [categories, setCategories] = useState<Category[]>([]);
@@ -175,24 +282,17 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
         },
         features: product.features || [],
         specifications: specificationsData,
-        deliveryInformation: {
-          estimatedDelivery: product.deliveryInformation?.estimatedDelivery || '7-10 business days',
-          shippingCost: product.deliveryInformation?.shippingCost || 'Free shipping',
-          availableLocations: product.deliveryInformation?.availableLocations || [],
-          specialInstructions: product.deliveryInformation?.specialInstructions || ''
-        },
         dimensions: {
           length: String(product.dimensions?.length || ''),
           width: String(product.dimensions?.width || ''),
           height: String(product.dimensions?.height || '')
         },
         material: product.material || '',
-        colors: product.colors || [],
         isAvailable: product.isAvailable !== undefined ? product.isAvailable : true,
         isMostSelling: product.isMostSelling || false,
         isTopProduct: product.isTopProduct || false,
         featured: product.featured || false,
-        manufacturerDetails: product.manufacturerDetails || ''
+        manufacturerDetails: normalizeManufacturerDetails(product.manufacturerDetails)
       };
 
       setFormData(newFormData);
@@ -251,6 +351,34 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
     }
   };
 
+  const removeMainImage = () => {
+    setFormData(prev => ({
+      ...prev,
+      image: '',
+      imageFile: null,
+      imagePreviews: { ...prev.imagePreviews, main: '' }
+    }));
+  };
+
+  const removeAdditionalImage = (index: number) => {
+    setFormData(prev => {
+      const additionalImageFiles = [...prev.additionalImageFiles];
+      const additionalPreviews = [...prev.imagePreviews.additional];
+      const images = [...prev.images];
+
+      additionalImageFiles[index] = null;
+      additionalPreviews[index] = '';
+      images[index] = '';
+
+      return {
+        ...prev,
+        images,
+        additionalImageFiles,
+        imagePreviews: { ...prev.imagePreviews, additional: additionalPreviews }
+      };
+    });
+  };
+
   const addFeature = () => {
     setFormData(prev => ({ ...prev, features: [...prev.features, ''] }));
   };
@@ -266,21 +394,6 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
       ...prev,
       features: prev.features.filter((_, i) => i !== index)
     }));
-  };
-
-
-
-  const handleDeliveryLocationsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const locations = e.target.value.split(',').map(item => item.trim()).filter(Boolean);
-    setFormData(prev => ({
-      ...prev,
-      deliveryInformation: { ...prev.deliveryInformation, availableLocations: locations }
-    }));
-  };
-
-  const handleColorsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const colors = e.target.value.split(',').map(item => item.trim()).filter(Boolean);
-    setFormData(prev => ({ ...prev, colors }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -309,10 +422,8 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
         subcategoryId: formData.subcategoryId || undefined,
         features: formData.features.filter(f => f.trim() !== ''),
         specifications: formData.specifications,
-        deliveryInformation: formData.deliveryInformation,
         dimensions: formData.dimensions,
         material: formData.material,
-        colors: formData.colors,
         isAvailable: formData.isAvailable,
         isMostSelling: formData.isMostSelling,
         isTopProduct: formData.isTopProduct,
@@ -343,19 +454,23 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
         if (formData.imageFile && uploadedUrls[urlIndex]) {
           productData.image = uploadedUrls[urlIndex];
           urlIndex++;
+        } else {
+          productData.image = formData.imagePreviews.main || formData.image || '';
         }
 
-        const images: string[] = [];
-        formData.additionalImageFiles.forEach((file) => {
+        const images = formData.imagePreviews.additional.map((preview, index) => {
+          const file = formData.additionalImageFiles[index];
           if (file && uploadedUrls[urlIndex]) {
-            images.push(uploadedUrls[urlIndex]);
+            const uploadedUrl = uploadedUrls[urlIndex];
             urlIndex++;
+            return uploadedUrl;
           }
-        });
+          return preview || formData.images[index] || '';
+        }).filter(Boolean);
         productData.images = images;
       } else if (product) {
-        productData.image = formData.image;
-        productData.images = Array.isArray(formData.images) ? formData.images : [];
+        productData.image = formData.imagePreviews.main || formData.image;
+        productData.images = formData.imagePreviews.additional.filter(Boolean);
       }
 
       if (product && product._id) {
@@ -380,503 +495,407 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
     }
   };
 
+  const selectedCategory = categories.find(category => (category._id || category.id) === formData.categoryId);
+  const selectedSubcategory = filteredSubcategories.find(subcategory => (subcategory._id || subcategory.id) === formData.subcategoryId);
+  const visibleBadges = [
+    formData.featured ? 'Featured' : '',
+    formData.isMostSelling ? 'Most Selling' : '',
+    formData.isTopProduct ? 'Top Product' : '',
+    formData.isAvailable ? 'Available' : 'Hidden'
+  ].filter(Boolean);
+
   return (
-    <div className="max-w-6xl mx-auto">
-      <form onSubmit={handleSubmit} className="space-y-8">
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-            {success}
-          </div>
-        )}
-
-        {/* Basic Information */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Name *
-              </label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              />
+    <form onSubmit={handleSubmit} className="bg-slate-50">
+      <div className="grid grid-cols-1 gap-6 p-4 sm:p-6 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="space-y-5">
+          {error && (
+            <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+              <FaInfoCircle className="mt-0.5 h-4 w-4 flex-none" />
+              {error}
             </div>
+          )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category *
-              </label>
-              <select
-                name="categoryId"
-                value={formData.categoryId}
-                onChange={handleCategoryChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                required
-              >
-                <option value="">Select Category</option>
-                {categories.map((category) => (
-                  <option key={category._id || category.id} value={category._id || category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+          {success && (
+            <div className="flex items-start gap-3 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+              <FaCheckCircle className="mt-0.5 h-4 w-4 flex-none" />
+              {success}
             </div>
+          )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Subcategory
-              </label>
-              <select
-                name="subcategoryId"
-                value={formData.subcategoryId || ''}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                disabled={!formData.categoryId || filteredSubcategories.length === 0}
-              >
-                <option value="">Select Subcategory</option>
-                {filteredSubcategories.map((subcategory) => (
-                  <option key={subcategory._id || subcategory.id} value={subcategory._id || subcategory.id}>
-                    {subcategory.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Material
-              </label>
-              <input
-                type="text"
-                name="material"
-                value={formData.material}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Steel, Wood, etc."
-              />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Product Description *
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                rows={4}
-                required
-              ></textarea>
-            </div>
-          </div>
-        </div>
-
-        {/* Image Upload */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Images</h3>
-
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Main Product Image *
-            </label>
-            <div className="flex items-center space-x-4">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleImageUpload(e, 'main')}
-                className="flex-1 border border-gray-300 rounded-md px-3 py-2"
-              />
-              {formData.imagePreviews.main && (
-                <div className="relative w-20 h-20">
-                  <Image
-                    src={formData.imagePreviews.main}
-                    alt="Main preview"
-                    fill
-                    className="object-contain border rounded-md"
-                    sizes="80px"
-                  />
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Additional Images (up to 3)
-            </label>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {[0, 1, 2].map((index) => (
-                <div key={index} className="space-y-2">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleImageUpload(e, 'additional', index)}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2"
-                  />
-                  {formData.imagePreviews.additional[index] && (
-                    <div className="relative w-full h-32">
-                      <Image
-                        src={formData.imagePreviews.additional[index]}
-                        alt={`Additional preview ${index + 1}`}
-                        fill
-                        className="object-contain border rounded-md"
-                        sizes="(max-width: 768px) 100vw, 300px"
-                      />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Features */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Features</h3>
-          <div className="space-y-3">
-            {formData.features.map((feature, index) => (
-              <div key={index} className="flex items-center space-x-2">
+          <FormSection title="Basic Information" icon={<FaFileAlt className="h-4 w-4" />}>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <div>
+                <label className={labelClass}>Product Name *</label>
                 <input
                   type="text"
-                  value={feature}
-                  onChange={(e) => updateFeature(index, e.target.value)}
-                  className="flex-1 border border-gray-300 rounded-md px-3 py-2"
-                  placeholder="Enter product feature"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className={inputClass}
+                  required
                 />
-                <button
-                  type="button"
-                  onClick={() => removeFeature(index)}
-                  className="p-2 text-red-600 hover:text-red-800"
+              </div>
+
+              <div>
+                <label className={labelClass}>Category *</label>
+                <select
+                  name="categoryId"
+                  value={formData.categoryId}
+                  onChange={handleCategoryChange}
+                  className={inputClass}
+                  required
                 >
-                  <FaTimes className="h-5 w-5" />
-                </button>
+                  <option value="">Select Category</option>
+                  {categories.map((category) => (
+                    <option key={category._id || category.id} value={category._id || category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
               </div>
-            ))}
-            <button
-              type="button"
-              onClick={addFeature}
-              className="flex items-center space-x-2 text-blue-600 hover:text-blue-800"
-            >
-              <FaPlus className="h-5 w-5" />
-              <span>Add Feature</span>
-            </button>
-          </div>
-        </div>
 
-        {/* Specifications */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Specifications</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Material</label>
-              <input
-                type="text"
-                name="specifications.material"
-                value={formData.specifications.material}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g. C.R. SHEET"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Dimension (MM)</label>
-              <input
-                type="text"
-                name="specifications.dimensions"
-                value={formData.specifications.dimensions}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g. 1630x915x530"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Guarantee</label>
-              <input
-                type="text"
-                name="specifications.guarantee"
-                value={formData.specifications.guarantee}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g. 10 Years on Paint & Locks"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Model Type</label>
-              <input
-                type="text"
-                name="specifications.modelType"
-                value={formData.specifications.modelType}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g. OFFICE MODEL"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Model Width</label>
-              <input
-                type="text"
-                name="specifications.modelWidth"
-                value={formData.specifications.modelWidth}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g. 36"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Hangers</label>
-              <input
-                type="text"
-                name="specifications.hangers"
-                value={formData.specifications.hangers}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g. NO HANGERS"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">No. of Doors</label>
-              <input
-                type="text"
-                name="specifications.noOfDoors"
-                value={formData.specifications.noOfDoors}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g. 2"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Type of Paint</label>
-              <input
-                type="text"
-                name="specifications.typeOfPaint"
-                value={formData.specifications.typeOfPaint}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g. Powder Coated"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Brand</label>
-              <input
-                type="text"
-                name="specifications.brand"
-                value={formData.specifications.brand}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g. Shree Manish Steel"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Delivery Information */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Delivery Information</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Estimated Delivery Time
-              </label>
-              <input
-                type="text"
-                name="deliveryInformation.estimatedDelivery"
-                value={formData.deliveryInformation.estimatedDelivery}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
-                placeholder="7-10 business days"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Shipping Cost
-              </label>
-              <input
-                type="text"
-                name="deliveryInformation.shippingCost"
-                value={formData.deliveryInformation.shippingCost}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
-                placeholder="Free shipping"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Available Delivery Locations
-              </label>
-              <input
-                type="text"
-                value={formData.deliveryInformation.availableLocations.join(', ')}
-                onChange={handleDeliveryLocationsChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
-                placeholder="Mumbai, Delhi, Bangalore (comma-separated)"
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Special Delivery Instructions
-              </label>
-              <textarea
-                name="deliveryInformation.specialInstructions"
-                value={formData.deliveryInformation.specialInstructions}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
-                rows={3}
-                placeholder="Assembly required, fragile item, etc."
-              ></textarea>
-            </div>
-          </div>
-        </div>
-
-        {/* Additional Details */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Additional Details</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Dimensions (cm)
-              </label>
-              <div className="grid grid-cols-3 gap-4">
-                <input
-                  type="number"
-                  name="dimensions.length"
-                  value={formData.dimensions.length}
+              <div>
+                <label className={labelClass}>Subcategory</label>
+                <select
+                  name="subcategoryId"
+                  value={formData.subcategoryId || ''}
                   onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
-                  placeholder="Length"
-                  min="0"
+                  className={inputClass}
+                  disabled={!formData.categoryId || filteredSubcategories.length === 0}
+                >
+                  <option value="">Select Subcategory</option>
+                  {filteredSubcategories.map((subcategory) => (
+                    <option key={subcategory._id || subcategory.id} value={subcategory._id || subcategory.id}>
+                      {subcategory.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className={labelClass}>Material</label>
+                <input
+                  type="text"
+                  name="material"
+                  value={formData.material}
+                  onChange={handleInputChange}
+                  className={inputClass}
+                  placeholder="Steel, Wood, etc."
                 />
-                <input
-                  type="number"
-                  name="dimensions.width"
-                  value={formData.dimensions.width}
+              </div>
+
+              <div className="md:col-span-2">
+                <label className={labelClass}>Product Description *</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
                   onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
-                  placeholder="Width"
-                  min="0"
-                />
-                <input
-                  type="number"
-                  name="dimensions.height"
-                  value={formData.dimensions.height}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
-                  placeholder="Height"
-                  min="0"
+                  className={`${inputClass} min-h-32 resize-y`}
+                  rows={5}
+                  required
                 />
               </div>
             </div>
+          </FormSection>
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Available Colors
-              </label>
-              <input
-                type="text"
-                value={formData.colors.join(', ')}
-                onChange={handleColorsChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2"
-                placeholder="Red, Blue, Black, White (comma-separated)"
-              />
+          <FormSection title="Product Images" icon={<FaImage className="h-4 w-4" />}>
+            <div className="space-y-5">
+              <div>
+                <label className={labelClass}>Main Product Image *</label>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-[180px_minmax(0,1fr)]">
+                  <div className="relative flex aspect-square items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                    {formData.imagePreviews.main ? (
+                      <>
+                        <Image
+                          src={formData.imagePreviews.main}
+                          alt="Main preview"
+                          fill
+                          className="object-contain p-2"
+                          sizes="180px"
+                        />
+                        <button
+                          type="button"
+                          onClick={removeMainImage}
+                          className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 text-slate-600 shadow-sm transition hover:bg-red-50 hover:text-red-600"
+                          aria-label="Remove main image"
+                        >
+                          <FaTimes className="h-3.5 w-3.5" />
+                        </button>
+                      </>
+                    ) : (
+                      <FaCamera className="h-9 w-9 text-slate-400" />
+                    )}
+                  </div>
+                  <label
+                    htmlFor="main-product-image"
+                    className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white px-5 py-6 text-center transition hover:border-primary hover:bg-primary-light/40"
+                  >
+                    <FaCloudUploadAlt className="mb-3 h-9 w-9 text-primary" />
+                    <span className="text-sm font-semibold text-slate-900">Choose main image</span>
+                    <span className="mt-1 text-xs text-slate-500">JPG, PNG, or WEBP</span>
+                    <input
+                      id="main-product-image"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, 'main')}
+                      className="sr-only"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>Additional Images</label>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                  {[0, 1, 2].map((index) => (
+                    <div key={index} className="overflow-hidden rounded-lg border border-slate-200 bg-white">
+                      <div className="relative flex h-36 items-center justify-center bg-slate-100">
+                        {formData.imagePreviews.additional[index] ? (
+                          <>
+                            <Image
+                              src={formData.imagePreviews.additional[index]}
+                              alt={`Additional preview ${index + 1}`}
+                              fill
+                              className="object-contain p-2"
+                              sizes="(max-width: 768px) 100vw, 240px"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeAdditionalImage(index)}
+                              className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 text-slate-600 shadow-sm transition hover:bg-red-50 hover:text-red-600"
+                              aria-label={`Remove additional image ${index + 1}`}
+                            >
+                              <FaTimes className="h-3.5 w-3.5" />
+                            </button>
+                          </>
+                        ) : (
+                          <FaImage className="h-7 w-7 text-slate-400" />
+                        )}
+                      </div>
+                      <label
+                        htmlFor={`additional-product-image-${index}`}
+                        className="flex cursor-pointer items-center justify-center gap-2 border-t border-slate-200 px-3 py-3 text-sm font-semibold text-primary transition hover:bg-primary-light"
+                      >
+                        <FaCloudUploadAlt className="h-4 w-4" />
+                        Choose Image
+                        <input
+                          id={`additional-product-image-${index}`}
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleImageUpload(e, 'additional', index)}
+                          className="sr-only"
+                        />
+                      </label>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
+          </FormSection>
+
+          <FormSection title="Product Features" icon={<FaTags className="h-4 w-4" />}>
+            <div className="space-y-3">
+              {formData.features.length === 0 && (
+                <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-center text-sm text-slate-500">
+                  No features added yet.
+                </div>
+              )}
+
+              {formData.features.map((feature, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={feature}
+                    onChange={(e) => updateFeature(index, e.target.value)}
+                    className={inputClass}
+                    placeholder="Enter product feature"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => removeFeature(index)}
+                    className="flex h-10 w-10 flex-none items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100"
+                    aria-label="Remove feature"
+                  >
+                    <FaTimes className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={addFeature}
+                className="inline-flex items-center gap-2 rounded-lg border border-primary/20 bg-primary-light px-4 py-2.5 text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
+              >
+                <FaPlus className="h-4 w-4" />
+                Add Feature
+              </button>
+            </div>
+          </FormSection>
+
+          <FormSection title="Product Specifications" icon={<FaCubes className="h-4 w-4" />}>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <div>
+                <label className={labelClass}>Material</label>
+                <input type="text" name="specifications.material" value={formData.specifications.material} onChange={handleInputChange} className={inputClass} placeholder="e.g. C.R. SHEET" />
+              </div>
+              <div>
+                <label className={labelClass}>Dimension (MM)</label>
+                <input type="text" name="specifications.dimensions" value={formData.specifications.dimensions} onChange={handleInputChange} className={inputClass} placeholder="e.g. 1630x915x530" />
+              </div>
+              <div>
+                <label className={labelClass}>Guarantee</label>
+                <input type="text" name="specifications.guarantee" value={formData.specifications.guarantee} onChange={handleInputChange} className={inputClass} placeholder="e.g. 10 Years on Paint & Locks" />
+              </div>
+              <div>
+                <label className={labelClass}>Model Type</label>
+                <input type="text" name="specifications.modelType" value={formData.specifications.modelType} onChange={handleInputChange} className={inputClass} placeholder="e.g. OFFICE MODEL" />
+              </div>
+              <div>
+                <label className={labelClass}>Model Width</label>
+                <input type="text" name="specifications.modelWidth" value={formData.specifications.modelWidth} onChange={handleInputChange} className={inputClass} placeholder="e.g. 36" />
+              </div>
+              <div>
+                <label className={labelClass}>Hangers</label>
+                <input type="text" name="specifications.hangers" value={formData.specifications.hangers} onChange={handleInputChange} className={inputClass} placeholder="e.g. NO HANGERS" />
+              </div>
+              <div>
+                <label className={labelClass}>No. of Doors</label>
+                <input type="text" name="specifications.noOfDoors" value={formData.specifications.noOfDoors} onChange={handleInputChange} className={inputClass} placeholder="e.g. 2" />
+              </div>
+              <div>
+                <label className={labelClass}>Type of Paint</label>
+                <input type="text" name="specifications.typeOfPaint" value={formData.specifications.typeOfPaint} onChange={handleInputChange} className={inputClass} placeholder="e.g. Powder Coated" />
+              </div>
+              <div>
+                <label className={labelClass}>Brand</label>
+                <input type="text" name="specifications.brand" value={formData.specifications.brand} onChange={handleInputChange} className={inputClass} placeholder="e.g. Shree Manish Steel" />
+              </div>
+            </div>
+          </FormSection>
+
+          <FormSection title="Card Dimensions" icon={<FaRulerCombined className="h-4 w-4" />}>
+            <div>
+              <label className={labelClass}>Dimensions shown on product cards (mm)</label>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <input type="number" name="dimensions.length" value={formData.dimensions.length} onChange={handleInputChange} className={inputClass} placeholder="Length" min="0" />
+                <input type="number" name="dimensions.width" value={formData.dimensions.width} onChange={handleInputChange} className={inputClass} placeholder="Width" min="0" />
+                <input type="number" name="dimensions.height" value={formData.dimensions.height} onChange={handleInputChange} className={inputClass} placeholder="Height" min="0" />
+              </div>
+            </div>
+          </FormSection>
+
+          <FormSection title="Manufacturer Details" icon={<FaIndustry className="h-4 w-4" />}>
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <div>
+                <label className={labelClass}>Name</label>
+                <input
+                  type="text"
+                  name="manufacturerDetails.name"
+                  value={formData.manufacturerDetails.name}
+                  onChange={handleInputChange}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Address</label>
+                <input
+                  type="text"
+                  name="manufacturerDetails.address"
+                  value={formData.manufacturerDetails.address}
+                  onChange={handleInputChange}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Email</label>
+                <input
+                  type="email"
+                  name="manufacturerDetails.email"
+                  value={formData.manufacturerDetails.email}
+                  onChange={handleInputChange}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Country of Origin</label>
+                <input
+                  type="text"
+                  name="manufacturerDetails.countryOfOrigin"
+                  value={formData.manufacturerDetails.countryOfOrigin}
+                  onChange={handleInputChange}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+          </FormSection>
         </div>
 
-        {/* Homepage Display Settings */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Homepage Display Settings</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="featured"
-                name="featured"
-                checked={formData.featured}
-                onChange={handleInputChange}
-                className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="featured" className="text-sm text-gray-700">
-                Featured Product
-              </label>
+        <aside className="space-y-5 lg:sticky lg:top-6 lg:self-start">
+          <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
+            <div className="relative flex aspect-[4/3] items-center justify-center bg-slate-100">
+              {formData.imagePreviews.main ? (
+                <Image
+                  src={formData.imagePreviews.main}
+                  alt={formData.name || 'Product preview'}
+                  fill
+                  className="object-contain p-4"
+                  sizes="320px"
+                />
+              ) : (
+                <FaBoxOpen className="h-12 w-12 text-slate-400" />
+              )}
             </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="isMostSelling"
-                name="isMostSelling"
-                checked={formData.isMostSelling}
-                onChange={handleInputChange}
-                className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="isMostSelling" className="text-sm text-gray-700">
-                Most Selling Product
-              </label>
+            <div className="space-y-4 p-5">
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Preview</p>
+                <h3 className="mt-1 line-clamp-2 text-lg font-bold text-slate-900">
+                  {formData.name || 'Untitled product'}
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  {[selectedCategory?.name, selectedSubcategory?.name].filter(Boolean).join(' / ') || 'No category selected'}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {visibleBadges.map((badge) => (
+                  <span key={badge} className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                    {badge}
+                  </span>
+                ))}
+              </div>
             </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="isTopProduct"
-                name="isTopProduct"
-                checked={formData.isTopProduct}
-                onChange={handleInputChange}
-                className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="isTopProduct" className="text-sm text-gray-700">
-                Top Product
-              </label>
+          </section>
+
+          <FormSection title="Display Settings" icon={<FaLayerGroup className="h-4 w-4" />}>
+            <div className="space-y-3">
+              <ToggleCard id="featured" name="featured" checked={formData.featured} title="Featured Product" icon={<FaStar className="h-4 w-4" />} onChange={handleInputChange} />
+              <ToggleCard id="isMostSelling" name="isMostSelling" checked={formData.isMostSelling} title="Most Selling Product" icon={<FaTags className="h-4 w-4" />} onChange={handleInputChange} />
+              <ToggleCard id="isTopProduct" name="isTopProduct" checked={formData.isTopProduct} title="Top Product" icon={<FaCheckCircle className="h-4 w-4" />} onChange={handleInputChange} />
+              <ToggleCard id="isAvailable" name="isAvailable" checked={formData.isAvailable} title="Product Available" icon={<FaPaintBrush className="h-4 w-4" />} onChange={handleInputChange} />
             </div>
-          </div>
-        </div>
+          </FormSection>
+        </aside>
+      </div>
 
-        {/* Product Status */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Status</h3>
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="isAvailable"
-              name="isAvailable"
-              checked={formData.isAvailable}
-              onChange={handleInputChange}
-              className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-            />
-            <label htmlFor="isAvailable" className="text-sm text-gray-700">
-              Product is Available
-            </label>
-          </div>
-        </div>
-
-        {/* Form Actions */}
-        <div className="flex gap-4 pt-6 border-t border-gray-200">
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-          >
-            {isLoading ? 'Saving...' : (product ? 'Update Product' : 'Create Product')}
-          </button>
-
+      <div className="sticky bottom-0 z-20 border-t border-slate-200 bg-white/95 px-4 py-4 shadow-[0_-10px_30px_rgba(15,23,42,0.08)] backdrop-blur sm:px-6">
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"
             onClick={onCancel}
-            className="px-6 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+            className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
           >
             Cancel
           </button>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <FaSave className="h-4 w-4" />
+            {isLoading ? 'Saving...' : (product ? 'Update Product' : 'Create Product')}
+          </button>
         </div>
-      </form>
-    </div>
+      </div>
+    </form>
   );
 };
 
