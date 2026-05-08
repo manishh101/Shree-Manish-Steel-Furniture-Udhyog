@@ -43,6 +43,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
     const productDoc = await Product.findById(productId)
       .populate('categoryId', 'name')
       .populate('subcategoryId', 'name')
+      .populate('colorVariants.productId', 'name image images colorName colorHex')
       .lean();
 
     if (!productDoc) {
@@ -65,6 +66,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
       subcategory: product.subcategoryId?.name || product.subcategory,
       features: product.features || [],
       specifications: product.specifications || {},
+      colors: product.colors || [],
+      colorName: product.colorName || '',
+      colorHex: product.colorHex || '',
+      colorVariants: product.colorVariants || [],
       isActive: product.isActive !== false,
       isFeatured: product.isFeatured || false,
       isBestSeller: product.isBestSeller || false,
@@ -93,6 +98,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 '@type': 'Brand',
                 name: 'Shree Manish Steel Furniture',
               },
+              color: product.colorName || product.colors?.join(', '),
               offers: {
                 '@type': 'Offer',
                 url: `https://manishsteel.com.np/products/${productId}`,

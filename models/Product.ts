@@ -39,6 +39,14 @@ export interface IProduct extends Document {
   };
   material?: string;
   colors: string[];
+  colorName?: string;
+  colorHex?: string;
+  colorVariants?: {
+    label: string;
+    hex?: string;
+    productId?: mongoose.Types.ObjectId | string;
+    image?: string;
+  }[];
   isAvailable: boolean;
   dateAdded: Date;
   featured: boolean;
@@ -134,6 +142,32 @@ const ProductSchema = new Schema<IProduct>({
   },
   material: String,
   colors: [String],
+  colorName: {
+    type: String,
+    trim: true
+  },
+  colorHex: {
+    type: String,
+    trim: true
+  },
+  colorVariants: [{
+    label: {
+      type: String,
+      trim: true
+    },
+    hex: {
+      type: String,
+      trim: true
+    },
+    productId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Product'
+    },
+    image: {
+      type: String,
+      trim: true
+    }
+  }],
   isAvailable: {
     type: Boolean,
     default: true

@@ -67,6 +67,28 @@ const normalizeManufacturerDetails = (details: APIProduct['manufacturerDetails']
   };
 };
 
+const colorFallbacks: Record<string, string> = {
+  black: '#111827',
+  blue: '#2563eb',
+  brown: '#7c2d12',
+  coffee: '#6f4e37',
+  cream: '#f5f5dc',
+  gold: '#d4af37',
+  gray: '#6b7280',
+  green: '#16a34a',
+  grey: '#6b7280',
+  maroon: '#7f1d1d',
+  orange: '#ea580c',
+  pink: '#db2777',
+  red: '#dc2626',
+  silver: '#c0c0c0',
+  white: '#f8fafc',
+  yellow: '#facc15'
+};
+
+const normalizeColorKey = (value: string) => value.trim().toLowerCase().replace(/\s+/g, '-');
+const getColorSwatch = (label: string, hex?: string) => hex || colorFallbacks[label.trim().toLowerCase()] || '#e5e7eb';
+
 interface Product extends APIProduct {
   stock?: number;
   sku?: string;
@@ -82,6 +104,15 @@ interface Product extends APIProduct {
   originalPrice?: number;
   rating?: number;
   reviewCount?: number;
+}
+
+interface ColorChoice {
+  label: string;
+  hex?: string;
+  productId?: string;
+  image?: string;
+  href: string;
+  isCurrent: boolean;
 }
 
 interface ProductClientProps {
@@ -170,6 +201,74 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
 
     return images;
   }, [product]);
+
+  const colorChoices = useMemo<ColorChoice[]>(() => {
+    if (!product) return [];
+
+    const currentProductId = product._id || product.id || productId;
+    const activeColor = product.colorName?.trim();
+    const choices: Omit<ColorChoice, 'href' | 'isCurrent'>[] = [];
+    const seenLabels = new Set<string>();
+
+    const addChoice = (choice: { label?: string; hex?: string; productId?: string; image?: string }) => {
+      const label = choice.label?.trim();
+      if (!label) return;
+
+      const key = normalizeColorKey(label);
+      if (seenLabels.has(key)) return;
+
+      seenLabels.add(key);
+      choices.push({
+        label,
+        hex: choice.hex,
+        productId: choice.productId,
+        image: choice.image
+      });
+    };
+
+    if (activeColor) {
+      addChoice({
+        label: activeColor,
+        hex: product.colorHex,
+        productId: currentProductId,
+        image: product.image || allImages[0]
+      });
+    }
+
+    if (Array.isArray(product.colorVariants)) {
+      product.colorVariants.forEach((variant) => {
+        const linkedProduct = typeof variant.productId === 'object' && variant.productId ? variant.productId : null;
+        const linkedProductId = linkedProduct?._id || (typeof variant.productId === 'string' ? variant.productId : undefined);
+        const linkedProductImage = linkedProduct?.image || linkedProduct?.images?.[0];
+        const linkedProductColor = linkedProduct?.colorName || variant.label;
+
+        addChoice({
+          label: linkedProductColor,
+          hex: variant.hex || linkedProduct?.colorHex,
+          productId: linkedProductId,
+          image: variant.image || linkedProductImage
+        });
+      });
+    }
+
+    if (choices.length === 0 && Array.isArray(product.colors)) {
+      product.colors.forEach((color) => addChoice({ label: color }));
+    }
+
+    return choices.map((choice, index) => {
+      const targetProductId = choice.productId || currentProductId;
+      const isCurrent =
+        targetProductId === currentProductId ||
+        (!!activeColor && normalizeColorKey(choice.label) === normalizeColorKey(activeColor)) ||
+        (!activeColor && index === 0);
+
+      return {
+        ...choice,
+        href: `/products/${targetProductId}?color=${normalizeColorKey(choice.label)}`,
+        isCurrent
+      };
+    });
+  }, [allImages, product, productId]);
 
   // Preload all images when component mounts for smoother experience
   useEffect(() => {
@@ -760,6 +859,59 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                 <p className="text-gray-600 leading-relaxed text-sm md:text-base">
                   {product.description}
                 </p>
+              </div>
+            )}
+
+            {colorChoices.length > 0 && (
+              <div className="mb-6 border-y border-gray-100 py-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <h3 className="text-base font-bold text-gray-900">Available Color:</h3>
+                  <span
+                    className="h-6 w-6 rounded-full border border-gray-300 shadow-inner"
+                    style={{
+                      backgroundColor: getColorSwatch(
+                        colorChoices.find((choice) => choice.isCurrent)?.label || colorChoices[0].label,
+                        colorChoices.find((choice) => choice.isCurrent)?.hex || colorChoices[0].hex
+                      )
+                    }}
+                    aria-hidden="true"
+                  />
+                  <span className="text-sm font-semibold uppercase text-gray-900">
+                    {colorChoices.find((choice) => choice.isCurrent)?.label || colorChoices[0].label}
+                  </span>
+                </div>
+
+                <div className="flex flex-wrap gap-2.5">
+                  {colorChoices.map((choice) => (
+                    <Link
+                      key={`${choice.label}-${choice.productId || 'current'}`}
+                      href={choice.href}
+                      className={`group relative flex h-[74px] w-[64px] items-center justify-center rounded-md border bg-white p-1.5 transition hover:border-primary hover:shadow-sm ${choice.isCurrent
+                        ? 'border-primary ring-2 ring-primary/20'
+                        : 'border-gray-200'
+                        }`}
+                      aria-label={`View ${choice.label} color`}
+                      title={choice.label}
+                    >
+                      <span className="relative flex h-full w-full items-center justify-center overflow-hidden rounded bg-gray-50">
+                        {choice.image ? (
+                          <OptimizedImage
+                            src={choice.image}
+                            alt={`${choice.label} color`}
+                            className="h-full w-full object-contain mix-blend-multiply"
+                            size="thumbnail"
+                          />
+                        ) : (
+                          <span
+                            className="h-8 w-8 rounded-full border border-black/10 shadow-inner"
+                            style={{ backgroundColor: getColorSwatch(choice.label, choice.hex) }}
+                          />
+                        )}
+                      </span>
+                      <span className="sr-only">{choice.isCurrent ? `${choice.label} selected` : `View ${choice.label}`}</span>
+                    </Link>
+                  ))}
+                </div>
               </div>
             )}
 

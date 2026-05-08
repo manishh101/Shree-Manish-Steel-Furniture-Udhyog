@@ -88,6 +88,21 @@ export interface Product {
   finish?: string;
   weight?: string;
   colors?: string[];
+  colorName?: string;
+  colorHex?: string;
+  colorVariants?: {
+    label: string;
+    hex?: string;
+    productId?: string | {
+      _id: string;
+      name?: string;
+      image?: string;
+      images?: string[];
+      colorName?: string;
+      colorHex?: string;
+    };
+    image?: string;
+  }[];
   dimensions?: {
     length?: string | number;
     width?: string | number;

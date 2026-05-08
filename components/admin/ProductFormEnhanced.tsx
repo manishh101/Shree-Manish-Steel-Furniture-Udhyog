@@ -31,6 +31,13 @@ interface ManufacturerDetails {
   countryOfOrigin: string;
 }
 
+interface ProductColorVariant {
+  label: string;
+  hex: string;
+  productId: string;
+  image: string;
+}
+
 interface FormData {
   name: string;
   categoryId: string;
@@ -58,6 +65,10 @@ interface FormData {
   };
   dimensions: { length: string; width: string; height: string };
   material: string;
+  colorName: string;
+  colorHex: string;
+  colors: string[];
+  colorVariants: ProductColorVariant[];
   isAvailable: boolean;
   isMostSelling: boolean;
   isTopProduct: boolean;
@@ -191,6 +202,10 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
     },
     dimensions: { length: '', width: '', height: '' },
     material: '',
+    colorName: '',
+    colorHex: '',
+    colors: [],
+    colorVariants: [],
     isAvailable: true,
     isMostSelling: false,
     isTopProduct: false,
@@ -200,6 +215,7 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [filteredSubcategories, setFilteredSubcategories] = useState<Subcategory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -209,12 +225,14 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [categoriesRes, subcategoriesRes] = await Promise.all([
+        const [categoriesRes, subcategoriesRes, productsRes] = await Promise.all([
           categoryAPI.getAll(),
-          subcategoryAPI.getAll()
+          subcategoryAPI.getAll(),
+          productAPI.getAll(1, 500)
         ]);
         setCategories(Array.isArray(categoriesRes) ? categoriesRes : []);
         setSubcategories(Array.isArray(subcategoriesRes) ? subcategoriesRes : []);
+        setAllProducts(Array.isArray(productsRes?.products) ? productsRes.products : []);
       } catch (err) {
         console.error('Error loading categories:', err);
         setError('Failed to load categories');
@@ -288,6 +306,19 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
           height: String(product.dimensions?.height || '')
         },
         material: product.material || '',
+        colorName: product.colorName || '',
+        colorHex: product.colorHex || '',
+        colors: Array.isArray(product.colors) ? product.colors : [],
+        colorVariants: Array.isArray(product.colorVariants)
+          ? product.colorVariants.map((variant) => ({
+            label: variant.label || '',
+            hex: variant.hex || '',
+            productId: typeof variant.productId === 'object' && variant.productId
+              ? variant.productId._id
+              : variant.productId || '',
+            image: variant.image || ''
+          }))
+          : [],
         isAvailable: product.isAvailable !== undefined ? product.isAvailable : true,
         isMostSelling: product.isMostSelling || false,
         isTopProduct: product.isTopProduct || false,
@@ -396,6 +427,31 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
     }));
   };
 
+  const addColorVariant = () => {
+    setFormData(prev => ({
+      ...prev,
+      colorVariants: [...prev.colorVariants, { label: '', hex: '', productId: '', image: '' }]
+    }));
+  };
+
+  const updateColorVariant = (index: number, field: keyof ProductColorVariant, value: string) => {
+    setFormData(prev => {
+      const colorVariants = [...prev.colorVariants];
+      colorVariants[index] = {
+        ...colorVariants[index],
+        [field]: value
+      };
+      return { ...prev, colorVariants };
+    });
+  };
+
+  const removeColorVariant = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      colorVariants: prev.colorVariants.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -415,6 +471,21 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
         return;
       }
 
+      const cleanColorVariants = formData.colorVariants
+        .map((variant) => ({
+          label: variant.label.trim(),
+          hex: variant.hex.trim(),
+          productId: variant.productId.trim() || undefined,
+          image: variant.image.trim()
+        }))
+        .filter((variant) => variant.label);
+
+      const colorNames = Array.from(new Set([
+        formData.colorName.trim(),
+        ...formData.colors.map((color) => color.trim()),
+        ...cleanColorVariants.map((variant) => variant.label)
+      ].filter(Boolean)));
+
       const productData: Record<string, unknown> = {
         name: formData.name,
         description: formData.description,
@@ -424,6 +495,10 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
         specifications: formData.specifications,
         dimensions: formData.dimensions,
         material: formData.material,
+        colors: colorNames,
+        colorName: formData.colorName.trim(),
+        colorHex: formData.colorHex.trim(),
+        colorVariants: cleanColorVariants,
         isAvailable: formData.isAvailable,
         isMostSelling: formData.isMostSelling,
         isTopProduct: formData.isTopProduct,
@@ -497,7 +572,9 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
 
   const selectedCategory = categories.find(category => (category._id || category.id) === formData.categoryId);
   const selectedSubcategory = filteredSubcategories.find(subcategory => (subcategory._id || subcategory.id) === formData.subcategoryId);
+  const selectableProducts = allProducts.filter((item) => (item._id || item.id) !== product?._id);
   const visibleBadges = [
+    formData.colorName ? formData.colorName : '',
     formData.featured ? 'Featured' : '',
     formData.isMostSelling ? 'Most Selling' : '',
     formData.isTopProduct ? 'Top Product' : '',
@@ -594,6 +671,125 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
                   rows={5}
                   required
                 />
+              </div>
+            </div>
+          </FormSection>
+
+          <FormSection title="Color Variants" icon={<FaPaintBrush className="h-4 w-4" />}>
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,1fr)_180px]">
+                <div>
+                  <label className={labelClass}>Current Product Color</label>
+                  <input
+                    type="text"
+                    name="colorName"
+                    value={formData.colorName}
+                    onChange={handleInputChange}
+                    className={inputClass}
+                    placeholder="e.g. Silver, Coffee, Maroon"
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Color Swatch</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={/^#[0-9A-Fa-f]{6}$/.test(formData.colorHex) ? formData.colorHex : '#0057A3'}
+                      onChange={(e) => setFormData(prev => ({ ...prev, colorHex: e.target.value }))}
+                      className="h-11 w-14 cursor-pointer rounded-lg border border-slate-300 bg-white p-1"
+                      aria-label="Current color swatch"
+                    />
+                    <input
+                      type="text"
+                      name="colorHex"
+                      value={formData.colorHex}
+                      onChange={handleInputChange}
+                      className={inputClass}
+                      placeholder="#c0c0c0"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900">Linked Color Pages</h4>
+                    <p className="mt-1 text-xs text-slate-500">Create each color as a separate product, then choose its matching product page here.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={addColorVariant}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-primary/20 bg-white px-3 py-2 text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
+                  >
+                    <FaPlus className="h-3.5 w-3.5" />
+                    Add Color
+                  </button>
+                </div>
+
+                {formData.colorVariants.length === 0 ? (
+                  <div className="rounded-lg border border-dashed border-slate-300 bg-white px-4 py-5 text-center text-sm text-slate-500">
+                    No linked colors yet.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {formData.colorVariants.map((variant, index) => (
+                      <div key={index} className="rounded-lg border border-slate-200 bg-white p-3">
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_120px_minmax(0,1.2fr)_40px]">
+                          <input
+                            type="text"
+                            value={variant.label}
+                            onChange={(e) => updateColorVariant(index, 'label', e.target.value)}
+                            className={inputClass}
+                            placeholder="Color name"
+                            aria-label="Variant color name"
+                          />
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="color"
+                              value={/^#[0-9A-Fa-f]{6}$/.test(variant.hex) ? variant.hex : '#0057A3'}
+                              onChange={(e) => updateColorVariant(index, 'hex', e.target.value)}
+                              className="h-11 w-full cursor-pointer rounded-lg border border-slate-300 bg-white p-1"
+                              aria-label="Variant color swatch"
+                            />
+                          </div>
+                          <select
+                            value={variant.productId}
+                            onChange={(e) => updateColorVariant(index, 'productId', e.target.value)}
+                            className={inputClass}
+                            aria-label="Linked product page"
+                          >
+                            <option value="">Select product page</option>
+                            {variant.productId && !selectableProducts.some((item) => (item._id || item.id) === variant.productId) && (
+                              <option value={variant.productId}>Linked product</option>
+                            )}
+                            {selectableProducts.map((item) => (
+                              <option key={item._id || item.id} value={item._id || item.id}>
+                                {item.colorName ? `${item.name} - ${item.colorName}` : item.name}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            type="button"
+                            onClick={() => removeColorVariant(index)}
+                            className="flex h-11 w-10 items-center justify-center rounded-lg border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100"
+                            aria-label="Remove color variant"
+                          >
+                            <FaTimes className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                        <input
+                          type="text"
+                          value={variant.image}
+                          onChange={(e) => updateColorVariant(index, 'image', e.target.value)}
+                          className={`${inputClass} mt-3`}
+                          placeholder="Optional swatch image URL"
+                          aria-label="Variant swatch image URL"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </FormSection>

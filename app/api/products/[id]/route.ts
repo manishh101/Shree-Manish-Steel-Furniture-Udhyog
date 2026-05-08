@@ -18,6 +18,7 @@ export async function GET(
     const rawProduct = await Product.findById(id)
       .populate('categoryId', 'name')
       .populate('subcategoryId', 'name')
+      .populate('colorVariants.productId', 'name image images colorName colorHex')
       .lean();
 
     if (!rawProduct) {
