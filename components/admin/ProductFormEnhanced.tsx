@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { productAPI, categoryAPI, subcategoryAPI, uploadAPI, Product, Category, Subcategory } from '@/services/api';
 import {
   FaBoxOpen,
@@ -8,6 +8,7 @@ import {
   FaCheck,
   FaCheckCircle,
   FaCloudUploadAlt,
+  FaSync,
   FaCubes,
   FaFileAlt,
   FaImage,
@@ -216,6 +217,8 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
   const [categories, setCategories] = useState<Category[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [backlinkMap, setBacklinkMap] = useState<Record<string, boolean>>({});
+  const [isSyncingVariants, setIsSyncingVariants] = useState(false);
   const [filteredSubcategories, setFilteredSubcategories] = useState<Subcategory[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -240,6 +243,62 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
     };
     loadData();
   }, []);
+
+  // Check backlinks for linked variant product pages
+  const checkBacklinks = useCallback(async () => {
+    if (!product || !product._id) return;
+    const map: Record<string, boolean> = {};
+
+    const idsToCheck = formData.colorVariants
+      .map(v => v.productId)
+      .filter(Boolean) as string[];
+
+    await Promise.all(idsToCheck.map(async (pid) => {
+      try {
+        const target = await productAPI.getById(pid);
+        const hasBacklink = Array.isArray(target.colorVariants) && target.colorVariants.some((cv: any) => {
+          const cvId = (cv.productId && (cv.productId._id || cv.productId)) || cv.productId;
+          return String(cvId) === String(product._id);
+        });
+        map[pid] = !!hasBacklink;
+      } catch (e) {
+        map[pid] = false;
+      }
+    }));
+
+    setBacklinkMap(map);
+  }, [formData.colorVariants, product]);
+
+  useEffect(() => {
+    checkBacklinks();
+  }, [checkBacklinks]);
+
+  const ensureBidirectionalLinks = async () => {
+    if (!product || !product._id) return;
+    setIsSyncingVariants(true);
+    try {
+      const cleanColorVariants = formData.colorVariants
+        .map((variant) => ({
+          label: variant.label.trim(),
+          hex: variant.hex.trim(),
+          productId: variant.productId.trim() || undefined,
+          image: variant.image.trim()
+        }))
+        .filter(Boolean);
+
+      // Trigger the API sync by updating this product's colorVariants (server will sync bidirectionally)
+      await productAPI.update(product._id, { colorVariants: cleanColorVariants });
+
+      // Refresh backlink checks
+      await checkBacklinks();
+      setSuccess('Variant links synchronized successfully');
+    } catch (e) {
+      console.error(e);
+      setError('Failed to sync variant links');
+    } finally {
+      setIsSyncingVariants(false);
+    }
+  };
 
   // Filter subcategories when category changes
   useEffect(() => {
@@ -717,14 +776,26 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
                     <h4 className="text-sm font-bold text-slate-900">Linked Color Pages</h4>
                     <p className="mt-1 text-xs text-slate-500">Create each color as a separate product, then choose its matching product page here.</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={addColorVariant}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-primary/20 bg-white px-3 py-2 text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
-                  >
-                    <FaPlus className="h-3.5 w-3.5" />
-                    Add Color
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={addColorVariant}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-primary/20 bg-white px-3 py-2 text-sm font-semibold text-primary transition hover:bg-primary hover:text-white"
+                    >
+                      <FaPlus className="h-3.5 w-3.5" />
+                      Add Color
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={ensureBidirectionalLinks}
+                      disabled={isSyncingVariants || !product?._id}
+                      className="inline-flex items-center justify-center gap-2 rounded-lg border border-green-200 bg-white px-3 py-2 text-sm font-semibold text-green-700 transition hover:bg-green-50 disabled:opacity-60"
+                    >
+                      <FaSync className="h-3.5 w-3.5" />
+                      {isSyncingVariants ? 'Synchronizing...' : 'Ensure bidirectional links'}
+                    </button>
+                  </div>
                 </div>
 
                 {formData.colorVariants.length === 0 ? (
@@ -769,6 +840,21 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
                               </option>
                             ))}
                           </select>
+                          <div className="flex items-center gap-2">
+                            {variant.productId ? (
+                              backlinkMap[variant.productId] ? (
+                                <span className="inline-flex items-center gap-2 rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-700">
+                                  <FaCheck className="h-3 w-3" />
+                                  Linked both ways
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-2 rounded-full bg-yellow-50 px-2 py-1 text-xs font-semibold text-yellow-700">
+                                  <FaInfoCircle className="h-3 w-3" />
+                                  Missing backlink
+                                </span>
+                              )
+                            ) : null}
+                          </div>
                           <button
                             type="button"
                             onClick={() => removeColorVariant(index)}

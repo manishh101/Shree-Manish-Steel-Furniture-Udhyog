@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'react-toastify';
 import {
   FaChevronLeft,
@@ -150,6 +150,10 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
   const [relatedLoading, setRelatedLoading] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const relatedProductsRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
+  const urlColorParam = searchParams?.get('color') || '';
+
+  const [linkedProductsMap, setLinkedProductsMap] = useState<Record<string, Product | null>>({});
 
   // Quick view functionality
   const { quickViewProduct, isQuickViewOpen, openQuickView, closeQuickView } = useQuickView();
@@ -202,11 +206,34 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
     return images;
   }, [product]);
 
+  // Prefetch linked products for better variant rendering
+  useEffect(() => {
+    if (!product || !Array.isArray(product.colorVariants) || product.colorVariants.length === 0) return;
+
+    const ids = product.colorVariants
+      .map((v: any) => (typeof v.productId === 'string' ? v.productId : (v.productId && v.productId._id ? v.productId._id : undefined)))
+      .filter(Boolean) as string[];
+
+    const toFetch = ids.filter(id => !linkedProductsMap[id]);
+    if (toFetch.length === 0) return;
+
+    Promise.all(toFetch.map(id => productAPI.getById(id).then(p => ({ id, p })).catch(() => ({ id, p: null }))))
+      .then(results => {
+        setLinkedProductsMap(prev => {
+          const next = { ...prev };
+          results.forEach(r => { next[r.id] = r.p as Product | null; });
+          return next;
+        });
+      });
+  }, [product]);
+
   const colorChoices = useMemo<ColorChoice[]>(() => {
     if (!product) return [];
 
     const currentProductId = product._id || product.id || productId;
-    const activeColor = product.colorName?.trim();
+    // Prefer URL color param when present so navigating via ?color= keeps selection
+    const activeColorKey = urlColorParam ? String(urlColorParam).trim().toLowerCase() : (product.colorName ? normalizeColorKey(product.colorName) : '');
+
     const choices: Omit<ColorChoice, 'href' | 'isCurrent'>[] = [];
     const seenLabels = new Set<string>();
 
@@ -226,41 +253,54 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
       });
     };
 
-    if (activeColor) {
+    // Add THIS product's own color first (it's part of the variant group)
+    if (product.colorName) {
       addChoice({
-        label: activeColor,
+        label: product.colorName,
         hex: product.colorHex,
         productId: currentProductId,
         image: product.image || allImages[0]
       });
     }
 
+    // Add variants in their stored order (which is now canonical/alphabetical)
+    // These are all OTHER products in the group, already sorted
     if (Array.isArray(product.colorVariants)) {
-      product.colorVariants.forEach((variant) => {
-        const linkedProduct = typeof variant.productId === 'object' && variant.productId ? variant.productId : null;
-        const linkedProductId = linkedProduct?._id || (typeof variant.productId === 'string' ? variant.productId : undefined);
+      product.colorVariants.forEach((variant: any) => {
+        const linkedId = typeof variant.productId === 'string' ? variant.productId : (variant.productId && variant.productId._id ? variant.productId._id : undefined);
+        const linkedProduct = linkedId ? linkedProductsMap[linkedId] : (typeof variant.productId === 'object' ? variant.productId : null);
+
         const linkedProductImage = linkedProduct?.image || linkedProduct?.images?.[0];
         const linkedProductColor = linkedProduct?.colorName || variant.label;
 
         addChoice({
           label: linkedProductColor,
           hex: variant.hex || linkedProduct?.colorHex,
-          productId: linkedProductId,
+          productId: linkedId || (linkedProduct?._id as any) || undefined,
           image: variant.image || linkedProductImage
         });
       });
     }
 
+    // Fallback to simple colors array
     if (choices.length === 0 && Array.isArray(product.colors)) {
       product.colors.forEach((color) => addChoice({ label: color }));
     }
 
-    return choices.map((choice, index) => {
+    // Sort by label alphabetically to ensure canonical order across all pages
+    const sortedChoices = [...choices].sort((a, b) => {
+      const aLabel = a.label.toLowerCase();
+      const bLabel = b.label.toLowerCase();
+      return aLabel.localeCompare(bLabel);
+    });
+
+    return sortedChoices.map((choice, index) => {
       const targetProductId = choice.productId || currentProductId;
+
       const isCurrent =
-        targetProductId === currentProductId ||
-        (!!activeColor && normalizeColorKey(choice.label) === normalizeColorKey(activeColor)) ||
-        (!activeColor && index === 0);
+        String(targetProductId) === String(currentProductId) ||
+        (activeColorKey && normalizeColorKey(choice.label) === normalizeColorKey(activeColorKey)) ||
+        (!activeColorKey && index === 0);
 
       return {
         ...choice,
@@ -268,7 +308,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
         isCurrent
       };
     });
-  }, [allImages, product, productId]);
+  }, [allImages, product, productId, urlColorParam, linkedProductsMap]);
 
   // Preload all images when component mounts for smoother experience
   useEffect(() => {
