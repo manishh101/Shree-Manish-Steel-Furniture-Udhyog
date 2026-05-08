@@ -11,11 +11,13 @@ import {
   FaTimes,
   FaStar,
   FaSync,
-  FaImage
+  FaImage,
+  FaSearch
 } from 'react-icons/fa';
 
 const AdminProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -185,11 +187,40 @@ const AdminProducts = () => {
     }
   };
 
+  const filteredProducts = products.filter(product => 
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (product.category && product.category.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (product.subcategory && product.subcategory.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
-        <h1 className="text-xl sm:text-2xl font-bold text-primary">Manage Products</h1>
-        <div className="flex gap-2 w-full sm:w-auto">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-4">
+        <h1 className="text-xl sm:text-2xl font-bold text-primary whitespace-nowrap">Manage Products</h1>
+        
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto flex-1 md:justify-end">
+          <div className="relative w-full sm:max-w-xs">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <FaSearch className="h-4 w-4 text-gray-400" />
+            </div>
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:ring-primary focus:border-primary text-sm outline-none transition-shadow focus:shadow-sm"
+            />
+            {searchTerm && (
+              <button 
+                onClick={() => setSearchTerm('')}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+              >
+                <FaTimes className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          <div className="flex gap-2 w-full sm:w-auto shrink-0">
           <button
             onClick={testConnection}
             className="bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 transition-colors flex items-center justify-center text-sm"
@@ -215,6 +246,8 @@ const AdminProducts = () => {
         </div>
       </div>
 
+      </div>
+
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
           <strong>Error:</strong> {error}
@@ -229,7 +262,7 @@ const AdminProducts = () => {
         <>
           {/* Mobile card view */}
           <div className="lg:hidden space-y-3">
-            {products.map((product) => (
+            {filteredProducts.map((product) => (
               <div key={product._id} className="bg-white shadow rounded-lg p-4">
                 <div className="flex items-start">
                   <OptimizedImage
@@ -288,9 +321,9 @@ const AdminProducts = () => {
                 </div>
               </div>
             ))}
-            {products.length === 0 && (
+            {filteredProducts.length === 0 && (
               <div className="bg-white shadow rounded-lg p-4 text-center text-gray-500">
-                No products found. Add a new product to get started.
+                {searchTerm ? 'No products found matching your search.' : 'No products found. Add a new product to get started.'}
               </div>
             )}
           </div>
@@ -309,7 +342,7 @@ const AdminProducts = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                   <tr key={product._id}>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <OptimizedImage
@@ -379,10 +412,10 @@ const AdminProducts = () => {
                     </td>
                   </tr>
                 ))}
-                {products.length === 0 && (
+                {filteredProducts.length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-6 py-4 text-center text-gray-500">
-                      No products found. Add a new product to get started.
+                      {searchTerm ? 'No products found matching your search.' : 'No products found. Add a new product to get started.'}
                     </td>
                   </tr>
                 )}
