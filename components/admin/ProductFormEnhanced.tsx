@@ -187,8 +187,8 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
     image: '',
     images: [],
     imageFile: null,
-    additionalImageFiles: [null, null, null],
-    imagePreviews: { main: '', additional: ['', '', ''] },
+    additionalImageFiles: [null, null, null, null, null, null],
+    imagePreviews: { main: '', additional: ['', '', '', '', '', ''] },
     features: [],
     specifications: {
       material: '',
@@ -350,12 +350,12 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
         image: product.image || '',
         images: Array.isArray(product.images) ? product.images : [],
         imageFile: null,
-        additionalImageFiles: [null, null, null],
+        additionalImageFiles: [null, null, null, null, null, null],
         imagePreviews: {
           main: product.image || '',
           additional: Array.isArray(product.images) ?
-            [product.images[0] || '', product.images[1] || '', product.images[2] || ''] :
-            ['', '', '']
+            [product.images[0] || '', product.images[1] || '', product.images[2] || '', product.images[3] || '', product.images[4] || '', product.images[5] || ''] :
+            ['', '', '', '', '', '']
         },
         features: product.features || [],
         specifications: specificationsData,
@@ -928,8 +928,8 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
 
               <div>
                 <label className={labelClass}>Additional Images</label>
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                  {[0, 1, 2].map((index) => (
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                  {[0, 1, 2, 3, 4, 5].map((index) => (
                     <div key={index} className="overflow-hidden rounded-lg border border-slate-200 bg-white">
                       <div className="relative flex h-36 items-center justify-center bg-slate-100">
                         {formData.imagePreviews.additional[index] ? (
