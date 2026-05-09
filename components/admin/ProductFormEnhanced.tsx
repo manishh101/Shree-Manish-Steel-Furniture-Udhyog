@@ -504,6 +504,30 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
     });
   };
 
+  const handleVariantProductSelect = (index: number, selectedProductId: string) => {
+    setFormData(prev => {
+      const colorVariants = [...prev.colorVariants];
+      const selectedProduct = allProducts.find((item) => (item._id || item.id) === selectedProductId);
+
+      if (!colorVariants[index]) {
+        return prev;
+      }
+
+      colorVariants[index] = {
+        ...colorVariants[index],
+        productId: selectedProductId,
+        label: selectedProductId
+          ? (selectedProduct?.colorName?.trim() || selectedProduct?.name || colorVariants[index].label)
+          : colorVariants[index].label,
+        hex: selectedProductId
+          ? (selectedProduct?.colorHex?.trim() || colorVariants[index].hex)
+          : colorVariants[index].hex
+      };
+
+      return { ...prev, colorVariants };
+    });
+  };
+
   const removeColorVariant = (index: number) => {
     setFormData(prev => ({
       ...prev,
@@ -826,7 +850,7 @@ const ProductFormEnhanced: React.FC<ProductFormEnhancedProps> = ({ product, onSa
                           </div>
                           <select
                             value={variant.productId}
-                            onChange={(e) => updateColorVariant(index, 'productId', e.target.value)}
+                            onChange={(e) => handleVariantProductSelect(index, e.target.value)}
                             className={inputClass}
                             aria-label="Linked product page"
                           >
