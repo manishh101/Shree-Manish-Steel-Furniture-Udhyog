@@ -3,7 +3,7 @@
 import React, { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FaImages, FaEye, FaShoppingCart, FaHeart } from 'react-icons/fa';
+import { FaEye, FaShoppingCart, FaHeart } from 'react-icons/fa';
 import { scrollToTop } from '../../utils/scrollUtils';
 import ImageService from '../../services/imageService';
 import OptimizedImage from './OptimizedImage';
@@ -71,6 +71,8 @@ interface ProductCardProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onQuickView?: (product: any) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  onAddToCart?: (product: any) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onProductView?: (idOrProduct: string | any) => void;
   onProductLike?: (id: string) => void;
   showCategory?: boolean;
@@ -85,6 +87,7 @@ interface ProductCardProps {
 const ProductCard: React.FC<ProductCardProps> = React.memo(({
   product,
   onQuickView,
+  onAddToCart,
   onProductView,
   onProductLike,
   showCategory = true,
@@ -166,6 +169,24 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
     }
   };
 
+  const handleQuickViewClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (onQuickView) {
+      onQuickView(safeProduct);
+    }
+  };
+
+  const handleAddToCartClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (onAddToCart) {
+      onAddToCart(safeProduct);
+    }
+  };
+
   // Get variant-specific classes
   const getVariantConfig = (): VariantConfig => {
     switch (variant) {
@@ -215,30 +236,28 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
         </div>
 
         {/* Hover Overlay with Quick View and Add to Cart */}
-        <div className="absolute inset-0 flex items-center justify-center gap-4 bg-black/5 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (onQuickView) onQuickView(safeProduct);
-            }}
-            className="w-12 h-12 flex items-center justify-center rounded-full bg-white shadow-lg text-gray-700 hover:bg-primary hover:text-white transition-all duration-300 transform translate-y-4 group-hover:translate-y-0"
-            title="Quick View"
-          >
-            <FaEye className="text-xl" />
-          </button>
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              // Logic for add to cart could go here
-            }}
-            className="w-12 h-12 flex items-center justify-center rounded-full bg-white shadow-lg text-gray-700 hover:bg-primary hover:text-white transition-all duration-300 transform translate-y-4 group-hover:translate-y-0 delay-75"
-            title="Add to Cart"
-          >
-            <FaShoppingCart className="text-xl" />
-          </button>
-        </div>
+        {withActions && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center gap-3 bg-transparent opacity-0 transition-all duration-300 group-hover:opacity-100">
+            <button
+              type="button"
+              onClick={handleQuickViewClick}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-gray-700 shadow-[0_10px_30px_rgba(0,0,0,0.12)] transition-all duration-300 transform translate-y-3 scale-95 hover:bg-primary hover:text-white group-hover:translate-y-0 group-hover:scale-100"
+              title="Quick View"
+              aria-label="Quick View"
+            >
+              <FaEye className="text-xl" />
+            </button>
+            <button
+              type="button"
+              onClick={handleAddToCartClick}
+              className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-gray-700 shadow-[0_10px_30px_rgba(0,0,0,0.12)] transition-all duration-300 transform translate-y-3 scale-95 hover:bg-primary hover:text-white group-hover:translate-y-0 group-hover:scale-100"
+              title="Add to Cart"
+              aria-label="Add to Cart"
+            >
+              <FaShoppingCart className="text-xl" />
+            </button>
+          </div>
+        )}
 
         {/* Wishlist Heart Icon */}
         <div className="absolute top-3 right-3 z-20">
