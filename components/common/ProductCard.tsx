@@ -226,8 +226,10 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
             alt={ImageService.getImageAlt(safeProduct)}
             category={safeProduct.category}
             size="medium"
-            className={`w-full h-full object-contain p-4 transition-all duration-500 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'
-              }`}
+            // Make wrapper fill the container and let the inner <img> use cover
+            className="w-full h-full"
+            objectFit="cover"
+            imageClassName={`transition-all duration-500 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             onLoad={handleImageLoad}
             onError={handleImageError}
             lazy={variant !== 'featured' && variant !== 'bestseller'}
@@ -298,20 +300,34 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
         /* Full layout - centered text like Triveni */
         <div className="p-4 flex-1 flex flex-col items-center justify-center text-center bg-white border-t border-gray-50">
           <div className="mb-1.5">
-            <h3 className="text-xs md:text-sm font-bold text-gray-800 uppercase tracking-tight line-clamp-2 leading-tight group-hover:text-primary transition-colors px-1">
+            <h3 className="text-sm md:text-sm font-semibold text-gray-800 tracking-tight line-clamp-2 leading-tight group-hover:text-primary transition-colors px-1">
               {safeProduct.name || safeProduct.title}
             </h3>
           </div>
 
           <div className="flex flex-col items-center gap-1.5">
             {/* Dimensions with ruler icon */}
-            <div className="flex items-center gap-1.5 text-gray-400">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="opacity-50">
+            <div className="flex items-center gap-2 text-gray-600">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-400">
                 <path d="M21 16H3V8H21V16ZM3 16V18M21 16V18M7 16V14M11 16V12M15 16V14M19 16V14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              <span className="text-[10px] font-medium">
-                {safeProduct.dimensions && (safeProduct.dimensions.length || safeProduct.dimensions.width || safeProduct.dimensions.height) 
-                  ? `${safeProduct.dimensions.length || 0}x${safeProduct.dimensions.width || 0}x${safeProduct.dimensions.height || 0} mm`
+              <span className="text-xs font-semibold text-gray-600">
+                {safeProduct.dimensions && (safeProduct.dimensions.length || safeProduct.dimensions.width || safeProduct.dimensions.height)
+                  ? (() => {
+                      const toInches = (val: number | undefined | null) => {
+                        if (!val && val !== 0) return null;
+                        const n = Number(val) || 0;
+                        // convert mm to inches
+                        const inches = n / 25.4;
+                        // show one decimal if < 10, otherwise round
+                        return inches < 10 ? inches.toFixed(1) : Math.round(inches).toString();
+                      };
+
+                      const L = toInches(safeProduct.dimensions?.length) || '0';
+                      const W = toInches(safeProduct.dimensions?.width) || '0';
+                      const H = toInches(safeProduct.dimensions?.height) || '0';
+                      return `${L} x ${W} x ${H} in`;
+                    })()
                   : 'Standard Size'}
               </span>
             </div>

@@ -823,7 +823,11 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                     <OptimizedImage
                       src={allImages[selectedImageIndex]}
                       alt={product.name || "Product Image"}
-                      className="w-full h-full object-cover mix-blend-multiply transition-all duration-300"
+                      // ensure the actual <img> uses cover so there is no empty gap
+                      objectFit="cover"
+                      // keep visual helpers on the image itself
+                      imageClassName="mix-blend-multiply transition-all duration-300"
+                      className="w-full h-full"
                       size="medium"
                       priority={true}
                     />
