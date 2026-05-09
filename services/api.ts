@@ -888,22 +888,117 @@ export const calculateSearchScore = (query: string, product: Product): number =>
 };
 
 // Upload API
-export const uploadAPI = {
-  uploadImages: async (formData: FormData) => {
-    const response = await fetch(`${API_BASE_URL}/upload`, {
-      method: 'POST',
-      body: formData,
-      headers: {
-        ...getAuthHeader(),
-      },
-    });
+const MAX_UPLOAD_FILE_SIZE_BYTES = 1.8 * 1024 * 1024;
+const MAX_UPLOAD_DIMENSION = 1600;
+const UPLOAD_IMAGE_QUALITY = 0.82;
 
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Upload failed' }));
-      throw new Error(error.message || `HTTP error! status: ${response.status}`);
+const isBrowserImageFile = (file: File) =>
+  typeof window !== 'undefined' && file.type.startsWith('image/');
+
+const loadImageFromFile = (file: File): Promise<HTMLImageElement> =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(image);
+    };
+
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error('Failed to load image for compression'));
+    };
+
+    image.src = objectUrl;
+  });
+
+const optimizeImageFile = async (file: File): Promise<File> => {
+  if (!isBrowserImageFile(file) || file.size <= MAX_UPLOAD_FILE_SIZE_BYTES) {
+    return file;
+  }
+
+  try {
+    const image = await loadImageFromFile(file);
+    const { width, height } = image;
+
+    const scale = Math.min(1, MAX_UPLOAD_DIMENSION / Math.max(width, height));
+    const targetWidth = Math.max(1, Math.round(width * scale));
+    const targetHeight = Math.max(1, Math.round(height * scale));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+
+    const context = canvas.getContext('2d');
+    if (!context) {
+      return file;
     }
 
-    return response.json() as Promise<{ urls: string[] }>;
+    context.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob(
+        (result) => resolve(result),
+        'image/webp',
+        UPLOAD_IMAGE_QUALITY
+      );
+    });
+
+    if (!blob) {
+      return file;
+    }
+
+    const optimizedName = file.name.replace(/\.[^.]+$/, '.webp');
+    return new File([blob], optimizedName, {
+      type: 'image/webp',
+      lastModified: Date.now()
+    });
+  } catch (error) {
+    console.warn('Image optimization failed, uploading original file:', error);
+    return file;
+  }
+};
+
+export const uploadAPI = {
+  uploadImages: async (formData: FormData) => {
+    const uploadEntries = Array.from(formData.entries()).filter(([, value]) => value instanceof File);
+    const folder = (formData.get('folder') as string) || 'manish-steel';
+
+    if (uploadEntries.length === 0) {
+      throw new Error('No files provided for upload');
+    }
+
+    const urls: string[] = [];
+
+    for (const [fieldName, value] of uploadEntries) {
+      const file = await optimizeImageFile(value as File);
+      const singleUploadForm = new FormData();
+      singleUploadForm.append('folder', folder);
+      singleUploadForm.append(fieldName, file, file.name);
+
+      const response = await fetch(`${API_BASE_URL}/upload`, {
+        method: 'POST',
+        body: singleUploadForm,
+        headers: {
+          ...getAuthHeader(),
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ message: 'Upload failed' }));
+        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json() as { url?: string; urls?: string[] };
+      const uploadedUrl = result.url || result.urls?.[0];
+
+      if (uploadedUrl) {
+        urls.push(uploadedUrl);
+      }
+    }
+
+    return { urls };
   },
 
   uploadSingleImage: async (file: File) => {
