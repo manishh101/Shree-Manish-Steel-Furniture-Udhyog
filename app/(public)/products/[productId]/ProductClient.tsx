@@ -885,7 +885,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
           <div className="flex flex-col">
             {/* Product Name & Actions */}
             <div className="flex items-start justify-between mb-6 pb-5 border-b border-gray-100">
-              <h1 className="text-2xl md:text-4xl font-bold text-gray-900 leading-tight flex-1 pr-4">
+              <h1 className="text-lg md:text-2xl font-semibold text-gray-800 leading-tight flex-1 pr-4 font-poppins">
                 {product.name}
               </h1>
               <div className="flex items-center gap-4 shrink-0 mt-2">
@@ -899,10 +899,10 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
             </div>            {/* Product Description */}
             {product.description && (
               <div className="mb-6">
-                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide mb-2">DESCRIPTION</h3>
-                <p className="text-gray-600 leading-relaxed text-sm md:text-base">
-                  {product.description}
-                </p>
+                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-2 font-poppins">DESCRIPTION</h3>
+                <p className="text-gray-600 leading-relaxed text-sm md:text-base font-open-sans">
+                      {product.description}
+                    </p>
               </div>
             )}
 
@@ -1002,8 +1002,8 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                       <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.material || "C.R. SHEET"}</span>
                     </div>
                     <div className="flex justify-between border-b border-gray-50 pb-2">
-                      <span className="text-gray-500 w-1/2">Dimension (MM):</span>
-                      <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.dimensions || "Contact for details"}</span>
+                      <span className="text-gray-500 w-1/2">Dimension (in):</span>
+                      <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.dimensions ? `${product.specifications.dimensions} in` : "Contact for details"}</span>
                     </div>
                     <div className="flex justify-between border-b border-gray-50 pb-2">
                       <span className="text-gray-500 w-1/2">Guarantee:</span>

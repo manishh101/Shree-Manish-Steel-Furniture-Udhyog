@@ -313,21 +313,7 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
               </svg>
               <span className="text-xs font-semibold text-gray-600">
                 {safeProduct.dimensions && (safeProduct.dimensions.length || safeProduct.dimensions.width || safeProduct.dimensions.height)
-                  ? (() => {
-                      const toInches = (val: number | undefined | null) => {
-                        if (!val && val !== 0) return null;
-                        const n = Number(val) || 0;
-                        // convert mm to inches
-                        const inches = n / 25.4;
-                        // show one decimal if < 10, otherwise round
-                        return inches < 10 ? inches.toFixed(1) : Math.round(inches).toString();
-                      };
-
-                      const L = toInches(safeProduct.dimensions?.length) || '0';
-                      const W = toInches(safeProduct.dimensions?.width) || '0';
-                      const H = toInches(safeProduct.dimensions?.height) || '0';
-                      return `${L} x ${W} x ${H} in`;
-                    })()
+                  ? `${safeProduct.dimensions.length || 0} x ${safeProduct.dimensions.width || 0} x ${safeProduct.dimensions.height || 0} in`
                   : 'Standard Size'}
               </span>
             </div>

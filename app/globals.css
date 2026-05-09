@@ -265,6 +265,17 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
+/* Helper font utility classes to apply imported Google fonts */
+.font-poppins {
+  font-family: 'Poppins', sans-serif;
+}
+.font-open-sans {
+  font-family: 'Open Sans', sans-serif;
+}
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
+
 /* Custom xs breakpoint for better mobile layouts */
 @media (min-width: 480px) {
   .xs\:grid-cols-2 {
