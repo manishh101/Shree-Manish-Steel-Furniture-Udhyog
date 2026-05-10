@@ -895,7 +895,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
             {product.description && (
               <div className="mb-6">
                 <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-2 font-poppins">DESCRIPTION</h3>
-                <p className="text-gray-600 leading-relaxed text-sm md:text-base font-open-sans">
+                <p className="text-gray-800 font-medium leading-relaxed text-sm md:text-base font-open-sans">
                       {product.description}
                     </p>
               </div>
@@ -993,39 +993,39 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                 <div className="p-4 pt-0 text-gray-600">
                   <div className="grid grid-cols-1 gap-y-3 text-sm">
                     <div className="flex justify-between border-b border-gray-50 pb-2">
-                      <span className="text-gray-500 w-1/2">Material:</span>
+                      <span className="text-gray-800 font-medium w-1/2">Material:</span>
                       <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.material || "C.R. SHEET"}</span>
                     </div>
                     <div className="flex justify-between border-b border-gray-50 pb-2">
-                      <span className="text-gray-500 w-1/2">Dimension (in):</span>
+                      <span className="text-gray-800 font-medium w-1/2">Dimension (in):</span>
                       <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.dimensions ? `${product.specifications.dimensions} in` : "Contact for details"}</span>
                     </div>
                     <div className="flex justify-between border-b border-gray-50 pb-2">
-                      <span className="text-gray-500 w-1/2">Guarantee:</span>
+                      <span className="text-gray-800 font-medium w-1/2">Guarantee:</span>
                       <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.guarantee || "10 Years"}</span>
                     </div>
                     <div className="flex justify-between border-b border-gray-50 pb-2">
-                      <span className="text-gray-500 w-1/2">Model Type:</span>
+                      <span className="text-gray-800 font-medium w-1/2">Model Type:</span>
                       <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.modelType || "Premium"}</span>
                     </div>
                     <div className="flex justify-between border-b border-gray-50 pb-2">
-                      <span className="text-gray-500 w-1/2">Model Width:</span>
+                      <span className="text-gray-800 font-medium w-1/2">Model Width:</span>
                       <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.modelWidth || "Standard"}</span>
                     </div>
                     <div className="flex justify-between border-b border-gray-50 pb-2">
-                      <span className="text-gray-500 w-1/2">Hangers:</span>
+                      <span className="text-gray-800 font-medium w-1/2">Hangers:</span>
                       <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.hangers || "Available"}</span>
                     </div>
                     <div className="flex justify-between border-b border-gray-50 pb-2">
-                      <span className="text-gray-500 w-1/2">No. of Doors:</span>
+                      <span className="text-gray-800 font-medium w-1/2">No. of Doors:</span>
                       <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.noOfDoors || "Varies"}</span>
                     </div>
                     <div className="flex justify-between border-b border-gray-50 pb-2">
-                      <span className="text-gray-500 w-1/2">Type of Paint:</span>
+                      <span className="text-gray-800 font-medium w-1/2">Type of Paint:</span>
                       <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.typeOfPaint || "Powder Coated"}</span>
                     </div>
                     <div className="flex justify-between border-b border-gray-50 pb-2">
-                      <span className="text-gray-500 w-1/2">Brand:</span>
+                      <span className="text-gray-800 font-medium w-1/2">Brand:</span>
                       <span className="font-medium text-gray-900 w-1/2 text-left">{product.specifications?.brand || "Shree Manish Steel"}</span>
                     </div>
                   </div>
@@ -1038,7 +1038,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                   <h3 className="text-base font-semibold text-gray-900">Key Features</h3>
                   <FaChevronRight className="text-gray-400 rotate-90 group-open:-rotate-90 transition-transform text-xs" />
                 </summary>
-                <div className="p-4 pt-0 text-gray-600 text-sm">
+                <div className="p-4 pt-0 text-gray-800 font-medium text-sm">
                   {product.features && product.features.length > 0 ? (
                     <ul className="list-disc list-inside space-y-2">
                       {product.features.map((feature, index) => (
@@ -1057,22 +1057,22 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                   <h3 className="text-base font-semibold text-gray-900">Manufacturer Details</h3>
                   <FaChevronRight className="text-gray-400 rotate-90 group-open:-rotate-90 transition-transform text-xs" />
                 </summary>
-                <div className="p-4 pt-0 text-gray-600 text-sm">
+                <div className="p-4 pt-0 text-gray-800 text-sm">
                   <div className="grid grid-cols-1 gap-3">
                     <div className="flex flex-col sm:flex-row sm:justify-between">
-                      <span className="text-gray-500">Name:</span>
+                      <span className="text-gray-800 font-medium">Name:</span>
                       <span className="font-medium text-gray-900 sm:text-right">{manufacturerDetails.name}</span>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:justify-between">
-                      <span className="text-gray-500">Address:</span>
+                      <span className="text-gray-800 font-medium">Address:</span>
                       <span className="font-medium text-gray-900 sm:text-right">{manufacturerDetails.address}</span>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:justify-between">
-                      <span className="text-gray-500">Email:</span>
+                      <span className="text-gray-800 font-medium">Email:</span>
                       <span className="font-medium text-gray-900 sm:text-right">{manufacturerDetails.email}</span>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:justify-between">
-                      <span className="text-gray-500">Country of Origin:</span>
+                      <span className="text-gray-800 font-medium">Country of Origin:</span>
                       <span className="font-medium text-gray-900 sm:text-right">{manufacturerDetails.countryOfOrigin}</span>
                     </div>
                   </div>
