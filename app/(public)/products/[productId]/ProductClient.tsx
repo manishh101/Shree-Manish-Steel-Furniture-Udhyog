@@ -765,7 +765,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                 {/* Up Arrow */}
                 <button
                   onClick={handlePrevImage}
-                  className="w-full h-8 xl:h-10 border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center shrink-0 mb-2 transition-colors"
+                  className="w-full h-6 xl:h-8 border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center shrink-0 mb-2 transition-colors"
                   aria-label="Previous thumbnail"
                 >
                   <FaChevronUp className="text-gray-500 text-sm" />
@@ -788,7 +788,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                 {/* Down Arrow */}
                 <button
                   onClick={handleNextImage}
-                  className="w-full h-8 xl:h-10 border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center shrink-0 mt-2 transition-colors"
+                  className="w-full h-6 xl:h-8 border border-gray-200 bg-white hover:bg-gray-50 flex items-center justify-center shrink-0 mt-2 transition-colors"
                   aria-label="Next thumbnail"
                 >
                   <FaChevronDown className="text-gray-500 text-sm" />
