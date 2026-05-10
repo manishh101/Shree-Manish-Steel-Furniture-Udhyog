@@ -206,31 +206,34 @@ export const productAPI = {
   getById: (id: string) =>
     fetchAPI<Product>(`/products/${id}`),
 
-  getByCategory: (category: string, options: { subcategory?: string; limit?: number } = {}) =>
+  getByCategory: (category: string, options: { subcategory?: string; page?: number; limit?: number } = {}) =>
     fetchAPI<ProductsResponse>('/products/filter', {
       params: {
         category,
         // Only include all subcategories if no specific subcategory is selected
         ...(options.subcategory ? { subcategory: options.subcategory } : { includeAllSubcategories: true }),
+        ...(options.page ? { page: options.page } : {}),
         limit: options.limit || 100
       }
     }),
 
-  getByCategoryAlternative: (category: string, options: { subcategory?: string; limit?: number; timestamp?: number } = {}) =>
+  getByCategoryAlternative: (category: string, options: { subcategory?: string; page?: number; limit?: number; timestamp?: number } = {}) =>
     fetchAPI<ProductsResponse>('/products/filter', {
       params: {
         category,
         subcategory: options.subcategory,
+        ...(options.page ? { page: options.page } : {}),
         limit: options.limit || 100,
         timestamp: options.timestamp
       }
     }),
 
-  getProductsByCategory: (category: string, options: { limit?: number } = {}) =>
+  getProductsByCategory: (category: string, options: { page?: number; limit?: number } = {}) =>
     fetchAPI<ProductsResponse>('/products/filter', {
       params: {
         category,
         includeAllSubcategories: true,
+        ...(options.page ? { page: options.page } : {}),
         limit: options.limit || 1000
       }
     }),

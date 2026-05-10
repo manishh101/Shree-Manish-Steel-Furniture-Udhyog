@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
@@ -12,7 +12,6 @@ import {
 } from 'react-icons/fa';
 import { productAPI, categoryAPI, type Product, type Category } from '../../../services/api';
 import ProductCard from '../../../components/common/ProductCard';
-import { scrollToTop } from '../../../utils/scrollUtils';
 import QuickView from '../../../components/QuickView';
 import useQuickView from '../../../hooks/useQuickView';
 
@@ -69,6 +68,10 @@ function ProductsPageContent() {
   const [mobileFiltersVisible, setMobileFiltersVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [sortDrawerVisible, setSortDrawerVisible] = useState(false);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   // Quick View Hook
   const { quickViewProduct, isQuickViewOpen, openQuickView, closeQuickView } = useQuickView();
@@ -81,6 +84,10 @@ function ProductsPageContent() {
   useEffect(() => {
     const category = searchParams.get('category') || 'all';
     const subcategory = searchParams.get('subcategory') || null;
+    setCurrentPage(1);
+    setProducts([]);
+    setTotalProducts(0);
+    setHasMore(true);
     setSelectedCategory(category);
     setSelectedSubcategory(subcategory);
   }, [searchParams]);
@@ -102,31 +109,83 @@ function ProductsPageContent() {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        setLoading(true);
-        setError(null);
+        if (currentPage === 1) {
+          setLoading(true);
+          setError(null);
+          setProducts([]);
+          setTotalProducts(0);
+          setHasMore(true);
+        } else {
+          setIsLoadingMore(true);
+        }
 
         let response;
         if (selectedCategory === 'all') {
-          response = await productAPI.getAll(1, 100);
+          response = await productAPI.getAll(currentPage, itemsPerPage);
         } else {
           response = await productAPI.getByCategory(selectedCategory, {
-            subcategory: selectedSubcategory || undefined
+            subcategory: selectedSubcategory || undefined,
+            page: currentPage,
+            limit: itemsPerPage
           });
         }
 
-        const productData = response.products || response || [];
-        setProducts(Array.isArray(productData) ? productData : []);
+        const productData = Array.isArray(response.products) ? response.products : [];
+        const totalCount = response.totalProducts || 0;
+
+        setTotalProducts(totalCount);
+        setHasMore(productData.length === itemsPerPage && currentPage * itemsPerPage < totalCount);
+        setProducts(prev => {
+          if (currentPage === 1) {
+            return productData;
+          }
+
+          const existingIds = new Set(prev.map(product => product._id || product.id));
+          const nextProducts = productData.filter(product => !existingIds.has(product._id || product.id));
+          return [...prev, ...nextProducts];
+        });
       } catch (err) {
         console.error('Error loading products:', err);
-        setError(err instanceof Error ? err.message : 'Failed to load products');
-        setProducts([]);
+        if (currentPage === 1) {
+          setError(err instanceof Error ? err.message : 'Failed to load products');
+          setProducts([]);
+        } else {
+          setHasMore(false);
+        }
       } finally {
-        setLoading(false);
+        if (currentPage === 1) {
+          setLoading(false);
+        } else {
+          setIsLoadingMore(false);
+        }
       }
     };
 
     loadProducts();
-  }, [selectedCategory, selectedSubcategory]);
+  }, [selectedCategory, selectedSubcategory, currentPage]);
+
+  useEffect(() => {
+    const loadMoreTrigger = loadMoreRef.current;
+
+    if (!loadMoreTrigger || loading || isLoadingMore || !hasMore || error) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+
+        if (entry?.isIntersecting) {
+          setCurrentPage(prev => prev + 1);
+        }
+      },
+      { rootMargin: '300px 0px' }
+    );
+
+    observer.observe(loadMoreTrigger);
+
+    return () => observer.disconnect();
+  }, [loading, isLoadingMore, hasMore, error]);
 
   // Filter and sort products
   const filteredAndSortedProducts = useMemo(() => {
@@ -159,17 +218,7 @@ function ProductsPageContent() {
     return filtered;
   }, [products, searchTerm, sortOption]);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredAndSortedProducts.length / itemsPerPage);
-  const currentProducts = filteredAndSortedProducts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-
-  // Reset page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, selectedCategory, selectedSubcategory, sortOption]);
+  const visibleProductCount = filteredAndSortedProducts.length;
 
   // Navigation utility
   const navigateToProducts = useCallback((category: string, subcategory: string | null = null) => {
@@ -200,6 +249,10 @@ function ProductsPageContent() {
 
   const handleCategoryFilter = (categoryId: string) => {
     if (selectedCategory === categoryId) return;
+    setCurrentPage(1);
+    setProducts([]);
+    setTotalProducts(0);
+    setHasMore(true);
     setSelectedCategory(categoryId);
     setSelectedSubcategory(null);
     navigateToProducts(categoryId);
@@ -207,15 +260,15 @@ function ProductsPageContent() {
 
   const handleSubcategoryFilter = (categoryId: string, subcategoryId: string) => {
     if (selectedCategory === categoryId && selectedSubcategory === subcategoryId) return;
+    setCurrentPage(1);
+    setProducts([]);
+    setTotalProducts(0);
+    setHasMore(true);
     setSelectedCategory(categoryId);
     setSelectedSubcategory(subcategoryId);
     navigateToProducts(categoryId, subcategoryId);
   };
 
-  const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
-    scrollToTop({ instant: true });
-  };
 
   const getCategoryById = (categoryId: string) => {
     return categories.find(cat => (cat._id || cat.id) === categoryId);
@@ -264,7 +317,9 @@ function ProductsPageContent() {
               {loading ? (
                 'Loading products...'
               ) : (
-                `Showing ${Math.min((currentPage - 1) * itemsPerPage + 1, filteredAndSortedProducts.length)}–${Math.min(currentPage * itemsPerPage, filteredAndSortedProducts.length)} of ${filteredAndSortedProducts.length} results`
+                totalProducts > 0
+                  ? `Showing ${visibleProductCount} of ${totalProducts} products`
+                  : `Showing ${visibleProductCount} products`
               )}
             </div>
           </div>
@@ -509,7 +564,7 @@ function ProductsPageContent() {
                   <>
                     {/* Products Grid */}
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                      {currentProducts.map((product, index) => (
+                      {filteredAndSortedProducts.map((product, index) => (
                         <div
                           key={product._id || product.id}
                           className="animate-fadeIn hover:scale-105 transition-transform duration-300"
@@ -522,56 +577,17 @@ function ProductsPageContent() {
                         </div>
                       ))}
                     </div>
+
+                    {hasMore && !error && (
+                      <div ref={loadMoreRef} className="py-10 flex justify-center">
+                        {isLoadingMore ? (
+                          <div className="text-sm text-gray-500">Loading more products...</div>
+                        ) : (
+                          <div className="h-4" aria-hidden="true" />
+                        )}
+                      </div>
+                    )}
                   </>
-                )}
-
-                {/* Pagination */}
-                {totalPages > 1 && (
-                  <div className="flex justify-center mt-12">
-                    <div className="flex items-center space-x-2 bg-white rounded-lg border border-gray-200 p-1">
-                      <button
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className={`px-3 py-2 rounded-md font-medium transition-all duration-200 ${currentPage === 1
-                            ? 'text-gray-400 cursor-not-allowed'
-                            : 'text-gray-700 hover:bg-gray-100'
-                          }`}
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
-                        </svg>
-                      </button>
-
-                      {[...Array(totalPages)].map((_, index) => {
-                        const pageNumber = index + 1;
-                        return (
-                          <button
-                            key={pageNumber}
-                            onClick={() => handlePageChange(pageNumber)}
-                            className={`px-3 py-2 rounded-md font-medium transition-all duration-200 ${currentPage === pageNumber
-                                ? 'bg-primary text-white'
-                                : 'text-gray-700 hover:bg-gray-100'
-                              }`}
-                          >
-                            {pageNumber}
-                          </button>
-                        );
-                      })}
-
-                      <button
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className={`px-3 py-2 rounded-md font-medium transition-all duration-200 ${currentPage === totalPages
-                            ? 'text-gray-400 cursor-not-allowed'
-                            : 'text-gray-700 hover:bg-gray-100'
-                          }`}
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
                 )}
               </>
             )}
