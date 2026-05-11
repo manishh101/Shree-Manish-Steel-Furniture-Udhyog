@@ -855,7 +855,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
               )}
 
               {/* Feature Badges Below Image */}
-              <div className="bg-[#f3f4f6] border border-gray-200 rounded-xl p-4 mt-2">
+              <div className="hidden lg:block bg-[#f3f4f6] border border-gray-200 rounded-xl p-4 mt-2">
                 <div className="grid grid-cols-3 gap-2 text-center">
                   <div className="flex flex-col items-center gap-1.5">
                     <FaLock className="w-6 h-6 text-gray-600" />
@@ -1076,6 +1076,24 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                   </div>
                 </div>
               </details>
+            </div>
+
+            {/* Feature Badges for Mobile */}
+            <div className="lg:hidden bg-[#f3f4f6] border border-gray-200 rounded-xl p-4">
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="flex flex-col items-center gap-1.5">
+                  <FaLock className="w-6 h-6 text-gray-600" />
+                  <span className="text-[11px] sm:text-sm text-gray-700 font-medium leading-tight">Guarantee on Lock</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5">
+                  <FaPaintBrush className="w-6 h-6 text-gray-600" />
+                  <span className="text-[11px] sm:text-sm text-gray-700 font-medium leading-tight">Guarantee on Paint</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5">
+                  <FaTruck className="w-6 h-6 text-gray-600" />
+                  <span className="text-[11px] sm:text-sm text-gray-700 font-medium leading-tight">Free Home Delivery*</span>
+                </div>
+              </div>
             </div>
 
             {/* Back to Products link */}
