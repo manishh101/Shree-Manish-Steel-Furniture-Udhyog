@@ -30,7 +30,10 @@ interface Product {
 
 class ImageService {
   static getCloudinaryUrl(publicId: string, transformations: TransformationOptions = {}): string {
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwrrja8cz';
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    if (!cloudName) {
+      throw new Error('NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME environment variable is required');
+    }
     const baseUrl = `https://res.cloudinary.com/${cloudName}/image/upload`;
 
     const {

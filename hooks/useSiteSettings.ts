@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { settingsAPI, SiteSettings } from '@/services/api';
+import { logger } from '@/lib/logger';
 
 // Default contact information from original React app
 const defaultSettings: SiteSettings = {
@@ -78,7 +79,7 @@ export function useSiteSettings() {
         setSettings(fetchedSettings);
       }
     } catch (err) {
-      console.error('Error fetching site settings:', err);
+      logger.error('Error fetching site settings', err as Error);
       setError(err instanceof Error ? err.message : 'Failed to fetch settings');
       // Use cached or default settings on error
       setSettings(settingsCache || defaultSettings);
@@ -132,7 +133,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
       };
     }
   } catch (error) {
-    console.error('Error fetching site settings:', error);
+    logger.error('Error fetching site settings', error as Error);
   }
   return defaultSettings;
 }

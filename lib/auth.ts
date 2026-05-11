@@ -1,7 +1,15 @@
 import jwt from 'jsonwebtoken';
 import { NextRequest } from 'next/server';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'manishsteelsecret';
+// JWT_SECRET must be provided via environment variables
+// Never use hardcoded defaults in production
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error(
+    'JWT_SECRET environment variable is required. Please set it in your .env.local file.'
+  );
+}
 
 export interface JWTPayload {
   user: {

@@ -33,11 +33,23 @@ class CloudinaryImageService {
    * Get cloudinary configuration
    */
   static getConfig(): CloudinaryConfig {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    const folder = process.env.NEXT_PUBLIC_CLOUDINARY_FOLDER;
+
+    if (!cloudName || !apiKey || !uploadPreset) {
+      throw new Error(
+        'Cloudinary configuration incomplete. Please set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME, ' +
+        'NEXT_PUBLIC_CLOUDINARY_API_KEY, and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET environment variables.'
+      );
+    }
+
     return {
-      cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'dwrrja8cz',
-      apiKey: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY || '',
-      uploadPreset: process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'manish-steel',
-      folder: process.env.NEXT_PUBLIC_CLOUDINARY_FOLDER || 'manish-steel'
+      cloudName,
+      apiKey,
+      uploadPreset,
+      folder: folder || 'manish-steel'
     };
   }
 

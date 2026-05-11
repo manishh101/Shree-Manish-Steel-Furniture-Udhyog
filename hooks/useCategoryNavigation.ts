@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import cacheService from '../services/cacheService';
+import { logger } from '@/lib/logger';
 
 interface Subcategory {
   id: string;
@@ -46,9 +47,9 @@ export const useCategoryNavigation = (): UseCategoryNavigationReturn => {
       const categoriesData = await cacheService.getCategories(forceRefresh);
       setCategories(categoriesData);
 
-      console.log('useCategoryNavigation: Loaded', categoriesData.length, 'categories');
+      logger.debug('Loaded categories', { count: categoriesData.length });
     } catch (err) {
-      console.error('useCategoryNavigation: Error loading categories:', err);
+      logger.error('Error loading categories', err as Error);
       setError((err as Error).message);
       setCategories([]);
     } finally {

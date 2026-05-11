@@ -3,6 +3,8 @@ import { connectDB } from '@/lib/db';
 import Inquiry from '@/models/Inquiry';
 import { getUserFromRequest } from '@/lib/auth';
 import { sendWhatsAppInquiryAlert } from '@/services/notification';
+import { ValidationSchemas, escapeRegex } from '@/lib/validation';
+import { logger } from '@/lib/logger';
 
 // GET /api/inquiries - Get all inquiries (admin only)
 export async function GET(request: NextRequest) {
@@ -10,6 +12,7 @@ export async function GET(request: NextRequest) {
     const user = getUserFromRequest(request);
 
     if (!user || user.role !== 'admin') {
+      logger.warn('Unauthorized inquiry access attempt');
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -19,22 +22,24 @@ export async function GET(request: NextRequest) {
     await connectDB();
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10')));
     const status = searchParams.get('status');
     const search = searchParams.get('search');
 
-    const query: any = {};
+    const query: Record<string, unknown> = {};
 
     if (status && status !== 'all') {
       query.status = status;
     }
 
+    // Fix MongoDB injection vulnerability by escaping regex
     if (search) {
+      const escapedSearch = escapeRegex(search);
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } },
-        { phone: { $regex: search, $options: 'i' } }
+        { name: { $regex: escapedSearch, $options: 'i' } },
+        { email: { $regex: escapedSearch, $options: 'i' } },
+        { phone: { $regex: escapedSearch, $options: 'i' } }
       ];
     }
 
@@ -56,7 +61,7 @@ export async function GET(request: NextRequest) {
       totalInquiries
     });
   } catch (error) {
-    console.error('Error fetching inquiries:', error);
+    logger.error('Error fetching inquiries', error as Error);
     return NextResponse.json(
       { error: 'Failed to fetch inquiries' },
       { status: 500 }
@@ -70,41 +75,48 @@ export async function POST(request: NextRequest) {
     await connectDB();
     const data = await request.json();
 
-    // Validate required fields
-    const requiredFields = ['name', 'email', 'phone', 'message'];
-    for (const field of requiredFields) {
-      if (!data[field] || data[field].trim() === '') {
-        return NextResponse.json(
-          { error: `${field} is required` },
-          { status: 400 }
-        );
-      }
+    // Validate request payload with Zod schema
+    const validation = ValidationSchemas.inquiry.safeParse(data);
+    if (!validation.success) {
+      logger.warn('Invalid inquiry submission', validation.error.errors);
+      return NextResponse.json(
+        { error: 'Invalid input data' },
+        { status: 400 }
+      );
     }
 
-    // Set default category if not provided
-    if (!data.category) {
-      data.category = 'general';
-    }
+    const validData = validation.data;
 
     // Get IP address
     const forwarded = request.headers.get('x-forwarded-for');
     const ip = forwarded ? forwarded.split(',')[0] : 'unknown';
-    data.ipAddress = ip;
 
-    const inquiry = new Inquiry(data);
+    const inquiryData = {
+      name: validData.name,
+      email: validData.email,
+      phone: validData.phone,
+      message: validData.message,
+      category: validData.category || 'general',
+      ipAddress: ip,
+      status: 'new'
+    };
+
+    const inquiry = new Inquiry(inquiryData);
     await inquiry.save();
 
-    // Send WhatsApp notification - await it but catch error so it doesn't block success response
+    logger.debug('Inquiry created successfully', { id: inquiry._id });
+
+    // Send WhatsApp notification - don't block response
     try {
       await sendWhatsAppInquiryAlert({
-        name: data.name,
-        phone: data.phone,
-        email: data.email,
-        message: data.message,
-        category: data.category
+        name: validData.name,
+        phone: validData.phone,
+        email: validData.email,
+        message: validData.message,
+        category: validData.category
       });
     } catch (err) {
-      console.error('Background WhatsApp notification failed:', err);
+      logger.error('Background WhatsApp notification failed', err as Error);
     }
 
     return NextResponse.json({
@@ -113,7 +125,7 @@ export async function POST(request: NextRequest) {
       data: inquiry
     }, { status: 201 });
   } catch (error) {
-    console.error('Error creating inquiry:', error);
+    logger.error('Error creating inquiry', error as Error);
     return NextResponse.json(
       { error: 'Failed to submit inquiry' },
       { status: 500 }

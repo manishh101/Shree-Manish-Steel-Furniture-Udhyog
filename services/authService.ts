@@ -30,108 +30,12 @@ class AuthService {
   private TOKEN_KEY = 'manish_steel_auth_token';
   private USER_KEY = 'manish_steel_user_data';
   private tokenCheckInterval: NodeJS.Timeout | null = null;
-  private isApiConnected = false;
-  private offlineModeActive = false;
-  private ADMIN_CREDENTIALS = {
-    email: '9814379071',
-    password: 'M@nishsteel'
-  };
+
 
   constructor() {
     if (typeof window !== 'undefined') {
       this.initializeTokenValidation();
     }
-  }
-
-  /**
-   * Check API health with timeout
-   */
-  async checkApiHealth(timeout = 2000): Promise<void> {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-      const response = await fetch(`${API_BASE_URL}/health`, {
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-      this.isApiConnected = response.ok;
-    } catch {
-      this.isApiConnected = false;
-      
-      // Always set offline mode active for admin
-      const user = this.getUser();
-      if (user && user.id === 'admin-local' && user.email === this.ADMIN_CREDENTIALS.email) {
-        this.offlineModeActive = true;
-      }
-    }
-  }
-
-  /**
-   * Create admin user object for offline mode
-   */
-  private createAdminUser(): User {
-    return {
-      id: "admin-local",
-      name: "Admin User",
-      email: this.ADMIN_CREDENTIALS.email,
-      role: "admin",
-      isAdmin: true
-    };
-  }
-
-  /**
-   * Create a valid JWT-like token for offline mode
-   */
-  private createOfflineToken(): string {
-    return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiYWRtaW4tbG9jYWwifSwiaXNzIjoibWFuaXNoLXN0ZWVsLWFwaSIsImF1ZCI6Im1hbmlzaC1zdGVlbC1mcm9udGVuZCIsImlhdCI6MTYyMDMxMjM0NSwiZXhwIjoxNjIwMzk4NzQ1fQ.mocked-signature-for-local-development-only';
-  }
-
-  /**
-   * Handle admin offline login
-   */
-  private handleOfflineAdminLogin(): AuthResponse {
-    try {
-      const mockAdminUser = this.createAdminUser();
-      const mockToken = this.createOfflineToken();
-
-      this.setToken(mockToken);
-      this.setUser(mockAdminUser);
-      this.offlineModeActive = true;
-
-      return {
-        success: true,
-        user: mockAdminUser,
-        message: "Login successful (offline mode)"
-      };
-    } catch {
-      return {
-        success: false,
-        message: "Failed to log in offline mode"
-      };
-    }
-  }
-
-  /**
-   * Check if credentials are admin credentials
-   */
-  isAdminCredentials(email: string, password: string): boolean {
-    return email === this.ADMIN_CREDENTIALS.email && password === this.ADMIN_CREDENTIALS.password;
-  }
-
-  /**
-   * Check if API is connected
-   */
-  isApiAvailable(): boolean {
-    return this.isApiConnected;
-  }
-
-  /**
-   * Check if offline mode is active
-   */
-  isOfflineMode(): boolean {
-    return this.offlineModeActive;
   }
 
   /**
@@ -143,16 +47,7 @@ class AuthService {
     const token = this.getToken();
     const user = this.getUser();
 
-    if (!token || !user) {
-      return false;
-    }
-
-    // For local admin token with admin user, always return true
-    if (user.id === 'admin-local' && user.email === this.ADMIN_CREDENTIALS.email) {
-      return true;
-    }
-
-    return true;
+    return !!(token && user);
   }
 
   /**
@@ -165,59 +60,44 @@ class AuthService {
 
     const sanitizedEmail = emailOrPhone.toString().trim();
 
-    // Check for admin credentials first
-    if (this.isAdminCredentials(sanitizedEmail, password)) {
-      return this.handleOfflineAdminLogin();
-    }
+    // Always require API login - no offline mode fallback
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: sanitizedEmail,
+          password: password
+        })
+      });
 
-    // Check API health first
-    await this.checkApiHealth();
+      const data = await response.json() as ApiResponse<{ token: string; user: User }>;
 
-    // Try API login if connected
-    if (this.isApiConnected) {
-      try {
-        const response = await fetch(`${API_BASE_URL}/auth/login`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: sanitizedEmail,
-            password: password
-          })
-        });
+      if (response.ok && data.success && data.data.token) {
+        this.setToken(data.data.token);
+        this.setUser(data.data.user);
+        this.startTokenValidation();
 
-        const data = await response.json() as ApiResponse<{ token: string; user: User }>;
-
-        if (response.ok && data.success && data.data.token) {
-          this.setToken(data.data.token);
-          this.setUser(data.data.user);
-          this.startTokenValidation();
-
-          return {
-            success: true,
-            user: data.data.user,
-            message: data.message || 'Login successful'
-          };
-        }
-
-        throw new Error(data.message || 'Login failed');
-      } catch (error) {
-        // If API login fails but it's admin credentials, fall back to offline mode
-        if (this.isAdminCredentials(sanitizedEmail, password)) {
-          return this.handleOfflineAdminLogin();
-        }
-        throw error;
+        return {
+          success: true,
+          user: data.data.user,
+          message: data.message || 'Login successful'
+        };
       }
-    }
 
-    // If not connected and not admin, throw error
-    if (!this.isAdminCredentials(sanitizedEmail, password)) {
-      throw new Error('Server is not available. Please try again later.');
+      return {
+        success: false,
+        message: data.message || 'Login failed'
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Network error';
+      return {
+        success: false,
+        message: `Login failed: ${errorMessage}`
+      };
     }
-
-    // Fallback to offline admin login
-    return this.handleOfflineAdminLogin();
   }
 
   /**
@@ -255,17 +135,7 @@ class AuthService {
   // Token management methods
   getToken(): string | null {
     if (typeof window === 'undefined') return null;
-
-    const token = localStorage.getItem(this.TOKEN_KEY);
-
-    // If not found and we're in admin mode, return offline admin token
-    if (!token && this.isAdmin()) {
-      const offlineToken = this.createOfflineToken();
-      localStorage.setItem(this.TOKEN_KEY, offlineToken);
-      return offlineToken;
-    }
-
-    return token;
+    return localStorage.getItem(this.TOKEN_KEY);
   }
 
   setToken(token: string): void {
@@ -289,7 +159,6 @@ class AuthService {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
     this.stopTokenValidation();
-    this.offlineModeActive = false;
   }
 
   // Token validation methods
@@ -297,12 +166,6 @@ class AuthService {
     const token = this.getToken();
     if (token) {
       this.startTokenValidation();
-    }
-
-    // Check if we're in offline mode with an admin user
-    const user = this.getUser();
-    if (user && user.id === 'admin-local') {
-      this.offlineModeActive = true;
     }
   }
 
@@ -339,11 +202,6 @@ class AuthService {
     const token = this.getToken();
     if (!token) {
       this.stopTokenValidation();
-      return;
-    }
-
-    // Skip validation when in offline mode
-    if (this.offlineModeActive) {
       return;
     }
 

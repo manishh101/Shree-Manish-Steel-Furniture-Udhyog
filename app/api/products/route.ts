@@ -4,6 +4,8 @@ import Product from '@/models/Product';
 import '@/models/Category'; // Required for populate()
 import '@/models/Subcategory'; // Required for populate()
 import { getUserFromRequest } from '@/lib/auth';
+import { ValidationSchemas, escapeRegex } from '@/lib/validation';
+import { logger } from '@/lib/logger';
 
 // GET /api/products - Get all products
 export async function GET(request: NextRequest) {
@@ -11,17 +13,19 @@ export async function GET(request: NextRequest) {
     await connectDB();
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '100');
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '20')));
     const search = searchParams.get('search');
     const category = searchParams.get('category');
     const featured = searchParams.get('featured');
 
-    // Build query
-    const query: any = {};
+    // Build query with safe parameters
+    const query: Record<string, unknown> = {};
     
+    // Fix MongoDB injection vulnerability
     if (search) {
-      query.$text = { $search: search };
+      const escapedSearch = escapeRegex(search);
+      query.$text = { $search: escapedSearch };
     }
     
     if (category) {
@@ -61,7 +65,7 @@ export async function GET(request: NextRequest) {
       totalProducts
     });
   } catch (error) {
-    console.error('Error fetching products:', error);
+    logger.error('Error fetching products', error as Error);
     return NextResponse.json(
       { error: 'Failed to fetch products' },
       { status: 500 }
@@ -75,8 +79,9 @@ export async function POST(request: NextRequest) {
     const user = getUserFromRequest(request);
     
     if (!user || user.role !== 'admin') {
+      logger.warn('Unauthorized product creation attempt');
       return NextResponse.json(
-        { error: 'Unauthorized - Admin access required' },
+        { error: 'Unauthorized' },
         { status: 401 }
       );
     }
@@ -84,19 +89,19 @@ export async function POST(request: NextRequest) {
     await connectDB();
     const data = await request.json();
 
-    console.log('Creating product with data:', JSON.stringify(data, null, 2));
+    logger.debug('Received product creation request', logger.sanitize({ ...data, image: '[REDACTED]' }));
 
     // Validate required fields
-    if (!data.name || !data.name.trim()) {
+    if (!data.name || !data.name.trim() || data.name.length > 200) {
       return NextResponse.json(
-        { error: 'Product name is required' },
+        { error: 'Product name is required and must be less than 200 characters' },
         { status: 400 }
       );
     }
     
-    if (!data.description || !data.description.trim()) {
+    if (!data.description || !data.description.trim() || data.description.length > 2000) {
       return NextResponse.json(
-        { error: 'Product description is required' },
+        { error: 'Product description is required and must be less than 2000 characters' },
         { status: 400 }
       );
     }
@@ -141,14 +146,13 @@ export async function POST(request: NextRequest) {
     
     await product.save();
 
-    console.log('Product created successfully:', product._id);
+    logger.info('Product created successfully', { productId: product._id });
 
     return NextResponse.json(product, { status: 201 });
   } catch (error) {
-    console.error('Error creating product:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    logger.error('Error creating product', error as Error);
     return NextResponse.json(
-      { error: `Failed to create product: ${errorMessage}` },
+      { error: 'Failed to create product' },
       { status: 500 }
     );
   }
