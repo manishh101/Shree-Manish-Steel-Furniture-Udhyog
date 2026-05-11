@@ -954,29 +954,29 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
 
             <div className="border-b border-gray-100 mb-6"></div>
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-8">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-8">
               <a
                 href={`https://wa.me/9779824336371?text=I'm interested in ${encodeURIComponent(product.name)} (ID: ${product._id}). Please provide more information.`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-[1.2] flex items-center justify-center px-4 py-3 rounded-lg text-sm font-semibold text-white bg-green-600 hover:bg-green-700 transition-all shadow-sm"
+                className="flex items-center justify-center px-2 sm:px-4 py-3 rounded-lg text-[11px] sm:text-sm font-semibold text-white bg-green-600 hover:bg-green-700 transition-all shadow-sm text-center"
               >
-                <FaWhatsapp className="w-5 h-5 mr-2" />
-                WhatsApp Enquiry
+                <FaWhatsapp className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 shrink-0" />
+                <span className="leading-tight">WhatsApp </span>
               </a>
               
               <button
-                className="flex-1 flex items-center justify-center px-4 py-3 rounded-lg text-sm font-semibold text-white bg-[#5b626e] hover:bg-[#4a4f59] transition-all shadow-sm"
+                className="flex items-center justify-center px-2 sm:px-4 py-3 rounded-lg text-[11px] sm:text-sm font-semibold text-white bg-[#5b626e] hover:bg-[#4a4f59] transition-all shadow-sm text-center"
               >
-                <FaRegHeart className="w-4 h-4 mr-2" />
-                Add Wishlist
+                <FaRegHeart className="w-4 h-4 mr-1 sm:mr-2 shrink-0" />
+                <span className="leading-tight">Add Wishlist</span>
               </button>
 
               <Link
                 href="/custom-order"
-                className="flex-1 flex items-center justify-center px-4 py-3 rounded-lg text-sm font-semibold text-white bg-primary hover:bg-primary-dark transition-all shadow-sm"
+                className="flex items-center justify-center px-2 sm:px-4 py-3 rounded-lg text-[11px] sm:text-sm font-semibold text-white bg-primary hover:bg-primary-dark transition-all shadow-sm text-center"
               >
-                ✉ Enquiry
+                <span className="leading-tight">✉ Enquiry</span>
               </Link>
             </div>
 
