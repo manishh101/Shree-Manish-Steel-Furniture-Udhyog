@@ -107,12 +107,6 @@ class AuthService {
     const token = this.getToken();
     if (!token) return null;
 
-    // If in offline mode, return stored user
-    if (this.offlineModeActive) {
-      const user = this.getUser();
-      return user ? { data: user } : null;
-    }
-
     try {
       const response = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: {

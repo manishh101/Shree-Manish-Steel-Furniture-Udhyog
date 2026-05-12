@@ -3,13 +3,15 @@ import { NextRequest } from 'next/server';
 
 // JWT_SECRET must be provided via environment variables
 // Never use hardcoded defaults in production
-const JWT_SECRET = process.env.JWT_SECRET;
+const jwtSecret = process.env.JWT_SECRET;
 
-if (!JWT_SECRET) {
+if (!jwtSecret) {
   throw new Error(
     'JWT_SECRET environment variable is required. Please set it in your .env.local file.'
   );
 }
+
+const JWT_SECRET: string = jwtSecret;
 
 export interface JWTPayload {
   user: {
@@ -24,7 +26,13 @@ export function signToken(payload: JWTPayload): string {
 
 export function verifyToken(token: string): JWTPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as JWTPayload;
+    const verified = jwt.verify(token, JWT_SECRET);
+
+    if (typeof verified === 'string' || !verified || typeof verified !== 'object' || !('user' in verified)) {
+      return null;
+    }
+
+    return verified as JWTPayload;
   } catch {
     return null;
   }

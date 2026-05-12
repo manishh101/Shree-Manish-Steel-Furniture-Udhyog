@@ -98,18 +98,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setError(null);
       } catch (err) {
         console.error('Auth error:', err);
-        // Don't logout for offline mode
-        if (!authService.isOfflineMode()) {
-          authService.logout();
-          setToken(null);
-          setUser(null);
-        } else {
-          // In offline mode, load user from storage
-          const storedUser = authService.getUser();
-          if (storedUser) {
-            setUser(storedUser);
-          }
-        }
+        authService.logout();
+        setToken(null);
+        setUser(null);
         setError('Authentication failed');
       } finally {
         setLoading(false);

@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
     // Validate request payload with Zod schema
     const validation = ValidationSchemas.inquiry.safeParse(data);
     if (!validation.success) {
-      logger.warn('Invalid inquiry submission', validation.error.errors);
+      logger.warn('Invalid inquiry submission', validation.error.issues);
       return NextResponse.json(
         { error: 'Invalid input data' },
         { status: 400 }
