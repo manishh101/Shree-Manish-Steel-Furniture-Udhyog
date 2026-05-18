@@ -1,8 +1,10 @@
 import type { Metadata, Viewport } from 'next';
 import { Poppins, Open_Sans, Playfair_Display } from 'next/font/google';
+import { Suspense } from 'react';
 import Script from 'next/script';
 import ToastProvider from '@/components/ToastProvider';
 import ScrollToTop from '@/components/ScrollToTop';
+import NavigationProgress from '@/components/NavigationProgress';
 import './globals.css';
 
 const poppins = Poppins({
@@ -565,6 +567,9 @@ export default function RootLayout({
           `}
         </Script>
         
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
         {children}
         <ScrollToTop />
         <ToastProvider />

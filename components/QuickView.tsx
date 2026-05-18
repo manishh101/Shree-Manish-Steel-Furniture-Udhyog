@@ -41,6 +41,7 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
   const [fullScreenView, setFullScreenView] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [touchPosition, setTouchPosition] = useState<{ x: number; y: number } | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(true);
 
   // Reset state when product changes
   useEffect(() => {
@@ -184,13 +185,19 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
                     className="w-full h-full cursor-pointer"
                     onClick={() => setFullScreenView(true)}
                   >
-                    <OptimizedImage
-                      src={product.images && product.images.length > 0 ? product.images[selectedImageIndex] : (product.image || '/images/furniture-1.jpg')}
-                      alt={imageService.getImageAlt(product)}
+                    <img
+                      src={product.images && product.images.length > 0 ? product.images[selectedImageIndex] : (product.image || '/images/placeholder-product.png')}
+                      alt={imageService.getImageAlt(product) || "Product Image"}
                       className="w-full h-full object-contain transition-transform group-hover:scale-105"
-                      size="large"
-                      category={product.category || (product.subcategory as string)}
-                      priority={true}
+                      onLoad={() => setImageLoaded(true)}
+                      style={{
+                        opacity: imageLoaded ? 1 : 0,
+                        transition: 'opacity 0.15s ease-in-out',
+                      }}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/images/placeholder-product.png';
+                        setImageLoaded(true);
+                      }}
                     />
                   </div>
                 </div>
@@ -211,15 +218,21 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
                   {product.images.slice(0, 4).map((image, index) => (
                     <button
                       key={index}
-                      onClick={() => setSelectedImageIndex(index)}
+                      onClick={() => {
+                        if (selectedImageIndex !== index) {
+                          setSelectedImageIndex(index);
+                        }
+                      }}
                       className={`relative w-16 h-16 rounded-lg border-2 cursor-pointer transition-colors flex-shrink-0 overflow-hidden ${selectedImageIndex === index ? 'border-primary ring-2 ring-primary/20' : 'border-gray-200 hover:border-primary'}`}
                     >
-                      <OptimizedImage
+                      <img
                         src={image}
                         alt={`${product.name} ${index + 1}`}
                         className="w-full h-full object-contain"
-                        size="thumbnail"
-                        category={product.category || (product.subcategory as string)}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/images/placeholder-product.png';
+                          (e.target as HTMLImageElement).style.opacity = '0.4';
+                        }}
                       />
                     </button>
                   ))}
@@ -370,12 +383,19 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <OptimizedImage
-              src={product.images && product.images.length > 0 ? product.images[selectedImageIndex] : (product.image || '/images/furniture-1.jpg')}
-              alt={product.name}
-              className="w-full h-full"
-              size="large"
-              objectFit="contain"
+            <img
+              src={product.images && product.images.length > 0 ? product.images[selectedImageIndex] : (product.image || '/images/placeholder-product.png')}
+              alt={product.name || "Product Image"}
+              className="w-full h-full object-contain"
+              onLoad={() => setImageLoaded(true)}
+              style={{
+                opacity: imageLoaded ? 1 : 0,
+                transition: 'opacity 0.15s ease-in-out',
+              }}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/images/placeholder-product.png';
+                setImageLoaded(true);
+              }}
             />
           </div>
 

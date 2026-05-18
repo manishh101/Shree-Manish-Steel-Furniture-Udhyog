@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FaEye, FaShoppingCart, FaHeart } from 'react-icons/fa';
@@ -154,6 +154,14 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
     ...product
   };
 
+  // Product URL for navigation
+  const productUrl = `/products/${safeProduct._id || safeProduct.id}`;
+
+  // Prefetch the product page on mount for instant navigation
+  useEffect(() => {
+    router.prefetch(productUrl);
+  }, [router, productUrl]);
+
   // Handle product link click
   const handleProductClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -164,7 +172,7 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
         onProductView(safeProduct._id || safeProduct.id);
       }
     } else {
-      router.push(`/products/${safeProduct._id || safeProduct.id}`);
+      router.push(productUrl);
       scrollToTop({ instant: true });
     }
   };
@@ -207,9 +215,11 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
   const config = getVariantConfig();
 
   return (
-    <div 
+    <Link
+      href={productUrl}
       onClick={handleProductClick}
       className={`product-card bg-white rounded-lg shadow-sm overflow-hidden transition-all duration-300 border border-gray-100 group h-full flex flex-col cursor-pointer ${config.cardClass} ${className}`}
+      prefetch={true}
     >
       {/* Image container - taller aspect ratio like reference */}
       <div className="relative w-full overflow-hidden bg-gray-50" style={{ aspectRatio: '3/4' }}>
@@ -320,7 +330,7 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
           </div>
         </div>
       )}
-    </div>
+    </Link>
   );
 });
 

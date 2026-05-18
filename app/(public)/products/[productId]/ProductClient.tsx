@@ -384,12 +384,11 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
 
   const handleThumbnailClick = (idx: number) => {
     if (idx !== selectedImageIndex) {
-      setImageLoaded(false);
       setSelectedImageIndex(idx);
     }
   };
 
-  // Navigate to previous image with animation
+  // Navigate to previous image
   const handlePrevImage = () => {
     const newIndex = selectedImageIndex > 0
       ? selectedImageIndex - 1
@@ -397,12 +396,11 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
 
     // Only update if index actually changes (prevents stuck loading state on single image)
     if (newIndex !== selectedImageIndex) {
-      setImageLoaded(false);
       setSelectedImageIndex(newIndex);
     }
   };
 
-  // Navigate to next image with animation
+  // Navigate to next image
   const handleNextImage = () => {
     const newIndex = selectedImageIndex < allImages.length - 1
       ? selectedImageIndex + 1
@@ -410,7 +408,6 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
 
     // Only update if index actually changes (prevents stuck loading state on single image)
     if (newIndex !== selectedImageIndex) {
-      setImageLoaded(false);
       setSelectedImageIndex(newIndex);
     }
   };
@@ -592,9 +589,10 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
   useEffect(() => {
     const fetchProduct = async () => {
       // If we already have initialProduct matching the ID, use it (handled by state init). 
-      // But if user navigates to another product client-side without full reload, we need to fetch.
+      // But if user navigates to another product client-side without full reload, we need to update state.
       if (initialProduct && (initialProduct._id === productId || initialProduct.id === productId)) {
-        // Already have it
+        setProduct(initialProduct);
+        setLoading(false);
         fetchRelatedProducts(initialProduct);
         return;
       }
@@ -1301,12 +1299,21 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            <OptimizedImage
+            <img
               src={allImages[selectedImageIndex] || '/images/placeholder-product.png'}
               alt={imageService.getImageAlt(product) || "Product Image"}
-              className="w-full h-full"
-              size="large"
-              objectFit="contain"
+              onLoad={() => setImageLoaded(true)}
+              style={{
+                opacity: imageLoaded ? 1 : 0,
+                transition: 'opacity 0.15s ease-in-out',
+                width: '100%',
+                height: '100%',
+                objectFit: 'contain',
+              }}
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = '/images/placeholder-product.png';
+                setImageLoaded(true);
+              }}
             />
           </div>
 
