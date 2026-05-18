@@ -143,7 +143,6 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
   const [loading, setLoading] = useState(!initialProduct);
   const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [imageLoading, setImageLoading] = useState(false);
   const [touchPosition, setTouchPosition] = useState<{ x: number; y: number } | null>(null);
   const [fullScreenView, setFullScreenView] = useState(false);
   const imageContainerRef = useRef<HTMLDivElement>(null);
@@ -360,14 +359,12 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
         const newIndex = selectedImageIndex > 0
           ? selectedImageIndex - 1
           : allImages.length - 1;
-        setImageLoading(true);
         setSelectedImageIndex(newIndex);
       } else if (e.key === 'ArrowRight') {
         // Next image with right arrow key
         const newIndex = selectedImageIndex < allImages.length - 1
           ? selectedImageIndex + 1
           : 0;
-        setImageLoading(true);
         setSelectedImageIndex(newIndex);
       } else if (e.key === 'Escape') {
         // Exit full screen view with Escape key
@@ -389,18 +386,14 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
     };
   }, [selectedImageIndex, allImages.length, fullScreenView]);
 
-  // Add scroll restoration on image change or zoom
+  // Ensure scroll position is maintained during image changes
   useEffect(() => {
-    // Save scroll position before image change
     const scrollPosition = window.scrollY;
-
-    // Restore scroll position after image loads
-    if (!imageLoading) {
-      setTimeout(() => {
-        window.scrollTo(0, scrollPosition);
-      }, 100);
-    }
-  }, [selectedImageIndex, imageLoading]);
+    const frame = requestAnimationFrame(() => {
+      window.scrollTo(0, scrollPosition);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [selectedImageIndex]);
 
   // Navigate to previous image with animation
   const handlePrevImage = () => {
@@ -780,7 +773,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                       className={`w-full aspect-[4/5] bg-white border shrink-0 overflow-hidden transition-all duration-200 ${selectedImageIndex === idx ? 'border-primary ring-1 ring-primary' : 'border-gray-200 hover:border-gray-300'}`}
                       aria-label={`View product image ${idx + 1}`}
                     >
-                      <OptimizedImage src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" size="thumbnail" />
+                      <OptimizedImage src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" size="thumbnail" priority={true} />
                     </button>
                   ))}
                 </div>
@@ -814,18 +807,13 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                     <FaChevronRight className="text-gray-600" />
                   </button>
 
-                  {imageLoading && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-[#f8f9fa]/80 z-20">
-                      <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary/30 border-t-primary"></div>
-                    </div>
-                  )}
 
                   <div onClick={handleImageZoom} className="w-full h-full cursor-pointer flex items-center justify-center">
                     <OptimizedImage
-                      src={allImages[selectedImageIndex]}
+                      src={allImages[selectedImageIndex] || '/images/placeholder-product.png'}
                       alt={product.name || "Product Image"}
                       objectFit="contain"
-                      imageClassName="mix-blend-multiply transition-all duration-300"
+                      imageClassName=""
                       className="w-full h-full"
                       size="medium"
                       priority={true}
@@ -848,7 +836,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                       className={`w-16 h-20 shrink-0 border bg-white overflow-hidden ${selectedImageIndex === idx ? 'border-primary ring-1 ring-primary' : 'border-gray-200'}`}
                       aria-label={`View product image ${idx + 1}`}
                     >
-                      <OptimizedImage src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" size="thumbnail" />
+                      <OptimizedImage src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" size="thumbnail" priority={true} />
                     </button>
                   ))}
                 </div>
@@ -1294,7 +1282,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
             onTouchEnd={handleTouchEnd}
           >
             <OptimizedImage
-              src={allImages[selectedImageIndex]}
+              src={allImages[selectedImageIndex] || '/images/placeholder-product.png'}
               alt={imageService.getImageAlt(product) || "Product Image"}
               className="w-full h-full"
               size="large"

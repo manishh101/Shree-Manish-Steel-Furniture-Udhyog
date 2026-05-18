@@ -5,6 +5,12 @@ import Image from 'next/image';
 import { FaImage } from 'react-icons/fa';
 import ImageService from '../../services/imageService';
 
+// Light grey SVG placeholder — prevents black/dark flash while images load
+const BLUR_DATA_URL =
+  'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjBmMGYwIi8+PC9zdmc+';
+
+const PLACEHOLDER_IMAGE = '/images/placeholder-product.png';
+
 interface OptimizedImageProps {
   src?: string | null;
   alt?: string;
@@ -77,7 +83,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   objectFit = 'contain', // Default to contain to ensure full image is visible
 }) => {
   const [imageState, setImageState] = useState<ImageState>({
-    loaded: false,
+    loaded: true,
     error: false,
     currentSrc: null
   });
@@ -87,9 +93,9 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   // Get optimized image source - prioritize Cloudinary URLs
   // Use useMemo to ensure stability across renders
   const optimizedSrc = React.useMemo(() => {
-    // No src provided - use Cloudinary placeholder
+    // No src provided - use placeholder
     if (!src) {
-      return ImageService.getCloudinaryPlaceholder(category) || '/images/furniture-1.jpg';
+      return ImageService.getCloudinaryPlaceholder(category) || PLACEHOLDER_IMAGE;
     }
 
     // Add Cloudinary optimizations for Cloudinary URLs
@@ -112,18 +118,21 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   // Get fallback source - use local placeholder
   const getFallbackSrc = (): string => {
-    return '/images/furniture-1.jpg';
+    return PLACEHOLDER_IMAGE;
   };
 
   // Reset loaded state when src changes (for image sliding functionality)
   useEffect(() => {
     const newSrc = getOptimizedSrc();
-    setImageState(prev => ({
-      ...prev,
-      loaded: false,
-      error: false,
-      currentSrc: newSrc
-    }));
+    // Only reset if the src actually changed to avoid unnecessary flickers
+    if (newSrc !== imageState.currentSrc) {
+      setImageState(prev => ({
+        ...prev,
+        loaded: false,
+        error: false,
+        currentSrc: newSrc
+      }));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [src]);
 
@@ -168,7 +177,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     const wasAlreadyLocalPlaceholder = failedSrc && (
       failedSrc.startsWith('/images/furniture') ||
       failedSrc.includes('placeholder') ||
-      failedSrc === '/images/furniture-1.jpg'
+      failedSrc === PLACEHOLDER_IMAGE
     );
 
     if (wasAlreadyLocalPlaceholder || imageState.error) {
@@ -197,7 +206,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const hasExplicitSize = className && className.split(/\s+/).some(cls => /^[hw]-/.test(cls));
 
   const combinedClassName = `
-    relative overflow-hidden bg-gray-100
+    relative overflow-hidden
     ${aspectRatioClasses[aspectRatio] || ''}
     ${aspectRatio === 'auto' && !hasExplicitSize ? 'w-full h-full' : ''}
   `.trim();
@@ -220,10 +229,10 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     <div
       ref={imgRef}
       className={wrapperClassName}
-      style={style}
+      style={{ backgroundColor: '#ffffff', ...style }}
     >
       {/* Main image using Next.js Image component */}
-      {imageSrc && imageSrc.trim() !== '' && (
+      {imageSrc && imageSrc.trim() !== '' ? (
         <Image
           src={imageSrc}
           alt={alt || ImageService.getImageAlt({ name: alt, category })}
@@ -236,12 +245,18 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
           loading={priority ? undefined : 'lazy'}
           className={`
             ${objectFit === 'contain' ? 'object-contain' : objectFit === 'fill' ? 'object-fill' : objectFit === 'none' ? 'object-none' : 'object-cover'}
-            transition-all duration-500 ease-out
-            ${imageState.loaded ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}
+            transition-opacity duration-150 ease-out
+            ${imageState.loaded ? 'opacity-100' : 'opacity-40'}
             ${imageClassName || ''}
           `.trim().replace(/\s+/g, ' ')}
           unoptimized={shouldUnoptimize}
         />
+      ) : (
+        /* Visible placeholder when no valid src is available */
+        <div className="absolute inset-0 flex flex-col items-center justify-center" style={{ backgroundColor: '#f5f5f5' }}>
+          <FaImage className="text-gray-300 text-4xl mb-2" />
+          <span className="text-gray-400 text-xs">Image not available</span>
+        </div>
       )}
     </div>
   );

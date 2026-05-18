@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Poppins, Open_Sans, Playfair_Display } from 'next/font/google';
 import Script from 'next/script';
 import ToastProvider from '@/components/ToastProvider';
+import ScrollToTop from '@/components/ScrollToTop';
 import './globals.css';
 
 const poppins = Poppins({
@@ -565,6 +566,7 @@ export default function RootLayout({
         </Script>
         
         {children}
+        <ScrollToTop />
         <ToastProvider />
       </body>
     </html>
