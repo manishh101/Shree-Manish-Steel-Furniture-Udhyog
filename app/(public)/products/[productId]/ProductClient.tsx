@@ -143,6 +143,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
   const [loading, setLoading] = useState(!initialProduct);
   const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [imageLoaded, setImageLoaded] = useState(true);
   const [touchPosition, setTouchPosition] = useState<{ x: number; y: number } | null>(null);
   const [fullScreenView, setFullScreenView] = useState(false);
   const imageContainerRef = useRef<HTMLDivElement>(null);
@@ -312,44 +313,30 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
     });
   }, [allImages, product, productId, urlColorParam, linkedProductsMap]);
 
-  // Preload all images when component mounts for smoother experience
+  // FIX 1: Preload ALL product images immediately when the page loads
   useEffect(() => {
-    const preloadImages = async () => {
-      if (!allImages || allImages.length === 0) return;
+    if (product?.images && product.images.length > 0) {
+      product.images.forEach((img: any) => {
+        const imageUrl = typeof img === 'string' ? img : (img?.url || img?.src);
+        if (imageUrl) {
+          const image = new window.Image();
+          image.src = imageUrl;
+        }
+      });
+    }
+  }, [product?.images]);
 
-      try {
-        const imagePromises = allImages.map(src => {
-          return new Promise((resolve) => {
-            if (!src) {
-              resolve(null);
-              return;
-            }
-
-            const isPlaceholder = imageService.isPlaceholder(src);
-            const img = new Image();
-
-            img.onload = () => resolve(src);
-
-            img.onerror = () => {
-              // Only try a placeholder if we're not already loading a placeholder
-              if (!isPlaceholder && defaultImages.length > 0) {
-                img.src = defaultImages[0];
-              }
-              resolve(null);
-            };
-
-            img.src = src;
-          });
-        });
-
-        await Promise.all(imagePromises);
-      } catch (error) {
-        console.error('Error preloading images:', error);
-      }
-    };
-
-    preloadImages();
-  }, [allImages]);
+  // FIX 2: Also preload color variant images
+  useEffect(() => {
+    if (product?.colorVariants && product.colorVariants.length > 0) {
+      product.colorVariants.forEach((variant: any) => {
+        if (variant.image) {
+          const img = new window.Image();
+          img.src = variant.image;
+        }
+      });
+    }
+  }, [product?.colorVariants]);
 
   // Add keyboard navigation and scroll management
   useEffect(() => {
@@ -395,6 +382,13 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
     return () => cancelAnimationFrame(frame);
   }, [selectedImageIndex]);
 
+  const handleThumbnailClick = (idx: number) => {
+    if (idx !== selectedImageIndex) {
+      setImageLoaded(false);
+      setSelectedImageIndex(idx);
+    }
+  };
+
   // Navigate to previous image with animation
   const handlePrevImage = () => {
     const newIndex = selectedImageIndex > 0
@@ -403,7 +397,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
 
     // Only update if index actually changes (prevents stuck loading state on single image)
     if (newIndex !== selectedImageIndex) {
-      // Don't set imageLoading(true) here to avoiding flickering/delay
+      setImageLoaded(false);
       setSelectedImageIndex(newIndex);
     }
   };
@@ -416,7 +410,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
 
     // Only update if index actually changes (prevents stuck loading state on single image)
     if (newIndex !== selectedImageIndex) {
-      // Don't set imageLoading(true) here to avoiding flickering/delay
+      setImageLoaded(false);
       setSelectedImageIndex(newIndex);
     }
   };
@@ -769,11 +763,19 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                   {allImages.map((img, idx) => (
                     <button
                       key={idx}
-                      onClick={() => setSelectedImageIndex(idx)}
+                      onClick={() => handleThumbnailClick(idx)}
                       className={`w-full aspect-[4/5] bg-white border shrink-0 overflow-hidden transition-all duration-200 ${selectedImageIndex === idx ? 'border-primary ring-1 ring-primary' : 'border-gray-200 hover:border-gray-300'}`}
                       aria-label={`View product image ${idx + 1}`}
                     >
-                      <OptimizedImage src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" size="thumbnail" priority={true} />
+                      <img 
+                        src={img} 
+                        alt={`View ${idx + 1}`} 
+                        className="w-full h-full object-cover" 
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/images/placeholder-product.png';
+                          (e.target as HTMLImageElement).style.opacity = '0.4';
+                        }}
+                      />
                     </button>
                   ))}
                 </div>
@@ -809,14 +811,21 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
 
 
                   <div onClick={handleImageZoom} className="w-full h-full cursor-pointer flex items-center justify-center">
-                    <OptimizedImage
+                    <img
                       src={allImages[selectedImageIndex] || '/images/placeholder-product.png'}
                       alt={product.name || "Product Image"}
-                      objectFit="contain"
-                      imageClassName=""
-                      className="w-full h-full"
-                      size="medium"
-                      priority={true}
+                      onLoad={() => setImageLoaded(true)}
+                      style={{
+                        opacity: imageLoaded ? 1 : 0,
+                        transition: 'opacity 0.15s ease-in-out',
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain',
+                      }}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = '/images/placeholder-product.png';
+                        setImageLoaded(true);
+                      }}
                     />
                   </div>
 
@@ -832,11 +841,19 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                   {allImages.map((img, idx) => (
                     <button
                       key={idx}
-                      onClick={() => setSelectedImageIndex(idx)}
+                      onClick={() => handleThumbnailClick(idx)}
                       className={`w-16 h-20 shrink-0 border bg-white overflow-hidden ${selectedImageIndex === idx ? 'border-primary ring-1 ring-primary' : 'border-gray-200'}`}
                       aria-label={`View product image ${idx + 1}`}
                     >
-                      <OptimizedImage src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" size="thumbnail" priority={true} />
+                      <img 
+                        src={img} 
+                        alt={`View ${idx + 1}`} 
+                        className="w-full h-full object-cover" 
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/images/placeholder-product.png';
+                          (e.target as HTMLImageElement).style.opacity = '0.4';
+                        }}
+                      />
                     </button>
                   ))}
                 </div>
@@ -920,11 +937,14 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                     >
                       <span className="relative flex h-full w-full items-center justify-center overflow-hidden rounded bg-gray-50">
                         {choice.image ? (
-                          <OptimizedImage
+                          <img
                             src={choice.image}
                             alt={`${choice.label} color`}
                             className="h-full w-full object-contain mix-blend-multiply"
-                            size="thumbnail"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/images/placeholder-product.png';
+                              (e.target as HTMLImageElement).style.opacity = '0.4';
+                            }}
                           />
                         ) : (
                           <span
