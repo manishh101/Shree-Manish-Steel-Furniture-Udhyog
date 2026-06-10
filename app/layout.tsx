@@ -135,6 +135,13 @@ export const metadata: Metadata = {
     'wardrobe Biratnagar',
     
     // Product-Specific Keywords
+    'daraj price',
+    'best steel daraj showroom in biratnagar',
+    'steel daraj in nepal',
+    'best steel daraj in nepal',
+    'office daraj',
+    'office table',
+    'desk benches',
     'steel table Biratnagar',
     'computer table Biratnagar',
     'dining table Biratnagar',
