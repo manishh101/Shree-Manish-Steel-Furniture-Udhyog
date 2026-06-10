@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
+import Blog from '@/models/Blog';
 import Product from '@/models/Product';
 import { GallerySection } from '@/models/Gallery';
 
@@ -88,8 +89,27 @@ export async function GET() {
       }
     });
 
+    // Get blog images
+    const blogs = await Blog.find({ status: 'published' })
+      .select('slug title excerpt image')
+      .lean();
+
+    const blogEntries: ImageEntry[] = [];
+    blogs.forEach((blog: any) => {
+      if (blog.slug && blog.image) {
+        blogEntries.push({
+          url: `${baseUrl}/blogs/${String(blog.slug).trim()}`,
+          images: [{
+            loc: blog.image,
+            title: `${blog.title} | Shree Manish Steel Furniture`,
+            caption: blog.excerpt || `${blog.title} - Learn more about steel furniture in Nepal`,
+          }]
+        });
+      }
+    });
+
     // Combine all entries
-    const allEntries: ImageEntry[] = [...imageEntries, ...galleryEntries];
+    const allEntries: ImageEntry[] = [...imageEntries, ...galleryEntries, ...blogEntries];
 
     // Generate XML
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
