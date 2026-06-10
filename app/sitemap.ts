@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { connectDB } from '@/lib/db';
 import Product from '@/models/Product';
+import Blog from '@/models/Blog';
 
 const baseUrl = 'https://manishsteel.com.np';
 
@@ -18,6 +19,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/blogs`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/about`,
@@ -67,15 +74,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         };
       });
 
-    // Note: Removed category/subcategory filter pages as they use query params
-    // which Google doesn't prefer in sitemaps. These pages will still be crawled
-    // through internal links.
+    // Get all published blogs
+    const blogs = await Blog.find({ status: 'published' })
+      .select('slug updatedAt')
+      .lean();
 
-    return [...staticPages, ...productPages];
+    const blogPages: MetadataRoute.Sitemap = blogs
+      .filter((blog: any) => blog.slug)
+      .map((blog: any) => {
+        return {
+          url: `${baseUrl}/blogs/${String(blog.slug).trim()}`,
+          lastModified: blog.updatedAt ? new Date(blog.updatedAt) : new Date(),
+          changeFrequency: 'weekly' as const,
+          priority: 0.8,
+        };
+      });
+
+    return [...staticPages, ...productPages, ...blogPages];
   } catch (error) {
     console.error('Error generating sitemap:', error);
     // Return static pages only if database fails
     return staticPages;
   }
 }
+
 

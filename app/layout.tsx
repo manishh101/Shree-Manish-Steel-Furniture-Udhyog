@@ -40,8 +40,8 @@ const siteConfig = {
   ogImage: 'https://manishsteel.com.np/images/og-image.jpg',
   phone: '+977 9824336371',
   email: 'shreemanishfurniture@gmail.com',
-  address: 'Biratnagar-4, Main Road, Morang, Nepal',
-  addressNepali: 'विराटनगर-४, मुख्य सडक, मोरङ, नेपाल',
+  address: 'Dharan Rd, Biratnagar 56613, Nepal',
+  addressNepali: 'धरान रोड, विराटनगर ५६६१३, मोरङ, नेपाल',
   links: {
     facebook: 'https://www.facebook.com/profile.php?id=61576758530152',
   },
@@ -289,10 +289,10 @@ const jsonLd = {
   email: siteConfig.email,
   address: {
     '@type': 'PostalAddress',
-    streetAddress: 'Biratnagar-4, Main Road',
+    streetAddress: 'Dharan Rd',
     addressLocality: 'Biratnagar',
     addressRegion: 'Morang',
-    postalCode: '56600',
+    postalCode: '56613',
     addressCountry: 'NP',
   },
   geo: {

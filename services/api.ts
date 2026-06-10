@@ -1194,6 +1194,87 @@ export const homepageAPI = {
     }),
 };
 
+// Blog Types
+export interface Blog {
+  _id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  image: string;
+  author: string;
+  status: 'draft' | 'published';
+  metaTitle?: string;
+  metaDescription?: string;
+  readTime: number;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BlogsResponse {
+  success: boolean;
+  blogs: Blog[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    pages: number;
+  };
+}
+
+// Blogs API
+export const blogsAPI = {
+  // Get all blogs (public listings show published only)
+  getAll: async (options: { page?: number; limit?: number; search?: string; tag?: string; status?: string } = {}): Promise<BlogsResponse> => {
+    const params: any = {};
+    if (options.page) params.page = options.page.toString();
+    if (options.limit) params.limit = options.limit.toString();
+    if (options.search) params.search = options.search;
+    if (options.tag) params.tag = options.tag;
+    if (options.status) params.status = options.status;
+
+    return fetchAPI('/blogs', { params, headers: getAuthHeader() });
+  },
+
+  // Get single blog by ID or slug
+  getByIdOrSlug: async (idOrSlug: string): Promise<{ success: boolean; blog: Blog }> => {
+    return fetchAPI(`/blogs/${idOrSlug}`, { headers: getAuthHeader() });
+  },
+
+  // Create new blog (admin only)
+  create: async (data: Omit<Blog, '_id' | 'createdAt' | 'updatedAt' | 'author'> & { slug?: string }): Promise<{ success: boolean; blog: Blog; message: string }> => {
+    return fetchAPI('/blogs', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      headers: {
+        ...getAuthHeader(),
+      },
+    });
+  },
+
+  // Update blog post (admin only)
+  update: async (id: string, data: Partial<Blog>): Promise<{ success: boolean; blog: Blog; message: string }> => {
+    return fetchAPI(`/blogs/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+      headers: {
+        ...getAuthHeader(),
+      },
+    });
+  },
+
+  // Delete blog post (admin only)
+  delete: async (id: string): Promise<{ success: boolean; message: string }> => {
+    return fetchAPI(`/blogs/${id}`, {
+      method: 'DELETE',
+      headers: {
+        ...getAuthHeader(),
+      },
+    });
+  },
+};
+
 export default {
   product: productAPI,
   category: categoryAPI,
@@ -1209,4 +1290,5 @@ export default {
   settings: settingsAPI,
   services: servicesAPI,
   homepage: homepageAPI,
+  blog: blogsAPI,
 };

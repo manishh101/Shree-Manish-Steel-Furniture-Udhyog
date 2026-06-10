@@ -15,7 +15,8 @@ import {
   FaEnvelope,
   FaShoppingBag,
   FaWrench,
-  FaHome
+  FaHome,
+  FaNewspaper
 } from 'react-icons/fa';
 
 interface AdminSidebarProps {
@@ -61,6 +62,11 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
       path: '/admin/homepage',
       name: 'Homepage',
       icon: FaHome
+    },
+    {
+      path: '/admin/blogs',
+      name: 'Blogs & Articles',
+      icon: FaNewspaper
     },
     {
       path: '/admin/about',

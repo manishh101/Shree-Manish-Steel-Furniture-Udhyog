@@ -802,41 +802,7 @@ const AdminHomepage = () => {
               </p>
             </div>
 
-            {/* Testimonials Section */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
-                  💬 Testimonials Section
-                </h2>
-                <ToggleSwitch
-                  enabled={homepageData.testimonialsEnabled}
-                  onChange={() => handleInputChange('testimonialsEnabled', !homepageData.testimonialsEnabled)}
-                  label="Show on Homepage"
-                />
-              </div>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Section Title</label>
-                  <input
-                    type="text"
-                    value={homepageData.testimonialsTitle}
-                    onChange={(e) => handleInputChange('testimonialsTitle', e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg"
-                    placeholder="What Our Customers Say"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Section Subtitle</label>
-                  <input
-                    type="text"
-                    value={homepageData.testimonialsSubtitle}
-                    onChange={(e) => handleInputChange('testimonialsSubtitle', e.target.value)}
-                    className="w-full p-3 border border-gray-300 rounded-lg"
-                    placeholder="Discover why customers trust us..."
-                  />
-                </div>
-              </div>
-            </div>
+
 
             {/* Location Section */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
