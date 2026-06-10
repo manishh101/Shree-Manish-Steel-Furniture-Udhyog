@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import React from 'react';
 import { connectDB } from '@/lib/db';
 import Product from '@/models/Product';
 import ProductClient from './ProductClient';
@@ -148,8 +149,10 @@ export default async function ProductDetailPage({ params }: PageProps) {
             ))}
           </div>
 
-          {/* Client component with interactivity */}
-          <ProductClient initialProduct={transformedProduct} productId={productId} />
+          {/* Client component with interactivity - wrap in Suspense for client-navigation hooks */}
+          <React.Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading product...</div>}>
+            <ProductClient initialProduct={transformedProduct} productId={productId} />
+          </React.Suspense>
         </article>
       </>
     );
