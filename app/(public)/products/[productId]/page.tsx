@@ -104,7 +104,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 '@type': 'Offer',
                 url: `https://manishsteel.com.np/products/${productId}`,
                 priceCurrency: 'NPR',
-                price: product.price,
+                price: product.price || 0,
                 availability: product.stock > 0
                   ? 'https://schema.org/InStock'
                   : 'https://schema.org/OutOfStock',
@@ -136,7 +136,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           <div itemProp="offers" itemScope itemType="https://schema.org/Offer">
             <meta itemProp="url" content={`https://manishsteel.com.np/products/${productId}`} />
             <meta itemProp="priceCurrency" content="NPR" />
-            <meta itemProp="price" content={product.price?.toString()} />
+            <meta itemProp="price" content={(product.price || 0).toString()} />
             <link itemProp="availability" href={product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'} />
           </div>
 
