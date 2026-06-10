@@ -4,6 +4,7 @@ import { connectDB } from '@/lib/db';
 import Product from '@/models/Product';
 import ProductClient from './ProductClient';
 import type { Metadata } from 'next';
+import React, { Suspense } from 'react';
 
 // Revalidate every hour for fresh content
 export const revalidate = 3600;

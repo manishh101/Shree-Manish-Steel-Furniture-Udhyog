@@ -21,15 +21,21 @@ interface Product {
   [key: string]: unknown;
 }
 
-const CleanMostSellingSection: React.FC = () => {
-  const [bestSellingProducts, setBestSellingProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+interface CleanMostSellingSectionProps {
+  initialProducts?: Product[];
+}
+
+const CleanMostSellingSection: React.FC<CleanMostSellingSectionProps> = ({ initialProducts }) => {
+  const [bestSellingProducts, setBestSellingProducts] = useState<Product[]>(initialProducts || []);
+  const [loading, setLoading] = useState(!initialProducts?.length);
   const [error, setError] = useState<string | null>(null);
   const { quickViewProduct, isQuickViewOpen, openQuickView, closeQuickView } = useQuickView();
 
   useEffect(() => {
-    fetchBestSellingProducts();
-  }, []);
+    if (!initialProducts || initialProducts.length === 0) {
+      fetchBestSellingProducts();
+    }
+  }, [initialProducts]);
 
   const fetchBestSellingProducts = async () => {
     try {

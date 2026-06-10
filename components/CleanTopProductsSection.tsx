@@ -20,15 +20,21 @@ interface Product {
   [key: string]: unknown;
 }
 
-const CleanTopProductsSection: React.FC = () => {
-  const [topProducts, setTopProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+interface CleanTopProductsSectionProps {
+  initialProducts?: Product[];
+}
+
+const CleanTopProductsSection: React.FC<CleanTopProductsSectionProps> = ({ initialProducts }) => {
+  const [topProducts, setTopProducts] = useState<Product[]>(initialProducts || []);
+  const [loading, setLoading] = useState(!initialProducts?.length);
   const [error, setError] = useState<string | null>(null);
   const { quickViewProduct, isQuickViewOpen, openQuickView, closeQuickView } = useQuickView();
 
   useEffect(() => {
-    fetchTopProducts();
-  }, []);
+    if (!initialProducts || initialProducts.length === 0) {
+      fetchTopProducts();
+    }
+  }, [initialProducts]);
 
   const fetchTopProducts = async () => {
     try {

@@ -414,42 +414,6 @@ const jsonLd = {
       },
     ],
   },
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '4.9',
-    ratingCount: '320',
-    reviewCount: '250',
-    bestRating: '5',
-    worstRating: '1',
-  },
-  review: [
-    {
-      '@type': 'Review',
-      reviewRating: {
-        '@type': 'Rating',
-        ratingValue: '5',
-        bestRating: '5',
-      },
-      author: {
-        '@type': 'Person',
-        name: 'Ramesh Sharma',
-      },
-      reviewBody: 'Best furniture shop in Biratnagar! Got office furniture at very affordable price. Quality is excellent and cheaper than Daraz!',
-    },
-    {
-      '@type': 'Review',
-      reviewRating: {
-        '@type': 'Rating',
-        ratingValue: '5',
-        bestRating: '5',
-      },
-      author: {
-        '@type': 'Person',
-        name: 'Sita Devi',
-      },
-      reviewBody: 'Bought steel almirah and bed for my home. Very cheap price and good quality. Free delivery and installation. Highly recommended!',
-    },
-  ],
   slogan: 'Best Quality, Cheapest Price - Furniture for Every Budget',
   foundingDate: '2009',
   founder: {
@@ -521,7 +485,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${poppins.variable} ${openSans.variable} ${playfairDisplay.variable}`}>
+    <html lang="ne" className={`${poppins.variable} ${openSans.variable} ${playfairDisplay.variable}`}>
       <head>
         {/* Favicon and Icons - Your Company Logo */}
         <link rel="icon" href="/favicon.ico" sizes="32x32" />
