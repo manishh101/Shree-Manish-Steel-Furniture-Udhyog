@@ -135,6 +135,10 @@ export const metadata: Metadata = {
     'wardrobe Biratnagar',
     
     // Product-Specific Keywords
+    'wholesaler of steel daraj',
+    'wholeseller of steel items',
+    'steel daraj wholesaler Nepal',
+    'steel furniture wholesale Biratnagar',
     'daraj price',
     'best steel daraj showroom in biratnagar',
     'steel daraj in nepal',
