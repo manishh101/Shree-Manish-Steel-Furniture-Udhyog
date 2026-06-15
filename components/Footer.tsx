@@ -193,7 +193,26 @@ const Footer = () => {
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
-                <a href={`tel:${settings.phone}`} className="text-white/80 hover:text-accent transition-colors">{settings.phone}</a>
+                <div className="flex flex-wrap items-center">
+                  {(() => {
+                    const phones = settings.phones;
+                    if (phones && phones.length > 0) {
+                      return phones.map((phoneNum: string, index: number) => (
+                        <span key={index} className="flex items-center">
+                          <a href={`tel:${phoneNum.replace(/[^\d+]/g, '')}`} className="text-white/80 hover:text-accent transition-colors">
+                            {phoneNum}
+                          </a>
+                          {index < phones.length - 1 && <span className="text-white/80 mr-1">,</span>}
+                        </span>
+                      ));
+                    }
+                    return (
+                      <a href={`tel:${settings.phone}`} className="text-white/80 hover:text-accent transition-colors">
+                        {settings.phone}
+                      </a>
+                    );
+                  })()}
+                </div>
               </li>
               <li className="flex items-start">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 mt-0.5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">

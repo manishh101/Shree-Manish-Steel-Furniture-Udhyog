@@ -129,7 +129,9 @@ const FloatingContactWidget: React.FC = () => {
       icon: <PhoneIcon className="w-5 h-5" />,
       color: 'bg-[#0066CC] hover:bg-[#0052A3]',
       action: () => window.open(`tel:${(settings.phones?.[0] || settings.phone || '+977 9824336371').replace(/[^\d+]/g, '')}`, '_self'),
-      label: 'Call Now'
+      label: settings.phones && settings.phones.length > 1
+        ? `Call: ${settings.phones.join(', ')}`
+        : `Call: ${settings.phones?.[0] || settings.phone || '+977 9824336371'}`
     },
     {
       name: 'Viber',

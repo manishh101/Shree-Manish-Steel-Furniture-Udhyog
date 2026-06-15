@@ -554,33 +554,57 @@ const AdminContact = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Embed URL</label>
                   <input
-                    type="url"
+                    type="text"
                     name="mapUrl"
                     value={formData.mapUrl || ''}
                     onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-                    placeholder="https://www.google.com/maps/embed?..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary font-mono text-sm"
+                    placeholder="https://www.google.com/maps/embed?pb=..."
                   />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Get this from Google Maps by clicking &quot;Share&quot; → &quot;Embed a map&quot;, then copy the src URL from the iframe code. This map will appear on the contact page.
-                  </p>
+                  <div className="mt-1 flex flex-wrap items-start gap-x-4 gap-y-1">
+                    <p className="text-xs text-gray-500">
+                      Go to <strong>Google Maps</strong> → find your location → click <strong>Share</strong> → <strong>Embed a map</strong> → copy the <code className="bg-gray-100 px-1 rounded">src="..."</code> URL from the iframe code.
+                      You can also paste the entire <code className="bg-gray-100 px-1 rounded">&lt;iframe&gt;</code> snippet — it will be extracted automatically.
+                    </p>
+                    {formData.mapUrl && (
+                      <a
+                        href={formData.mapUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary hover:underline whitespace-nowrap font-medium"
+                      >
+                        ↗ Open map in new tab
+                      </a>
+                    )}
+                  </div>
                 </div>
-                
+
                 {/* Map Preview */}
-                {formData.mapUrl && (
+                {formData.mapUrl ? (
                   <div className="mt-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">Preview:</label>
-                    <div className="rounded-lg overflow-hidden border border-gray-300">
+                    <div className="rounded-lg overflow-hidden border border-gray-300 shadow-sm" style={{ height: '350px' }}>
                       <iframe
+                        key={formData.mapUrl}
                         src={formData.mapUrl}
                         width="100%"
-                        height="200"
-                        style={{ border: 0 }}
+                        height="100%"
+                        style={{ border: 0, display: 'block' }}
                         allowFullScreen
                         loading="lazy"
                         referrerPolicy="no-referrer-when-downgrade"
+                        title="Google Maps Preview"
                       />
                     </div>
+                    <p className="mt-1 text-xs text-gray-400">
+                      If the map shows a broken icon, make sure the URL starts with <code className="bg-gray-100 px-1 rounded">https://www.google.com/maps/embed?</code>
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-4 rounded-lg border-2 border-dashed border-gray-300 bg-white flex flex-col items-center justify-center text-center p-10 text-gray-400" style={{ height: '200px' }}>
+                    <FaMapMarkerAlt className="text-4xl mb-3 text-gray-300" />
+                    <p className="text-sm font-medium">No map URL set</p>
+                    <p className="text-xs mt-1">Paste a Google Maps embed URL above to see a preview here.</p>
                   </div>
                 )}
               </div>

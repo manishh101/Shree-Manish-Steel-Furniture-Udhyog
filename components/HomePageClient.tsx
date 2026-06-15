@@ -617,7 +617,13 @@ export default function HomePageClient({
                     <span className="flex-shrink-0 w-5 h-5 bg-primary bg-opacity-10 rounded-full flex items-center justify-center text-primary mr-3 mt-0.5">•</span>
                     <div>
                       <span className="font-medium">Phone: </span>
-                      <span className="text-gray-600">{settings.phone}</span>
+                      <span className="text-gray-600">
+                        {settings.phones && settings.phones.length > 0 ? (
+                          settings.phones.join(', ')
+                        ) : (
+                          settings.phone
+                        )}
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-start">
