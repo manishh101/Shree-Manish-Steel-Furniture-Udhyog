@@ -7,6 +7,7 @@ import { logger } from '@/lib/logger';
 // Default contact information from original React app
 const defaultSettings: SiteSettings = {
   phone: '+977 982-4336371',
+  phones: ['+977 982-4336371'],
   email: 'shreemanishfurniture@gmail.com',
   address: 'Dharan Rd, Biratnagar 56613, Nepal',
   businessHours: 'Sunday - Friday: 8:00 AM - 7:00 PM\nSaturday: 8:00 AM - 12:00 PM',
@@ -54,6 +55,7 @@ export function useSiteSettings() {
       if (response.success && response.settings) {
         const fetchedSettings: SiteSettings = {
           phone: response.settings.phone || defaultSettings.phone,
+          phones: response.settings.phones || [response.settings.phone || defaultSettings.phone],
           email: response.settings.email || defaultSettings.email,
           address: response.settings.address || defaultSettings.address,
           businessHours: response.settings.businessHours || defaultSettings.businessHours,
@@ -114,6 +116,7 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     if (response.success && response.settings) {
       return {
         phone: response.settings.phone || defaultSettings.phone,
+        phones: response.settings.phones || [response.settings.phone || defaultSettings.phone],
         email: response.settings.email || defaultSettings.email,
         address: response.settings.address || defaultSettings.address,
         businessHours: response.settings.businessHours || defaultSettings.businessHours,

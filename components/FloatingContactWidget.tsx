@@ -10,7 +10,7 @@ import {
   MapPinIcon,
   BuildingOffice2Icon
 } from '@heroicons/react/24/outline';
-import { getContactInfo } from '../utils/storage';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 // WhatsApp SVG Icon
 const WhatsAppIcon: React.FC = () => (
@@ -60,27 +60,9 @@ interface ContactOption {
  */
 const FloatingContactWidget: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const { settings } = useSiteSettings();
   const pathname = usePathname();
   const router = useRouter();
-  
-  // Load contact info on component mount
-  useEffect(() => {
-    try {
-      const info = getContactInfo();
-      setContactInfo(info);
-    } catch (error) {
-      console.error('Error loading contact info for widget:', error);
-      // Set fallback values if error occurs
-      setContactInfo({
-        phone: '+977 9824336371',
-        social: {
-          whatsapp: 'https://wa.me/9779824336371',
-          viber: '9779824336371'
-        }
-      });
-    }
-  }, []);
   
   // Check if we're on an admin route
   const isAdminRoute = pathname?.startsWith('/admin');
@@ -105,11 +87,6 @@ const FloatingContactWidget: React.FC = () => {
     return null;
   }
   
-  // Don't render if contact info is not loaded yet
-  if (!contactInfo) {
-    return null;
-  }
-
   // Helper function to extract phone number from various formats
   const extractPhoneNumber = (phoneStr?: string): string => {
     if (!phoneStr) return '';
@@ -128,15 +105,15 @@ const FloatingContactWidget: React.FC = () => {
 
   // Extract WhatsApp URL or number
   const getWhatsAppUrl = (): string => {
-    const whatsapp = contactInfo.social?.whatsapp || '';
+    const whatsapp = settings.social?.whatsapp || '';
     if (whatsapp.includes('wa.me/') || whatsapp.includes('whatsapp.com/')) {
       return whatsapp.includes('?text=') 
         ? whatsapp 
         : `${whatsapp}?text=Hello! I am interested in your steel furniture products from Manish Steel.`;
     }
     // If it's just a number, create WhatsApp URL
-    const phoneNumber = extractPhoneNumber(whatsapp || contactInfo.phone);
-    return `https://wa.me/${phoneNumber}?text=Hello! I am interested in your steel furniture products from Manish Steel.`;
+    const phoneNumber = extractPhoneNumber(whatsapp || settings.phones?.[0] || settings.phone);
+    return `https://wa.me/${phoneNumber || '9779824336371'}?text=Hello! I am interested in your steel furniture products from Manish Steel.`;
   };
 
   const contactOptions: ContactOption[] = [
@@ -151,14 +128,14 @@ const FloatingContactWidget: React.FC = () => {
       name: 'Call Us',
       icon: <PhoneIcon className="w-5 h-5" />,
       color: 'bg-[#0066CC] hover:bg-[#0052A3]',
-      action: () => window.open(`tel:${contactInfo.phone || '+977 9824336371'}`, '_self'),
+      action: () => window.open(`tel:${(settings.phones?.[0] || settings.phone || '+977 9824336371').replace(/[^\d+]/g, '')}`, '_self'),
       label: 'Call Now'
     },
     {
       name: 'Viber',
       icon: <ViberIcon />,
       color: 'bg-[#665CAC] hover:bg-[#574B8C]',
-      action: () => window.open(`viber://chat?number=${extractPhoneNumber(contactInfo.social?.viber || contactInfo.phone)}`, '_self'),
+      action: () => window.open(`viber://chat?number=${extractPhoneNumber(settings.social?.viber || settings.phones?.[0] || settings.phone || '9779824336371')}`, '_self'),
       label: 'Chat on Viber'
     },
     {

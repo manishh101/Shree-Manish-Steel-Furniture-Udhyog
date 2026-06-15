@@ -16,6 +16,7 @@ export async function GET() {
       // Create default settings
       settings = await SiteSettings.create({
         phone: '+977 9824336371',
+        phones: ['+977 9824336371'],
         email: 'shreemanishfurniture@gmail.com',
         address: 'Dharan Rd, Biratnagar 56613, Nepal',
         businessHours: 'Sunday - Friday: 8:00 AM - 7:00 PM\nSaturday: 8:00 AM - 12:00 PM',
@@ -31,6 +32,10 @@ export async function GET() {
           youtube: ''
         }
       });
+    } else if (!settings.phones || settings.phones.length === 0) {
+      // Migrate existing phone to phones array
+      settings.phones = [settings.phone || '+977 9824336371'];
+      await settings.save();
     }
     
     return NextResponse.json({
@@ -71,7 +76,7 @@ export async function PUT(request: NextRequest) {
     
     // Update fields
     const allowedFields = [
-      'phone', 'email', 'address', 'businessHours',
+      'phone', 'phones', 'email', 'address', 'businessHours',
       'social', 'mapUrl', 'businessName', 'tagline', 'logo'
     ];
     
@@ -88,6 +93,22 @@ export async function PUT(request: NextRequest) {
         }
       }
     });
+
+    // Sync phone with the first element of phones array if phones is updated
+    if (body.phones && Array.isArray(body.phones) && body.phones.length > 0) {
+      // Filter out empty strings
+      const cleanPhones = body.phones.map((p: any) => String(p).trim()).filter(Boolean);
+      if (cleanPhones.length > 0) {
+        settings.phones = cleanPhones;
+        settings.phone = cleanPhones[0];
+      }
+    } else if (body.phone !== undefined) {
+      const cleanPhone = String(body.phone).trim();
+      if (cleanPhone) {
+        settings.phone = cleanPhone;
+        settings.phones = [cleanPhone];
+      }
+    }
     
     settings.updatedAt = new Date();
     if (user.id) {

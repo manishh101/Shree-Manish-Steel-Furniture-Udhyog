@@ -45,9 +45,25 @@ const Footer = () => {
     fetchCategories();
   }, []);
 
+  const whatsappNumber = (() => {
+    const whatsappLink = settings.social?.whatsapp || '';
+    const digitsOnly = whatsappLink.replace(/\D/g, '');
+    if (digitsOnly.length >= 7) {
+      return digitsOnly;
+    }
+    const primaryPhone = settings.phones?.[0] || settings.phone || '9779824336371';
+    const cleanPhone = primaryPhone.replace(/\D/g, '');
+    if (cleanPhone.length === 10 && cleanPhone.startsWith('9')) {
+      return `977${cleanPhone}`;
+    }
+    return cleanPhone || '9779824336371';
+  })();
+
   // Social links with defaults
   const socialLinks = {
-    whatsapp: settings.social?.whatsapp || 'https://wa.me/9779824336371',
+    whatsapp: settings.social?.whatsapp?.includes('wa.me/') || settings.social?.whatsapp?.includes('whatsapp.com/')
+      ? settings.social.whatsapp
+      : `https://wa.me/${whatsappNumber}`,
     viber: settings.social?.viber || '',
     facebook: settings.social?.facebook || 'https://www.facebook.com/profile.php?id=61576758530152',
     instagram: settings.social?.instagram || 'https://www.instagram.com/shreemanishfurniture',

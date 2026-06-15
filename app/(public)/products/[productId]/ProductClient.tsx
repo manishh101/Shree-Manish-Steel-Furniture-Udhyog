@@ -21,6 +21,7 @@ import {
 } from 'react-icons/fa';
 
 import { productAPI, Product as APIProduct } from '@/services/api';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { scrollToTop } from '@/utils/scrollUtils';
 import imageService from '@/services/imageService';
 import OptimizedImage from '@/components/common/OptimizedImage';
@@ -139,8 +140,27 @@ interface ProductClientProps {
  */
 const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
   const router = useRouter();
+  const { settings } = useSiteSettings();
   const [product, setProduct] = useState<Product | null>(initialProduct || null);
   const [loading, setLoading] = useState(!initialProduct);
+
+  // Helper to get WhatsApp phone number dynamically from settings
+  const whatsappNumber = useMemo(() => {
+    const whatsappLink = settings.social?.whatsapp || '';
+    // Try to extract digits from whatsapp link (e.g. wa.me/9779824336371)
+    const digitsOnly = whatsappLink.replace(/\D/g, '');
+    if (digitsOnly.length >= 7) {
+      return digitsOnly;
+    }
+    // Fallback: extract from the primary phone number
+    const primaryPhone = settings.phones?.[0] || settings.phone || '9779824336371';
+    const cleanPhone = primaryPhone.replace(/\D/g, '');
+    // If it's a 10-digit Nepalese number starting with 9, prepend 977
+    if (cleanPhone.length === 10 && cleanPhone.startsWith('9')) {
+      return `977${cleanPhone}`;
+    }
+    return cleanPhone || '9779824336371';
+  }, [settings]);
   const [error, setError] = useState<string | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(true);
@@ -712,7 +732,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
             Back
           </Link>
           <a
-            href={`https://wa.me/9779824336371?text=${encodeURIComponent(`Hello, I'm interested in *${product.name}*\n\nView Product: https://manishsteel.com.np/products/${product._id || productId}\n\nKindly share pricing and availability details. Thank you.`)}`}
+            href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hello, I'm interested in *${product.name}*\n\nView Product: https://manishsteel.com.np/products/${product._id || productId}\n\nKindly share pricing and availability details. Thank you.`)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-2 flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
@@ -962,7 +982,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
             {/* Action Buttons */}
             <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-8">
               <a
-                href={`https://wa.me/9779824336371?text=${encodeURIComponent(`Hello, I'm interested in *${product.name}*\n\nView Product: https://manishsteel.com.np/products/${product._id || productId}\n\nKindly share pricing and availability details. Thank you.`)}`}
+                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hello, I'm interested in *${product.name}*\n\nView Product: https://manishsteel.com.np/products/${product._id || productId}\n\nKindly share pricing and availability details. Thank you.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center px-2 sm:px-4 py-3 rounded-lg text-[11px] sm:text-sm font-semibold text-white bg-green-600 hover:bg-green-700 transition-all shadow-sm text-center"

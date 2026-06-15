@@ -78,10 +78,20 @@ const ContactPageContent = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-primary mb-1">Phone Number</h3>
-                    <a href={`tel:${settings.phone}`} className="text-text/80 hover:text-primary transition-colors">
-                      {settings.phone}
-                    </a>
+                    <h3 className="text-lg font-semibold text-primary mb-1">Phone Numbers</h3>
+                    {settings.phones && settings.phones.length > 0 ? (
+                      <div className="flex flex-col space-y-1">
+                        {settings.phones.map((phoneNum: string, index: number) => (
+                          <a key={index} href={`tel:${phoneNum.replace(/[^\d+]/g, '')}`} className="text-text/80 hover:text-primary transition-colors block">
+                            {phoneNum}
+                          </a>
+                        ))}
+                      </div>
+                    ) : (
+                      <a href={`tel:${settings.phone}`} className="text-text/80 hover:text-primary transition-colors block">
+                        {settings.phone}
+                      </a>
+                    )}
                   </div>
                 </div>
                 

@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { connectDB } from '@/lib/db';
 import Blog, { IBlog } from '@/models/Blog';
+import SiteSettings from '@/models/SiteSettings';
 import { FaClock, FaCalendarAlt, FaUser, FaArrowLeft, FaPhone, FaTags, FaEnvelope } from 'react-icons/fa';
 
 interface PageParams {
@@ -62,6 +63,11 @@ export default async function BlogDetailsPage({ params }: PageParams) {
   if (!blog) {
     notFound();
   }
+
+  // Fetch settings for dynamic contact phone number
+  const settings = await (SiteSettings as any).getSettings();
+  const displayPhone = settings?.phones?.[0] || settings?.phone || '9824336371';
+  const telLink = `tel:${displayPhone.replace(/[^\d+]/g, '')}`;
 
   // Schema.org Article structured data
   const articleSchema = {
@@ -213,10 +219,10 @@ export default async function BlogDetailsPage({ params }: PageParams) {
               
               <div className="space-y-3">
                 <a 
-                  href="tel:+9779824336371" 
+                  href={telLink} 
                   className="bg-white hover:bg-gray-55 text-primary text-sm font-bold w-full py-3 rounded-lg flex items-center justify-center gap-2 transition-all shadow-sm"
                 >
-                  <FaPhone className="w-3.5 h-3.5" /> फोन गर्नुहोस्: 9824336371
+                  <FaPhone className="w-3.5 h-3.5" /> फोन गर्नुहोस्: {displayPhone}
                 </a>
                 <Link 
                   href="/contact" 

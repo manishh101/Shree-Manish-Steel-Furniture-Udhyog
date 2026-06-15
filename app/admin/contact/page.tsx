@@ -7,6 +7,7 @@ import { settingsAPI, SiteSettings } from '@/services/api';
 // Default contact information from original React app
 const defaultContactInfo: SiteSettings = {
   phone: '+977 982-4336371',
+  phones: ['+977 982-4336371'],
   email: 'shreemanishfurniture@gmail.com',
   address: 'Dharan Rd, Biratnagar 56613, Nepal',
   businessHours: 'Sunday - Friday: 8:00 AM - 7:00 PM\nSaturday: 8:00 AM - 12:00 PM',
@@ -45,6 +46,7 @@ const AdminContact = () => {
           const settings = response.settings;
           setFormData({
             phone: settings.phone || defaultContactInfo.phone,
+            phones: settings.phones || [settings.phone || defaultContactInfo.phone],
             email: settings.email || defaultContactInfo.email,
             address: settings.address || defaultContactInfo.address,
             businessHours: settings.businessHours || defaultContactInfo.businessHours,
@@ -107,6 +109,41 @@ const AdminContact = () => {
     }
   };
 
+  const handlePhoneChange = (index: number, value: string) => {
+    setFormData(prev => {
+      const newPhones = [...(prev.phones || [prev.phone || ''])];
+      newPhones[index] = value;
+      return {
+        ...prev,
+        phones: newPhones,
+        phone: newPhones[0] || ''
+      };
+    });
+  };
+
+  const addPhoneField = () => {
+    setFormData(prev => {
+      const newPhones = [...(prev.phones || [prev.phone || '']), ''];
+      return {
+        ...prev,
+        phones: newPhones
+      };
+    });
+  };
+
+  const removePhoneField = (index: number) => {
+    setFormData(prev => {
+      const currentPhones = prev.phones || [prev.phone || ''];
+      if (currentPhones.length <= 1) return prev;
+      const newPhones = currentPhones.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        phones: newPhones,
+        phone: newPhones[0] || ''
+      };
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -114,21 +151,44 @@ const AdminContact = () => {
       setSaving(true);
       setSaveStatus({ show: false, success: false, message: '' });
       
-      console.log('Saving site settings:', formData);
+      // Filter out empty phone strings
+      const cleanPhones = (formData.phones || [formData.phone])
+        .map(p => p.trim())
+        .filter(Boolean);
+
+      if (cleanPhones.length === 0) {
+        throw new Error('At least one phone number is required');
+      }
+
+      const updatedFormData = {
+        ...formData,
+        phones: cleanPhones,
+        phone: cleanPhones[0]
+      };
+
+      console.log('Saving site settings:', updatedFormData);
       
       // Validate required fields
-      if (!formData.address.trim() || !formData.phone.trim() || !formData.email.trim()) {
+      if (!updatedFormData.address.trim() || !updatedFormData.phone.trim() || !updatedFormData.email.trim()) {
         throw new Error('Address, phone, and email are required fields');
       }
       
       // Save to database
-      const response = await settingsAPI.update(formData);
+      const response = await settingsAPI.update(updatedFormData);
       
       if (!response.success) {
         throw new Error('Failed to save settings');
       }
       
       console.log('Site settings saved successfully');
+      
+      // Update local state with response settings if available
+      if (response.settings) {
+        setFormData({
+          ...response.settings,
+          phones: response.settings.phones || [response.settings.phone]
+        });
+      }
       
       // Show success message
       setSaveStatus({
@@ -257,25 +317,58 @@ const AdminContact = () => {
             </div>
             
             {/* Phone */}
-            <div className="bg-gray-50 rounded-lg p-4 border">
+            <div className="bg-gray-50 rounded-lg p-4 border col-span-1 md:col-span-2">
               <h2 className="text-lg font-semibold mb-4 flex items-center">
                 <FaPhone className="mr-2 text-primary" />
-                Phone
+                Phone Numbers
               </h2>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number <span className="text-red-500">*</span>
+              <div className="space-y-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Manage Phone Numbers <span className="text-red-500">*</span>
                 </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
-                  placeholder="+977 XXXXXXXXXX"
-                />
-                <p className="mt-1 text-xs text-gray-500">This number will be shown in footer, header, and contact sections.</p>
+                
+                <div className="space-y-3">
+                  {(formData.phones && formData.phones.length > 0 ? formData.phones : [formData.phone]).map((phoneVal, index) => (
+                    <div key={index} className="flex gap-2 items-center">
+                      <div className="flex-grow">
+                        <input
+                          type="tel"
+                          value={phoneVal}
+                          onChange={(e) => handlePhoneChange(index, e.target.value)}
+                          required={index === 0}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary"
+                          placeholder={index === 0 ? "Primary number (e.g. +977 XXXXXXXXXX)" : "Secondary number"}
+                        />
+                      </div>
+                      
+                      {index === 0 ? (
+                        <span className="text-xs font-semibold px-2.5 py-1 bg-blue-100 text-blue-800 rounded">
+                          Primary
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => removePhoneField(index)}
+                          className="px-3 py-2 text-sm text-red-600 hover:text-red-800 border border-red-200 rounded-md bg-white hover:bg-red-50 transition-colors"
+                          title="Remove phone number"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={addPhoneField}
+                    className="px-4 py-2 text-sm bg-white border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors flex items-center gap-1 font-medium"
+                  >
+                    + Add Phone Number
+                  </button>
+                  <p className="mt-2 text-xs text-gray-500">The first phone number is the primary number. These will appear in the footer, header, and contact sections.</p>
+                </div>
               </div>
             </div>
             

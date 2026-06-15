@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 
 export interface SiteSettings {
   phone: string;
+  phones?: string[];
   email: string;
   address: string;
   businessHours: string;
@@ -32,6 +33,7 @@ interface SiteSettingsContextType {
 // Default settings (fallback)
 const defaultSettings: SiteSettings = {
   phone: '+977 9824336371',
+  phones: ['+977 9824336371'],
   email: 'shreemanishfurniture@gmail.com',
   address: 'Dharan Rd, Biratnagar 56613, Nepal',
   businessHours: 'Sunday - Friday: 8:00 AM - 7:00 PM\nSaturday: 8:00 AM - 12:00 PM',
@@ -72,6 +74,7 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
       if (data.success && data.settings) {
         setSettings({
           phone: data.settings.phone || defaultSettings.phone,
+          phones: data.settings.phones || [data.settings.phone || defaultSettings.phone],
           email: data.settings.email || defaultSettings.email,
           address: data.settings.address || defaultSettings.address,
           businessHours: data.settings.businessHours || defaultSettings.businessHours,

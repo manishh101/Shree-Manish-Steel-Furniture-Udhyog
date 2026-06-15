@@ -1029,6 +1029,7 @@ export const uploadAPI = {
 export interface SiteSettings {
   _id?: string;
   phone: string;
+  phones?: string[];
   email: string;
   address: string;
   businessHours: string;

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { customOrderAPI } from '@/services/api';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
 
 interface CustomOrderFormData {
   name: string;
@@ -21,9 +22,24 @@ interface CustomOrderFormData {
 }
 
 const CustomOrderPage = () => {
+  const { settings } = useSiteSettings();
   const { register, handleSubmit, formState: { errors }, reset } = useForm<CustomOrderFormData>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  const whatsappNumber = (() => {
+    const whatsappLink = settings.social?.whatsapp || '';
+    const digitsOnly = whatsappLink.replace(/\D/g, '');
+    if (digitsOnly.length >= 7) {
+      return digitsOnly;
+    }
+    const primaryPhone = settings.phones?.[0] || settings.phone || '9779824336371';
+    const cleanPhone = primaryPhone.replace(/\D/g, '');
+    if (cleanPhone.length === 10 && cleanPhone.startsWith('9')) {
+      return `977${cleanPhone}`;
+    }
+    return cleanPhone || '9779824336371';
+  })();
   const [countdown, setCountdown] = useState(3);
   const [errorMessage, setErrorMessage] = useState('');
   
@@ -131,7 +147,7 @@ const CustomOrderPage = () => {
               </div>
               <div className="text-center">
                 <a 
-                  href="https://wa.me/9779824336371" 
+                  href={`https://wa.me/${whatsappNumber}`} 
                   target="_blank" 
                   rel="noopener noreferrer" 
                   className="inline-flex items-center justify-center bg-[#25D366] text-white font-bold text-xl px-8 py-4 rounded-full shadow-lg hover:bg-[#128C7E] transition-all hover:scale-105"

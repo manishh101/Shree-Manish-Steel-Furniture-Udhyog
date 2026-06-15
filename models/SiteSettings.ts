@@ -3,6 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface ISiteSettings extends Document {
   // Contact Information
   phone: string;
+  phones?: string[];
   email: string;
   address: string;
   businessHours: string;
@@ -37,6 +38,10 @@ const SiteSettingsSchema = new Schema<ISiteSettings>({
     required: true,
     trim: true,
     default: '+977 9824336371'
+  },
+  phones: {
+    type: [String],
+    default: ['+977 9824336371']
   },
   email: {
     type: String,
