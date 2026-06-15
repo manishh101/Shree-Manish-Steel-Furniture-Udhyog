@@ -712,7 +712,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
             Back
           </Link>
           <a
-            href={`https://wa.me/9779824336371?text=I'm interested in ${encodeURIComponent(product.name)}. Please provide more information.`}
+            href={`https://wa.me/9779824336371?text=${encodeURIComponent(`Hello, I'm interested in *${product.name}*\n\nView Product: https://manishsteel.com.np/products/${product._id || productId}\n\nKindly share pricing and availability details. Thank you.`)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-2 flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
@@ -962,7 +962,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
             {/* Action Buttons */}
             <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-8">
               <a
-                href={`https://wa.me/9779824336371?text=I'm interested in ${encodeURIComponent(product.name)} (ID: ${product._id}). Please provide more information.`}
+                href={`https://wa.me/9779824336371?text=${encodeURIComponent(`Hello, I'm interested in *${product.name}*\n\nView Product: https://manishsteel.com.np/products/${product._id || productId}\n\nKindly share pricing and availability details. Thank you.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center px-2 sm:px-4 py-3 rounded-lg text-[11px] sm:text-sm font-semibold text-white bg-green-600 hover:bg-green-700 transition-all shadow-sm text-center"
