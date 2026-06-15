@@ -51,12 +51,8 @@ export default async function HomePage() {
   try {
     const doc = await Homepage.findOne().lean();
     if (doc) {
-      // Serialize Date to string and ObjectId to string
-      homepageContent = {
-        ...doc,
-        _id: doc._id.toString(),
-        lastUpdated: doc.lastUpdated ? new Date(doc.lastUpdated).toISOString() : undefined,
-      };
+      // Serialize Date to string and all ObjectIds (including nested ones) to string
+      homepageContent = JSON.parse(JSON.stringify(doc));
     }
   } catch (error) {
     console.error('Error fetching homepage content:', error);
@@ -66,11 +62,7 @@ export default async function HomePage() {
   let categories: any[] = [];
   try {
     const cats = await Category.find().sort({ displayOrder: 1 }).lean();
-    categories = cats.map(c => ({
-      ...c,
-      _id: c._id.toString(),
-      dateAdded: c.dateAdded ? new Date(c.dateAdded).toISOString() : undefined,
-    }));
+    categories = JSON.parse(JSON.stringify(cats));
   } catch (error) {
     console.error('Error fetching categories:', error);
   }
@@ -92,12 +84,7 @@ export default async function HomePage() {
   let services: any[] = [];
   try {
     const servs = await Service.find({ isActive: true }).sort({ order: 1 }).lean();
-    services = servs.map(s => ({
-      ...s,
-      _id: s._id.toString(),
-      createdAt: s.createdAt ? new Date(s.createdAt).toISOString() : undefined,
-      updatedAt: s.updatedAt ? new Date(s.updatedAt).toISOString() : undefined,
-    }));
+    services = JSON.parse(JSON.stringify(servs));
   } catch (error) {
     console.error('Error fetching services:', error);
   }
@@ -129,7 +116,7 @@ export default async function HomePage() {
         .limit(8)
         .lean();
     }
-    topProducts = transformProducts(products);
+    topProducts = JSON.parse(JSON.stringify(transformProducts(products)));
   } catch (error) {
     console.error('Error fetching top products:', error);
   }
@@ -170,7 +157,7 @@ export default async function HomePage() {
         .limit(8)
         .lean();
     }
-    mostSellingProducts = transformProducts(products);
+    mostSellingProducts = JSON.parse(JSON.stringify(transformProducts(products)));
   } catch (error) {
     console.error('Error fetching most selling products:', error);
   }

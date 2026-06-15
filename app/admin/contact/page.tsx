@@ -88,6 +88,16 @@ const AdminContact = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
+    let processedValue = value;
+    
+    // Automatically extract src from iframe snippet if user pastes the whole embed code
+    if (name === 'mapUrl' && value.includes('<iframe') && value.includes('src=')) {
+      const srcMatch = value.match(/src=["']([^"']+)["']/);
+      if (srcMatch && srcMatch[1]) {
+        processedValue = srcMatch[1];
+      }
+    }
+    
     if (name.includes('.')) {
       // Handle nested properties (social media links)
       const [parent, child] = name.split('.');
@@ -96,7 +106,7 @@ const AdminContact = () => {
           ...prev,
           social: {
             ...prev.social,
-            [child]: value
+            [child]: processedValue
           }
         }));
       }
@@ -104,7 +114,7 @@ const AdminContact = () => {
       // Handle top-level properties
       setFormData(prev => ({
         ...prev,
-        [name]: value
+        [name]: processedValue
       }));
     }
   };
