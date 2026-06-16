@@ -83,7 +83,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const nepaliSEO = getNepaliKeywords(productName, categoryName, subcategoryName);
 
     // Build comprehensive description for Nepali audience
-    const seoDescription = `${productName} - ${subcategoryName || categoryName}। विराटनगरमा उत्कृष्ट स्टील फर्निचर। ${productDescription.substring(0, 100)}`;
+    const seoDescription = `${productName} - ${subcategoryName || categoryName}। ${productDescription.substring(0, 120)}`;
 
     return {
       title: `${productName} | ${subcategoryName || categoryName} | विराटनगर नेपाल`,
@@ -112,7 +112,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         ...(productData.features || []).slice(0, 3)
       ],
       openGraph: {
-        title: `${productName} - ${subcategoryName || categoryName} | स्टील फर्निचर नेपाल`,
+        title: `${productName} - ${subcategoryName || categoryName} | श्री मनिश स्टील फर्निचर उद्योग`,
         description: seoDescription.substring(0, 160),
         type: 'website',
         url: `https://manishsteel.com.np/products/${productId}`,
