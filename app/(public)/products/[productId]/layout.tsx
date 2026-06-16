@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import mongoose from 'mongoose';
 import { connectDB } from '@/lib/db';
 import Product from '@/models/Product';
 
@@ -52,7 +53,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   
   try {
     await connectDB();
-    const product = await Product.findById(productId)
+    const isObjectId = mongoose.Types.ObjectId.isValid(productId);
+    const query = isObjectId ? { _id: productId } : { slug: productId };
+
+    const product = await Product.findOne(query)
       .populate('categoryId', 'name')
       .lean();
 
@@ -67,6 +71,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const categoryName = productData.categoryId?.name || productData.category || 'Steel Furniture';
     const subcategoryName = productData.subcategoryId?.name || productData.subcategory;
     const productName = productData.name || 'Product';
+    const canonicalSlug = productData.slug || productId;
     const productDescription = productData.description || `High-quality ${subcategoryName || categoryName} from Shree Manish Steel Furniture Nepal`;
     const productImage = productData.image || productData.images?.[0] || '/images/og-image.jpg';
     
@@ -115,7 +120,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: `${productName} - ${subcategoryName || categoryName} | श्री मनिश स्टील फर्निचर उद्योग`,
         description: seoDescription.substring(0, 160),
         type: 'website',
-        url: `https://manishsteel.com.np/products/${productId}`,
+        url: `https://manishsteel.com.np/products/${canonicalSlug}`,
         siteName: 'Shree Manish Steel Furniture',
         locale: 'ne_NP',
         images: allImages.slice(0, 6).map(img => ({
@@ -133,10 +138,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         creator: '@ManishSteelFurniture',
       },
       alternates: {
-        canonical: `https://manishsteel.com.np/products/${productId}`,
+        canonical: `https://manishsteel.com.np/products/${canonicalSlug}`,
         languages: {
-          'ne-NP': `https://manishsteel.com.np/products/${productId}`,
-          'en-NP': `https://manishsteel.com.np/products/${productId}`,
+          'ne-NP': `https://manishsteel.com.np/products/${canonicalSlug}`,
+          'en-NP': `https://manishsteel.com.np/products/${canonicalSlug}`,
         },
       },
     };

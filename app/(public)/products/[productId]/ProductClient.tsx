@@ -114,6 +114,7 @@ interface ColorChoice {
   label: string;
   hex?: string;
   productId?: string;
+  slug?: string;
   image?: string;
   href: string;
   isCurrent: boolean;
@@ -260,7 +261,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
     const choices: Omit<ColorChoice, 'href' | 'isCurrent'>[] = [];
     const seenLabels = new Set<string>();
 
-    const addChoice = (choice: { label?: string; hex?: string; productId?: string; image?: string }) => {
+    const addChoice = (choice: { label?: string; hex?: string; productId?: string; slug?: string; image?: string }) => {
       const label = choice.label?.trim();
       if (!label) return;
 
@@ -272,6 +273,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
         label,
         hex: choice.hex,
         productId: choice.productId,
+        slug: choice.slug,
         image: choice.image
       });
     };
@@ -282,6 +284,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
         label: product.colorName,
         hex: product.colorHex,
         productId: currentProductId,
+        slug: (product as any).slug,
         image: product.image || allImages[0]
       });
     }
@@ -290,8 +293,9 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
     // These are all OTHER products in the group, already sorted
     if (Array.isArray(product.colorVariants)) {
       product.colorVariants.forEach((variant: any) => {
-        const linkedId = typeof variant.productId === 'string' ? variant.productId : (variant.productId && variant.productId._id ? variant.productId._id : undefined);
-        const linkedProduct = linkedId ? linkedProductsMap[linkedId] : (typeof variant.productId === 'object' ? variant.productId : null);
+        const isObject = typeof variant.productId === 'object' && variant.productId !== null;
+        const linkedId = typeof variant.productId === 'string' ? variant.productId : (isObject ? variant.productId._id : undefined);
+        const linkedProduct = (linkedId && linkedProductsMap[linkedId]) || (isObject ? variant.productId : null);
 
         const linkedProductImage = linkedProduct?.image || linkedProduct?.images?.[0];
         const linkedProductColor = linkedProduct?.colorName || variant.label;
@@ -300,6 +304,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
           label: linkedProductColor,
           hex: variant.hex || linkedProduct?.colorHex,
           productId: linkedId || (linkedProduct?._id as any) || undefined,
+          slug: linkedProduct?.slug,
           image: variant.image || linkedProductImage
         });
       });
@@ -325,9 +330,19 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
         (activeColorKey && normalizeColorKey(choice.label) === normalizeColorKey(activeColorKey)) ||
         (!activeColorKey && index === 0);
 
+      // Resolve slug: check choice.slug first, then product.slug (if current), then linkedProductsMap
+      let targetSlug = choice.slug;
+      if (!targetSlug) {
+        if (String(targetProductId) === String(currentProductId)) {
+          targetSlug = (product as any).slug;
+        } else {
+          targetSlug = (linkedProductsMap[targetProductId] as any)?.slug;
+        }
+      }
+
       return {
         ...choice,
-        href: `/products/${targetProductId}?color=${normalizeColorKey(choice.label)}`,
+        href: `/products/${targetSlug || targetProductId}?color=${normalizeColorKey(choice.label)}`,
         isCurrent
       };
     });
@@ -610,7 +625,12 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
     const fetchProduct = async () => {
       // If we already have initialProduct matching the ID, use it (handled by state init). 
       // But if user navigates to another product client-side without full reload, we need to update state.
-      if (initialProduct && (initialProduct._id === productId || initialProduct.id === productId)) {
+      // Use initialProduct if it matches by ObjectId OR by slug (productId may be slug-based)
+      if (initialProduct && (
+        initialProduct._id === productId ||
+        initialProduct.id === productId ||
+        (initialProduct as any).slug === productId
+      )) {
         setProduct(initialProduct);
         setLoading(false);
         fetchRelatedProducts(initialProduct);
@@ -732,7 +752,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
             Back
           </Link>
           <a
-            href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hello, I'm interested in *${product.name}*\n\nView Product: https://manishsteel.com.np/products/${product._id || productId}\n\nKindly share pricing and availability details. Thank you.`)}`}
+            href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hello, I'm interested in *${product.name}*\n\nView Product: https://manishsteel.com.np/products/${(product as any).slug || product._id || productId}\n\nKindly share pricing and availability details. Thank you.`)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-2 flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
@@ -982,7 +1002,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
             {/* Action Buttons */}
             <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-8">
               <a
-                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hello, I'm interested in *${product.name}*\n\nView Product: https://manishsteel.com.np/products/${product._id || productId}\n\nKindly share pricing and availability details. Thank you.`)}`}
+                href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hello, I'm interested in *${product.name}*\n\nView Product: https://manishsteel.com.np/products/${(product as any).slug || product._id || productId}\n\nKindly share pricing and availability details. Thank you.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center px-2 sm:px-4 py-3 rounded-lg text-[11px] sm:text-sm font-semibold text-white bg-green-600 hover:bg-green-700 transition-all shadow-sm text-center"

@@ -33,9 +33,9 @@ const playfairDisplay = Playfair_Display({
 
 // Site configuration
 const siteConfig = {
-  name: 'Shree Manish Steel Furniture Udhyog',
+  name: 'Manish Steel Furniture',
   nameNepali: 'श्री मनिष स्टील फर्निचर उद्योग',
-  description: "विराटनगरको सबैभन्दा सस्तो र राम्रो फर्निचर! Best & Cheapest Furniture in Biratnagar, Nepal! Affordable steel & wood furniture - Office, School, Home. Premium quality beds (palang/खाट), almirahs (अलमिरा), tables, chairs at best prices. Cheaper than Daraz! Free delivery in Biratnagar, Dharan, Itahari. Call: 9824336371",
+  description: 'Premium steel furniture manufacturer in Nepal. Quality office and household furniture at affordable prices. Serving Biratnagar, Dharan, Itahari and across Nepal with fast delivery and home setup.',
   url: 'https://manishsteel.com.np',
   ogImage: 'https://manishsteel.com.np/images/og-image.jpg',
   phone: '+977 9824336371',
@@ -57,7 +57,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `विराटनगरको उत्कृष्ट फर्निचर | Best Furniture in Biratnagar - ${siteConfig.name}`,
+    default: 'Manish Steel Furniture - Premium Steel Furniture Nepal | Biratnagar',
     template: `%s | श्री मनिष स्टील फर्निचर विराटनगर`,
   },
   description: siteConfig.description,
@@ -236,22 +236,22 @@ export const metadata: Metadata = {
     locale: 'ne_NP',
     alternateLocale: ['en_NP'],
     url: siteConfig.url,
-    title: 'विराटनगरको उत्कृष्ट फर्निचर | Best & Cheapest Furniture in Biratnagar',
-    description: 'सस्तो र राम्रो स्टील फर्निचर विराटनगरमा! अलमिरा, खाट, टेबल, कुर्सी - उत्तम मूल्यमा। अफिस र स्कूल फर्निचर। निःशुल्क डेलिभरी! फोन: 9824336371',
+    title: 'Manish Steel Furniture - Premium Steel Furniture Nepal | Biratnagar',
+    description: siteConfig.description,
     siteName: siteConfig.name,
     images: [
       {
         url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: 'श्री मनिष स्टील फर्निचर - विराटनगरको उत्कृष्ट फर्निचर पसल',
+        alt: 'Manish Steel Furniture - Premium Steel Furniture Nepal',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Best Furniture in Biratnagar | Affordable Office & School Furniture',
-    description: 'Cheapest furniture in Biratnagar! Steel & wood furniture, beds, almirahs at best prices. Free delivery!',
+    title: 'Manish Steel Furniture - Premium Steel Furniture Nepal | Biratnagar',
+    description: siteConfig.description,
     images: [siteConfig.ogImage],
   },
   robots: {

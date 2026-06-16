@@ -16,6 +16,7 @@ interface ProductImage {
 interface Product {
   _id?: string;
   id?: string;
+  slug?: string;
   name?: string;
   title?: string;
   image?: string | null;
@@ -37,6 +38,7 @@ interface Product {
 interface SafeProduct {
   _id: string;
   id: string;
+  slug?: string;
   name: string;
   title?: string;
   image: string | null;
@@ -155,7 +157,7 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
   };
 
   // Product URL for navigation
-  const productUrl = `/products/${safeProduct._id || safeProduct.id}`;
+  const productUrl = `/products/${safeProduct.slug || safeProduct._id || safeProduct.id}`;
 
   // Prefetch the product page on mount for instant navigation
   useEffect(() => {

@@ -23,12 +23,12 @@ export async function GET() {
     const products = await Product.find({ isActive: { $ne: false } })
       .populate('categoryId', 'name')
       .populate('subcategoryId', 'name')
-      .select('_id name description image images category subcategory categoryId subcategoryId')
+      .select('_id name description image images category subcategory categoryId subcategoryId slug')
       .lean();
 
     // Build image sitemap XML
     const imageEntries = products.map((product: any) => {
-      const productUrl = `${baseUrl}/products/${product._id}`;
+      const productUrl = `${baseUrl}/products/${product.slug || product._id}`;
       const productName = product.name || 'Product';
       const categoryName = product.categoryId?.name || product.category || 'Steel Furniture';
       const subcategoryName = product.subcategoryId?.name || product.subcategory;

@@ -3,10 +3,10 @@ import LayoutWrapper from '@/components/LayoutWrapper';
 
 export const metadata: Metadata = {
   title: {
-    default: 'श्री मनिष स्टील फर्निचर | Shree Manish Steel Furniture | विराटनगर नेपाल',
+    default: 'Manish Steel Furniture - Premium Steel Furniture Nepal | Biratnagar',
     template: '%s | श्री मनिष स्टील फर्निचर विराटनगर',
   },
-  description: 'विराटनगरको उत्कृष्ट स्टील फर्निचर पसल। अलमिरा, खाट, अफिस फर्निचर, र्‍याक सबै उत्तम मूल्यमा। Best steel furniture shop in Biratnagar, Nepal. Free delivery in Biratnagar, Dharan, Itahari.',
+  description: 'Premium steel furniture manufacturer in Nepal. Quality office and household furniture at affordable prices. Serving Biratnagar, Dharan, Itahari and across Nepal with fast delivery and home setup.',
   keywords: [
     // Core Nepali keywords
     'स्टील फर्निचर',
@@ -26,7 +26,27 @@ export const metadata: Metadata = {
     'इटहरी फर्निचर',
   ],
   openGraph: {
+    title: 'Manish Steel Furniture - Premium Steel Furniture Nepal | Biratnagar',
+    description: 'Premium steel furniture manufacturer in Nepal. Quality office and household furniture at affordable prices. Serving Biratnagar, Dharan, Itahari and across Nepal with fast delivery and home setup.',
+    type: 'website',
     locale: 'ne_NP',
+    alternateLocale: ['en_NP'],
+    url: 'https://manishsteel.com.np',
+    siteName: 'Manish Steel Furniture',
+    images: [
+      {
+        url: 'https://manishsteel.com.np/images/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Manish Steel Furniture - Premium Steel Furniture Nepal',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Manish Steel Furniture - Premium Steel Furniture Nepal | Biratnagar',
+    description: 'Premium steel furniture manufacturer in Nepal. Quality office and household furniture at affordable prices. Serving Biratnagar, Dharan, Itahari and across Nepal with fast delivery and home setup.',
+    images: ['https://manishsteel.com.np/images/og-image.jpg'],
   },
   alternates: {
     languages: {

@@ -43,9 +43,10 @@ export const metadata: Metadata = {
     locale: 'ne_NP',
   },
   alternates: {
+    canonical: 'https://manishsteel.com.np/products',
     languages: {
-      'ne-NP': '/products',
-      'en-NP': '/products',
+      'ne-NP': 'https://manishsteel.com.np/products',
+      'en-NP': 'https://manishsteel.com.np/products',
     },
   },
 };

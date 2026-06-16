@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation';
 import React, { Suspense } from 'react';
+import mongoose from 'mongoose';
 import { connectDB } from '@/lib/db';
 import Product from '@/models/Product';
 import ProductClient from './ProductClient';
-import type { Metadata } from 'next';
 
 // Revalidate every hour for fresh content
 export const revalidate = 3600;
@@ -19,12 +19,12 @@ export async function generateStaticParams() {
   try {
     await connectDB();
     const products = await Product.find({ isActive: { $ne: false } })
-      .select('_id')
+      .select('slug _id')
       .limit(100) // Limit for build performance
       .lean();
 
     return products.map((product: any) => ({
-      productId: product._id.toString(),
+      productId: product.slug || product._id.toString(),
     }));
   } catch (error) {
     console.error('Error generating static params:', error);
@@ -34,22 +34,29 @@ export async function generateStaticParams() {
 
 // Server Component - renders product data for SEO
 export default async function ProductDetailPage({ params }: PageProps) {
+  // Resolve the canonical URL slug before rendering
   const resolvedParams = await params;
   const productId = resolvedParams.productId;
 
   try {
     await connectDB();
 
+    const isObjectId = mongoose.Types.ObjectId.isValid(productId);
+    const query = isObjectId ? { _id: productId } : { slug: productId };
+
     // Fetch product with populated data
-    const productDoc = await Product.findById(productId)
+    const productDoc = await Product.findOne(query)
       .populate('categoryId', 'name')
       .populate('subcategoryId', 'name')
-      .populate('colorVariants.productId', 'name image images colorName colorHex')
+      .populate('colorVariants.productId', 'name image images colorName colorHex slug')
       .lean();
 
     if (!productDoc) {
       notFound();
     }
+
+    // Resolve canonical slug — always use the product's own slug if available
+    const canonicalSlug = (productDoc as any).slug || productId;
 
     // Convert MongoDB document to plain object
     const product = JSON.parse(JSON.stringify(productDoc));
@@ -57,6 +64,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
     // Transform data for client component
     const transformedProduct = {
       _id: product._id,
+      slug: product.slug || canonicalSlug,
       name: product.name,
       description: product.description,
       price: product.price,
@@ -102,7 +110,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
               color: product.colorName || product.colors?.join(', '),
               offers: {
                 '@type': 'Offer',
-                url: `https://manishsteel.com.np/products/${productId}`,
+                url: `https://manishsteel.com.np/products/${canonicalSlug}`,
                 priceCurrency: 'NPR',
                 price: product.price || 0,
                 availability: product.stock > 0
@@ -134,7 +142,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
           </div>
 
           <div itemProp="offers" itemScope itemType="https://schema.org/Offer">
-            <meta itemProp="url" content={`https://manishsteel.com.np/products/${productId}`} />
+            <meta itemProp="url" content={`https://manishsteel.com.np/products/${canonicalSlug}`} />
             <meta itemProp="priceCurrency" content="NPR" />
             <meta itemProp="price" content={(product.price || 0).toString()} />
             <link itemProp="availability" href={product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'} />

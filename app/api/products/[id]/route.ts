@@ -2,9 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { connectDB } from '@/lib/db';
 import Product from '@/models/Product';
-import Category from '@/models/Category';
-import Subcategory from '@/models/Subcategory';
 import { getUserFromRequest } from '@/lib/auth';
+import { logger } from '@/lib/logger';
 import mongoose from 'mongoose';
 
 // GET /api/products/[id] - Get product by ID
@@ -16,10 +15,13 @@ export async function GET(
     const { id } = await params;
     await connectDB();
 
-    const rawProduct = await Product.findById(id)
+    const isObjectId = mongoose.Types.ObjectId.isValid(id);
+    const query = isObjectId ? { _id: id } : { slug: id };
+
+    const rawProduct = await Product.findOne(query)
       .populate('categoryId', 'name')
       .populate('subcategoryId', 'name')
-      .populate('colorVariants.productId', 'name image images colorName colorHex')
+      .populate('colorVariants.productId', 'name image images colorName colorHex slug')
       .lean();
 
     if (!rawProduct) {
@@ -55,7 +57,7 @@ export async function PUT(
     const user = getUserFromRequest(request);
 
     if (!user || user.role !== 'admin') {
-      console.log('PUT /api/products/[id] - Unauthorized. User:', user);
+      logger.warn('Unauthorized product update attempt', { id: (await params).id });
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -66,28 +68,9 @@ export async function PUT(
     await connectDB();
 
     const data = await request.json();
-    console.log('PUT /api/products/[id] - Updating product:', id, 'with data:', data);
+    logger.debug('Updating product', { id });
 
-    // If categoryId or subcategoryId is being updated, fetch the names
-    if (data.categoryId) {
-      const category = await Category.findById(data.categoryId);
-      if (category) {
-        data.category = category.name;
-      }
-    }
-
-    if (data.subcategoryId) {
-      const subcategory = await Subcategory.findById(data.subcategoryId);
-      if (subcategory) {
-        data.subcategory = subcategory.name;
-      }
-    }
-
-    const product = await Product.findByIdAndUpdate(
-      id,
-      { $set: data },
-      { new: true, runValidators: true }
-    );
+    const product = await Product.findById(id);
 
     if (!product) {
       return NextResponse.json(
@@ -95,6 +78,10 @@ export async function PUT(
         { status: 404 }
       );
     }
+
+    // Apply the updates to trigger the Mongoose pre-save hooks (for slugs & category names)
+    Object.assign(product, data);
+    await product.save();
 
     // SYNC COLOR VARIANTS BIDIRECTIONALLY
     if (data.colorVariants !== undefined) {
@@ -173,9 +160,12 @@ export async function PUT(
     revalidatePath('/');
     revalidatePath('/admin/products');
     revalidatePath(`/products/${id}`);
+    if (product.slug) {
+      revalidatePath(`/products/${product.slug}`);
+    }
     revalidateTag('products', {});
 
-    console.log('PUT /api/products/[id] - Product updated successfully:', product._id);
+    logger.info('Product updated successfully', { id: product._id, slug: product.slug });
     return NextResponse.json(product);
   } catch (error) {
     console.error('Error updating product:', error);
@@ -217,6 +207,9 @@ export async function DELETE(
     revalidatePath('/');
     revalidatePath('/admin/products');
     revalidatePath(`/products/${id}`);
+    if (product.slug) {
+      revalidatePath(`/products/${product.slug}`);
+    }
     revalidateTag('products', {});
 
     return NextResponse.json({ message: 'Product deleted successfully' });

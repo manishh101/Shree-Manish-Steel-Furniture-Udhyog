@@ -57,17 +57,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Get all products for dynamic product pages
     const products = await Product.find({ isActive: { $ne: false } })
-      .select('_id updatedAt')
+      .select('_id slug updatedAt')
       .limit(1000) // Limit for sitemap size
       .lean();
 
     const productPages: MetadataRoute.Sitemap = products
       .filter((product: any) => product._id) // Validate _id exists
       .map((product: any) => {
-        // Ensure product ID is properly stringified and URL-safe
-        const productId = String(product._id).trim();
+        // Ensure product ID or slug is properly stringified and URL-safe
+        const productSlugOrId = String(product.slug || product._id).trim();
         return {
-          url: `${baseUrl}/products/${productId}`,
+          url: `${baseUrl}/products/${productSlugOrId}`,
           lastModified: product.updatedAt ? new Date(product.updatedAt) : new Date(),
           changeFrequency: 'weekly' as const,
           priority: 0.8,

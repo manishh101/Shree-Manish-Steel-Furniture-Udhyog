@@ -56,6 +56,7 @@ function getAuthHeader(): HeadersInit {
 export interface Product {
   _id: string;
   id?: string;
+  slug?: string;
   name: string;
   description?: string;
   image?: string | null;
@@ -96,6 +97,7 @@ export interface Product {
     productId?: string | {
       _id: string;
       name?: string;
+      slug?: string;
       image?: string;
       images?: string[];
       colorName?: string;

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { connectDB } from '@/lib/db';
 import Product from '@/models/Product';
 import '@/models/Category'; // Required for populate()
@@ -147,6 +148,19 @@ export async function POST(request: NextRequest) {
     await product.save();
 
     logger.info('Product created successfully', { productId: product._id });
+
+    // Revalidate cache for product-related pages
+    try {
+      revalidatePath('/products');
+      revalidatePath('/');
+      revalidatePath('/admin/products');
+      if (product.slug) {
+        revalidatePath(`/products/${product.slug}`);
+      }
+      revalidateTag('products', {});
+    } catch (revalError) {
+      logger.error('Error revalidating paths on product creation', revalError as Error);
+    }
 
     return NextResponse.json(product, { status: 201 });
   } catch (error) {

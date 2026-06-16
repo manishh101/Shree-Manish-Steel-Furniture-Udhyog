@@ -4,6 +4,7 @@ import './Subcategory';
 
 export interface IProduct extends Document {
   name: string;
+  slug?: string;
   description: string;
   categoryId: mongoose.Types.ObjectId;
   subcategoryId?: mongoose.Types.ObjectId;
@@ -66,6 +67,12 @@ const ProductSchema = new Schema<IProduct>({
   name: {
     type: String,
     required: true,
+    trim: true
+  },
+  slug: {
+    type: String,
+    unique: true,
+    index: true,
     trim: true
   },
   description: {
@@ -224,8 +231,47 @@ ProductSchema.index({ usedAsCategoryThumbnail: 1, categoryId: 1 });
 
 // Pre-save middleware to automatically populate category and subcategory names
 ProductSchema.pre('save', async function () {
-  // Only populate if the IDs are set but names are not
-  if (this.categoryId && !this.category) {
+  // Generate slug if name modified or slug is empty
+  if (this.isModified('name') || !this.slug) {
+    const generateSlug = (text: string): string => {
+      return text
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '') // remove non-alphanumeric except spaces and hyphens
+        .replace(/[\s_]+/g, '-')   // replace spaces/underscores with hyphens
+        .replace(/-+/g, '-');      // remove duplicate hyphens
+    };
+
+    let baseSlug = generateSlug(this.name);
+    if (!baseSlug.endsWith('-biratnagar') && !baseSlug.includes('biratnagar')) {
+      baseSlug = `${baseSlug}-biratnagar`;
+    }
+
+    let uniqueSlug = baseSlug;
+    let counter = 1;
+    const ProductModel = this.constructor as mongoose.Model<any>;
+
+    while (true) {
+      const existing = await ProductModel.findOne({
+        slug: uniqueSlug,
+        _id: { $ne: this._id }
+      });
+      if (!existing) {
+        break;
+      }
+      if (baseSlug.endsWith('-biratnagar')) {
+        const prefix = baseSlug.slice(0, -11); // remove '-biratnagar'
+        uniqueSlug = `${prefix}-${counter}-biratnagar`;
+      } else {
+        uniqueSlug = `${baseSlug}-${counter}`;
+      }
+      counter++;
+    }
+    this.slug = uniqueSlug;
+  }
+
+  // Populate category/subcategory names when the ID changes or name is missing
+  if (this.categoryId && (this.isModified('categoryId') || !this.category)) {
     const Category = mongoose.model('Category');
     const category = await Category.findById(this.categoryId);
     if (category) {
@@ -233,7 +279,7 @@ ProductSchema.pre('save', async function () {
     }
   }
 
-  if (this.subcategoryId && !this.subcategory) {
+  if (this.subcategoryId && (this.isModified('subcategoryId') || !this.subcategory)) {
     const Subcategory = mongoose.model('Subcategory');
     const subcategory = await Subcategory.findById(this.subcategoryId);
     if (subcategory) {

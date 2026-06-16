@@ -9,6 +9,7 @@ import OptimizedImage from '@/components/common/OptimizedImage';
 interface Product {
   _id?: string;
   id?: string;
+  slug?: string;
   name: string;
   category?: string;
   subcategory?: string;
@@ -352,7 +353,7 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
               {/* Action buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <Link
-                  href={`/products/${product._id || product.id}`}
+                  href={`/products/${product.slug || product._id || product.id}`}
                   onClick={handleViewDetails}
                   className={`flex-1 text-center py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 font-medium ${config.buttonClass}`}
                 >
