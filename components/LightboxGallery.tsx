@@ -1,13 +1,22 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Lightbox from 'yet-another-react-lightbox';
-import Zoom from 'yet-another-react-lightbox/plugins/zoom';
-import Fullscreen from 'yet-another-react-lightbox/plugins/fullscreen';
-import 'yet-another-react-lightbox/styles.css';
+import dynamic from 'next/dynamic';
 import { PhotoIcon, ArrowsPointingOutIcon } from '@heroicons/react/24/outline';
 import GalleryCard from './GalleryCard';
 import GalleryListItem from './GalleryListItem';
+
+// Dynamic import for heavy lightbox libraries
+const Lightbox = dynamic(() => import('yet-another-react-lightbox'), {
+  loading: () => null,
+  ssr: false,
+});
+
+import Zoom from 'yet-another-react-lightbox/plugins/zoom';
+import Fullscreen from 'yet-another-react-lightbox/plugins/fullscreen';
+
+// Dynamically import styles only when lightbox is used
+import('yet-another-react-lightbox/styles.css');
 
 interface GalleryImage {
   id?: string;

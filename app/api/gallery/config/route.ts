@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { GalleryConfig } from '@/models/Gallery';
@@ -30,7 +31,7 @@ export async function GET() {
       data: config
     });
   } catch (error) {
-    console.error('Error fetching gallery config:', error);
+    logger.error('Error fetching gallery config:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch gallery config' },
       { status: 500 }
@@ -72,7 +73,7 @@ export async function PUT(request: NextRequest) {
       message: 'Gallery configuration updated successfully'
     });
   } catch (error) {
-    console.error('Error updating gallery config:', error);
+    logger.error('Error updating gallery config:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update gallery config' },
       { status: 500 }

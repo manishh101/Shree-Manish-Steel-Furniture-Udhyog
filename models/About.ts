@@ -6,6 +6,11 @@ export interface ICoreValue {
   icon: string;
 }
 
+export interface IFAQItem {
+  question: string;
+  answer: string;
+}
+
 export interface IAbout extends Document {
   heroTitle: string;
   heroDescription: string;
@@ -20,6 +25,7 @@ export interface IAbout extends Document {
   workshopTitle: string;
   workshopDescription: string;
   workshopImages: string[];
+  faqs: IFAQItem[];
   lastUpdated: Date;
 }
 
@@ -88,6 +94,16 @@ const AboutSchema = new Schema<IAbout>({
   },
   workshopImages: [{
     type: String
+  }],
+  faqs: [{
+    question: {
+      type: String,
+      required: true
+    },
+    answer: {
+      type: String,
+      required: true
+    }
   }],
   lastUpdated: {
     type: Date,

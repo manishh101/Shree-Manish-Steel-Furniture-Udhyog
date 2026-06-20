@@ -16,13 +16,100 @@ import {
   FaShoppingBag,
   FaWrench,
   FaHome,
-  FaNewspaper
+  FaNewspaper,
+  FaTachometerAlt,
+  FaChartLine,
+  FaQuestionCircle
 } from 'react-icons/fa';
 
 interface AdminSidebarProps {
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }
+
+// Defined outside component to prevent re-creation on each render and avoid hydration mismatch
+const menuItems = [
+  {
+    path: '/admin/dashboard',
+    name: 'Dashboard',
+    icon: FaThLarge
+  },
+  {
+    path: '/admin/products',
+    name: 'Products',
+    icon: FaClipboardList
+  },
+  {
+    path: '/admin/categories',
+    name: 'Categories',
+    icon: FaTags
+  },
+  {
+    path: '/admin/gallery',
+    name: 'Gallery',
+    icon: FaImages
+  },
+  {
+    path: '/admin/homepage',
+    name: 'Homepage',
+    icon: FaHome
+  },
+  {
+    path: '/admin/blogs',
+    name: 'Blogs & Articles',
+    icon: FaNewspaper
+  },
+  {
+    path: '/admin/about',
+    name: 'About Page',
+    icon: FaClipboardList
+  },
+  {
+    path: '/admin/faq',
+    name: 'FAQ Manager',
+    icon: FaQuestionCircle
+  },
+  {
+    path: '/admin/inquiries',
+    name: 'Inquiries',
+    icon: FaEnvelope
+  },
+  {
+    path: '/admin/custom-orders',
+    name: 'Custom Orders',
+    icon: FaShoppingBag
+  },
+  {
+    path: '/admin/contact',
+    name: 'Contact',
+    icon: FaPhone
+  },
+  {
+    path: '/admin/services',
+    name: 'Services',
+    icon: FaWrench
+  },
+  {
+    path: '/admin/performance',
+    name: 'Performance',
+    icon: FaTachometerAlt
+  },
+  {
+    path: '/admin/seo',
+    name: 'SEO Monitoring',
+    icon: FaChartLine
+  },
+  {
+    path: '/admin/seo-settings',
+    name: 'SEO Settings',
+    icon: FaCog
+  },
+  {
+    path: '/admin/settings',
+    name: 'Settings',
+    icon: FaCog
+  }
+];
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
   const pathname = usePathname();
@@ -37,68 +124,6 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
     router.push('/login');
   };
 
-  const menuItems = [
-    {
-      path: '/admin/dashboard',
-      name: 'Dashboard',
-      icon: FaThLarge
-    },
-    {
-      path: '/admin/products',
-      name: 'Products',
-      icon: FaClipboardList
-    },
-    {
-      path: '/admin/categories',
-      name: 'Categories',
-      icon: FaTags
-    },
-    {
-      path: '/admin/gallery',
-      name: 'Gallery',
-      icon: FaImages
-    },
-    {
-      path: '/admin/homepage',
-      name: 'Homepage',
-      icon: FaHome
-    },
-    {
-      path: '/admin/blogs',
-      name: 'Blogs & Articles',
-      icon: FaNewspaper
-    },
-    {
-      path: '/admin/about',
-      name: 'About Page',
-      icon: FaClipboardList
-    },
-    {
-      path: '/admin/inquiries',
-      name: 'Inquiries',
-      icon: FaEnvelope
-    },
-    {
-      path: '/admin/custom-orders',
-      name: 'Custom Orders',
-      icon: FaShoppingBag
-    },
-    {
-      path: '/admin/contact',
-      name: 'Contact',
-      icon: FaPhone
-    },
-    {
-      path: '/admin/services',
-      name: 'Services',
-      icon: FaWrench
-    },
-    {
-      path: '/admin/settings',
-      name: 'Settings',
-      icon: FaCog
-    }
-  ];
 
   return (
     <>
@@ -140,11 +165,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({ isOpen, setIsOpen }) => {
                       ? 'bg-blue-600 text-white'
                       : 'text-gray-300 hover:bg-gray-700 hover:text-white'
                   }`}
-                  onClick={() => {
-                    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
-                      setIsOpen(false);
-                    }
-                  }}
+                  onClick={() => setIsOpen(false)}
                 >
                   <Icon className="h-5 w-5" />
                   <span>{item.name}</span>

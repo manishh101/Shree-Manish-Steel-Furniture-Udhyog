@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { GallerySection } from '@/models/Gallery';
@@ -54,7 +55,7 @@ export async function POST(
       message: 'Image added successfully'
     }, { status: 201 });
   } catch (error) {
-    console.error('Error adding image:', error);
+    logger.error('Error adding image:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to add image' },
       { status: 500 }
@@ -117,7 +118,7 @@ export async function PUT(
       message: 'Images reordered successfully'
     });
   } catch (error) {
-    console.error('Error reordering images:', error);
+    logger.error('Error reordering images:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to reorder images' },
       { status: 500 }

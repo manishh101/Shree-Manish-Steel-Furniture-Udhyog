@@ -11,6 +11,12 @@ import {
   BuildingOffice2Icon
 } from '@heroicons/react/24/outline';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import {
+  trackWhatsAppClick,
+  trackPhoneClick,
+  trackViberClick,
+  trackDirectionsClick,
+} from '@/lib/analytics';
 
 // WhatsApp SVG Icon
 const WhatsAppIcon: React.FC = () => (
@@ -121,14 +127,21 @@ const FloatingContactWidget: React.FC = () => {
       name: 'WhatsApp',
       icon: <WhatsAppIcon />,
       color: 'bg-[#25D366] hover:bg-[#1DA851]',
-      action: () => window.open(getWhatsAppUrl(), '_blank'),
+      action: () => {
+        trackWhatsAppClick('floating_widget');
+        window.open(getWhatsAppUrl(), '_blank');
+      },
       label: 'Chat on WhatsApp'
     },
     {
       name: 'Call Us',
       icon: <PhoneIcon className="w-5 h-5" />,
       color: 'bg-[#0066CC] hover:bg-[#0052A3]',
-      action: () => window.open(`tel:${(settings.phones?.[0] || settings.phone || '+977 9824336371').replace(/[^\d+]/g, '')}`, '_self'),
+      action: () => {
+        const phone = (settings.phones?.[0] || settings.phone || '+977 9824336371').replace(/[^\d+]/g, '');
+        trackPhoneClick(phone, 'floating_widget');
+        window.open(`tel:${phone}`, '_self');
+      },
       label: settings.phones && settings.phones.length > 1
         ? `Call: ${settings.phones.join(', ')}`
         : `Call: ${settings.phones?.[0] || settings.phone || '+977 9824336371'}`
@@ -137,14 +150,20 @@ const FloatingContactWidget: React.FC = () => {
       name: 'Viber',
       icon: <ViberIcon />,
       color: 'bg-[#665CAC] hover:bg-[#574B8C]',
-      action: () => window.open(`viber://chat?number=${extractPhoneNumber(settings.social?.viber || settings.phones?.[0] || settings.phone || '9779824336371')}`, '_self'),
+      action: () => {
+        trackViberClick('floating_widget');
+        window.open(`viber://chat?number=${extractPhoneNumber(settings.social?.viber || settings.phones?.[0] || settings.phone || '9779824336371')}`, '_self');
+      },
       label: 'Chat on Viber'
     },
     {
       name: 'Location',
       icon: <MapPinIcon className="w-5 h-5" />,
       color: 'bg-[#FF6B35] hover:bg-[#E85A2B]',
-      action: () => window.open('https://www.google.com/maps/place/Shree+Manish+Steel+Furniture+Udhyog+Pvt.+Ltd./@26.49980678332793,87.27763091503517,17z/data=!3m1!4b1!4m6!3m5!1s0x39ef7395d46084a5:0xc709a12df1274cc8!8m2!3d26.49980678332793!4d87.27763091503517!16s%2Fg%2F11y3k8y8y8', '_blank'),
+      action: () => {
+        trackDirectionsClick('floating_widget');
+        window.open('https://www.google.com/maps/place/Shree+Manish+Steel+Furniture+Udhyog+Pvt.+Ltd./@26.49980678332793,87.27763091503517,17z/data=!3m1!4b1!4m6!3m5!1s0x39ef7395d46084a5:0xc709a12df1274cc8!8m2!3d26.49980678332793!4d87.27763091503517!16s%2Fg%2F11y3k8y8y8', '_blank');
+      },
       label: 'Visit Our Showroom'
     },
     {

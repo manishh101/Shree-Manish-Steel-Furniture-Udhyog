@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import CustomOrder from '@/models/CustomOrder';
@@ -56,7 +57,7 @@ export async function GET(request: NextRequest) {
       totalOrders
     });
   } catch (error) {
-    console.error('Error fetching custom orders:', error);
+    logger.error('Error fetching custom orders:', error);
     return NextResponse.json(
       { error: 'Failed to fetch custom orders' },
       { status: 500 }
@@ -95,7 +96,7 @@ export async function POST(request: NextRequest) {
       data: customOrder
     }, { status: 201 });
   } catch (error) {
-    console.error('Error creating custom order:', error);
+    logger.error('Error creating custom order:', error);
     return NextResponse.json(
       { error: 'Failed to submit custom order' },
       { status: 500 }

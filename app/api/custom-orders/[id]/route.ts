@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import CustomOrder from '@/models/CustomOrder';
@@ -32,7 +33,7 @@ export async function GET(
 
     return NextResponse.json(order);
   } catch (error) {
-    console.error('Error fetching custom order:', error);
+    logger.error('Error fetching custom order:', error);
     return NextResponse.json(
       { error: 'Failed to fetch custom order' },
       { status: 500 }
@@ -81,7 +82,7 @@ export async function PUT(
       data: order
     });
   } catch (error) {
-    console.error('Error updating custom order:', error);
+    logger.error('Error updating custom order:', error);
     return NextResponse.json(
       { error: 'Failed to update custom order' },
       { status: 500 }
@@ -121,7 +122,7 @@ export async function DELETE(
       message: 'Custom order deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting custom order:', error);
+    logger.error('Error deleting custom order:', error);
     return NextResponse.json(
       { error: 'Failed to delete custom order' },
       { status: 500 }

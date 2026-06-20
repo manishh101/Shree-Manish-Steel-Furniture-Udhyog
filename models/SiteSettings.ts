@@ -1,5 +1,42 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
+// Service Area interface
+export interface IServiceArea {
+  name: string;
+  type: 'city' | 'district' | 'province';
+  priority: 'primary' | 'secondary';
+  deliveryAvailable: boolean;
+}
+
+// LocalBusiness information interface
+export interface ILocalBusinessInfo {
+  name: string;
+  legalName: string;
+  address: {
+    street: string;
+    city: string;
+    region: string;
+    postalCode: string;
+    country: string;
+  };
+  geo: {
+    latitude: number;
+    longitude: number;
+  };
+  contacts: {
+    phones: string[];
+    whatsapp: string;
+    email: string;
+  };
+  openingHours: string[];
+  socialProfiles: {
+    facebook?: string;
+    instagram?: string;
+    youtube?: string;
+    twitter?: string;
+  };
+}
+
 export interface ISiteSettings extends Document {
   // Contact Information
   phone: string;
@@ -26,6 +63,19 @@ export interface ISiteSettings extends Document {
   businessName: string;
   tagline?: string;
   logo?: string;
+  
+  // SEO Configuration
+  businessInfo?: ILocalBusinessInfo;
+  serviceAreas?: IServiceArea[];
+  defaultTitleSuffix?: string;
+  defaultDescription?: string;
+  defaultKeywords?: string[];
+  ogImage?: string;
+  googleAnalyticsId?: string;
+  googleSearchConsoleId?: string;
+  priceRange?: string;
+  currencyAccepted?: string;
+  paymentAccepted?: string[];
   
   // Meta Info
   updatedAt: Date;
@@ -89,6 +139,100 @@ const SiteSettingsSchema = new Schema<ISiteSettings>({
     type: String,
     trim: true,
     default: ''
+  },
+  // SEO Configuration
+  businessInfo: {
+    type: {
+      name: { type: String, trim: true },
+      legalName: { type: String, trim: true },
+      address: {
+        street: { type: String, trim: true },
+        city: { type: String, trim: true },
+        region: { type: String, trim: true },
+        postalCode: { type: String, trim: true },
+        country: { type: String, trim: true }
+      },
+      geo: {
+        latitude: { type: Number },
+        longitude: { type: Number }
+      },
+      contacts: {
+        phones: { type: [String] },
+        whatsapp: { type: String, trim: true },
+        email: { type: String, trim: true }
+      },
+      openingHours: { type: [String] },
+      socialProfiles: {
+        facebook: { type: String, trim: true },
+        instagram: { type: String, trim: true },
+        youtube: { type: String, trim: true },
+        twitter: { type: String, trim: true }
+      }
+    },
+    required: false,
+    default: undefined
+  },
+  serviceAreas: {
+    type: [{
+      name: { type: String, required: true, trim: true },
+      type: { 
+        type: String, 
+        required: true, 
+        enum: ['city', 'district', 'province'],
+        trim: true 
+      },
+      priority: { 
+        type: String, 
+        required: true, 
+        enum: ['primary', 'secondary'],
+        trim: true 
+      },
+      deliveryAvailable: { type: Boolean, required: true, default: true }
+    }],
+    default: []
+  },
+  defaultTitleSuffix: {
+    type: String,
+    trim: true,
+    default: ' | Shree Manish Steel Furniture'
+  },
+  defaultDescription: {
+    type: String,
+    trim: true,
+    default: 'Quality powder-coated steel furniture manufacturer in Biratnagar, Nepal. Almirahs, tables, racks and custom furniture with free delivery.'
+  },
+  defaultKeywords: {
+    type: [String],
+    default: ['steel furniture', 'furniture Nepal', 'Biratnagar furniture', 'steel almirah', 'office furniture']
+  },
+  ogImage: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  googleAnalyticsId: {
+    type: String,
+    trim: true,
+    default: 'G-TGW5L8QT90'
+  },
+  googleSearchConsoleId: {
+    type: String,
+    trim: true,
+    default: ''
+  },
+  priceRange: {
+    type: String,
+    trim: true,
+    default: 'Rs. 2,000 - Rs. 100,000'
+  },
+  currencyAccepted: {
+    type: String,
+    trim: true,
+    default: 'NPR'
+  },
+  paymentAccepted: {
+    type: [String],
+    default: ['Cash', 'eSewa', 'Khalti', 'Bank Transfer']
   },
   updatedAt: {
     type: Date,

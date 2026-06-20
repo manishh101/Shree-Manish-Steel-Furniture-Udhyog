@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Product from '@/models/Product';
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
     // Return in the expected format { products: [] }
     return NextResponse.json({ products: transformedProducts });
   } catch (error) {
-    console.error('Error fetching most selling products:', error);
+    logger.error('Error fetching most selling products:', error);
     return NextResponse.json(
       { error: 'Failed to fetch most selling products', products: [] },
       { status: 500 }

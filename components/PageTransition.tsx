@@ -19,25 +19,22 @@ const hasReducedMotion = (): boolean => {
 // Enhanced animation variants for professional page transitions
 const pageVariants: Variants = {
   initial: {
-    opacity: 0,
-    y: 15,
-    scale: 0.98,
+    opacity: 0.2,  // Start mostly visible to reduce LCP impact (Req 10.1)
+    y: 8,
   },
   in: {
     opacity: 1,
     y: 0,
-    scale: 1,
     transition: {
-      duration: 0.5,
-      ease: [0.22, 1, 0.36, 1], // Custom cubic-bezier for professional feel
-      staggerChildren: 0.05
+      duration: 0.25,  // Reduced from 0.5s to minimize LCP delay
+      ease: [0.22, 1, 0.36, 1],
     }
   },
   out: {
     opacity: 0,
-    y: -10,
+    y: -8,
     transition: {
-      duration: 0.3,
+      duration: 0.2,
       ease: [0.47, 0, 0.745, 0.715]
     }
   }
@@ -45,14 +42,14 @@ const pageVariants: Variants = {
 
 // Simplified variants for users who prefer reduced motion
 const accessibleVariants: Variants = {
-  initial: { opacity: 0 },
+  initial: { opacity: 0.5 },
   in: { 
     opacity: 1,
-    transition: { duration: 0.3 }
+    transition: { duration: 0.15 }
   },
   out: { 
     opacity: 0,
-    transition: { duration: 0.2 }
+    transition: { duration: 0.15 }
   }
 };
 

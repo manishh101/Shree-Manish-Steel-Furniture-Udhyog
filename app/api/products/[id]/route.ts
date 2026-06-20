@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { connectDB } from '@/lib/db';
 import Product from '@/models/Product';
+import URLRedirect from '@/models/URLRedirect';
 import { getUserFromRequest } from '@/lib/auth';
 import { logger } from '@/lib/logger';
 import mongoose from 'mongoose';
@@ -40,7 +41,7 @@ export async function GET(
 
     return NextResponse.json(product);
   } catch (error) {
-    console.error('Error fetching product:', error);
+    logger.error('Error fetching product', error as Error);
     return NextResponse.json(
       { error: 'Failed to fetch product' },
       { status: 500 }
@@ -79,9 +80,26 @@ export async function PUT(
       );
     }
 
+    // Capture old slug before update for redirect creation
+    const oldSlug = product.slug;
+
     // Apply the updates to trigger the Mongoose pre-save hooks (for slugs & category names)
     Object.assign(product, data);
     await product.save();
+
+    // Create 301 redirect if slug changed
+    if (oldSlug && product.slug && oldSlug !== product.slug) {
+      try {
+        await URLRedirect.findOneAndUpdate(
+          { from: `/products/${oldSlug}` },
+          { from: `/products/${oldSlug}`, to: `/products/${product.slug}`, permanent: true },
+          { upsert: true, new: true, setDefaultsOnInsert: true }
+        );
+        logger.info('Redirect created for slug change', { from: oldSlug, to: product.slug });
+      } catch (redirectErr) {
+        logger.warn('Failed to create redirect for slug change', { error: redirectErr });
+      }
+    }
 
     // SYNC COLOR VARIANTS BIDIRECTIONALLY
     if (data.colorVariants !== undefined) {
@@ -168,7 +186,7 @@ export async function PUT(
     logger.info('Product updated successfully', { id: product._id, slug: product.slug });
     return NextResponse.json(product);
   } catch (error) {
-    console.error('Error updating product:', error);
+    logger.error('Error updating product', error as Error);
     return NextResponse.json(
       { error: 'Failed to update product' },
       { status: 500 }
@@ -214,7 +232,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Product deleted successfully' });
   } catch (error) {
-    console.error('Error deleting product:', error);
+    logger.error('Error deleting product', error as Error);
     return NextResponse.json(
       { error: 'Failed to delete product' },
       { status: 500 }

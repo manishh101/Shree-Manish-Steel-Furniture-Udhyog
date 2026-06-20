@@ -3,23 +3,47 @@ import ContactPageContent from '@/components/ContactPageContent';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'सम्पर्क | Contact Us - श्री मनिष स्टील फर्निचर विराटनगर',
-  description: 'हामीलाई सम्पर्क गर्नुहोस्। श्री मनिष स्टील फर्निचर शोरुम विराटनगर। विराटनगर, धरान, इटहरीमा निःशुल्क डेलिभरी। फोन: 9824336371। Contact us for steel furniture in Biratnagar.',
+  title: 'Contact Furniture Shop Biratnagar | सम्पर्क - श्री मनिष स्टील फर्निचर',
+  description: 'Contact Manish Steel Furniture showroom in Biratnagar. Free delivery in Biratnagar, Dharan, Itahari. Phone: +977 9824336371, WhatsApp available. Visit us at Dharan Road, Biratnagar.',
   keywords: [
+    // Primary local keywords
+    'contact furniture shop Biratnagar',
+    'furniture showroom Biratnagar address',
+    'furniture shop phone number Biratnagar',
+    'furniture delivery Biratnagar',
     // Nepali keywords
     'फर्निचर पसल विराटनगर ठेगाना',
     'फर्निचर सम्पर्क नेपाल',
     'फर्निचर शोरुम विराटनगर',
     'फर्निचर डेलिभरी विराटनगर',
-    'स्टील फर्निचर किन्ने',
-    // English keywords
-    'furniture shop Biratnagar address',
-    'contact furniture shop Nepal',
-    'furniture showroom Biratnagar',
-    'furniture delivery Biratnagar',
+    // Service area keywords
+    'furniture shop Dharan',
+    'furniture delivery Itahari',
+    'steel furniture contact Nepal',
   ],
   openGraph: {
+    title: 'Contact Furniture Shop Biratnagar',
+    description: 'Contact Manish Steel Furniture showroom in Biratnagar. Free delivery in Biratnagar, Dharan, Itahari. Phone: +977 9824336371',
+    type: 'website',
+    url: 'https://manishsteel.com.np/contact',
     locale: 'ne_NP',
+    alternateLocale: 'en_NP',
+    siteName: 'Shree Manish Steel Furniture',
+    images: [
+      {
+        url: 'https://manishsteel.com.np/images/og-image.jpg',
+        width: 1200,
+        height: 630,
+        alt: 'Contact Manish Steel Furniture Biratnagar',
+      },
+    ],
+  },
+  other: {
+    // Geo-tagging meta tags for local SEO
+    'geo.region': 'NP-P1',
+    'geo.placename': 'Biratnagar',
+    'geo.position': '26.4525;87.2718',
+    'ICBM': '26.4525, 87.2718',
   },
 };
 

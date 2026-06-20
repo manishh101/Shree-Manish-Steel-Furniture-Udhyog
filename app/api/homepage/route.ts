@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Homepage from '@/models/Homepage';
@@ -74,7 +75,7 @@ export async function GET() {
       data: homepageContent
     });
   } catch (error) {
-    console.error('Error fetching homepage content:', error);
+    logger.error('Error fetching homepage content:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch homepage content' },
       { status: 500 }
@@ -106,7 +107,7 @@ export async function PUT(request: NextRequest) {
       data: homepageContent
     });
   } catch (error: any) {
-    console.error('Error updating homepage content:', error);
+    logger.error('Error updating homepage content:', error);
     
     if (error.name === 'ValidationError') {
       const messages = Object.values(error.errors).map((err: any) => err.message);

@@ -85,6 +85,7 @@ export interface Product {
     brand?: string;
   };
   features?: string[];
+  faqs?: { question: string; answer: string; }[];
   material?: string;
   finish?: string;
   weight?: string;
@@ -122,6 +123,10 @@ export interface Product {
     email?: string;
     countryOfOrigin?: string;
   } | string;
+  metaTitle?: string;
+  metaDescription?: string;
+  focusKeywords?: string[];
+  dualKeywords?: string[] | unknown[];
   createdAt?: string;
   updatedAt?: string;
   [key: string]: unknown; // Index signature for additional properties
@@ -146,6 +151,16 @@ export interface Subcategory {
   displayOrder?: number;
 }
 
+export interface CategoryKeywordPair {
+  formal: string;
+  colloquial: string;
+}
+
+export interface CategoryFAQ {
+  question: string;
+  answer: string;
+}
+
 export interface Category {
   _id: string;
   id?: string;
@@ -154,6 +169,11 @@ export interface Category {
   image?: string;
   displayOrder?: number;
   subcategories?: Subcategory[];
+  metaTitle?: string;
+  metaDescription?: string;
+  focusKeywords?: string[];
+  dualKeywords?: CategoryKeywordPair[];
+  faqs?: CategoryFAQ[];
 }
 
 // Inquiry Types
@@ -309,14 +329,14 @@ export const categoryAPI = {
   getById: (id: string, withSubcategories = false) =>
     fetchAPI<Category>(`/categories/${id}`, { params: { subcategories: withSubcategories } }),
 
-  create: (data: { name: string; description?: string; image?: string; displayOrder?: number }) =>
+  create: (data: Partial<Category>) =>
     fetchAPI<Category>('/categories', {
       method: 'POST',
       body: JSON.stringify(data),
       headers: getAuthHeader()
     }),
 
-  update: (id: string, data: { name?: string; description?: string; image?: string; displayOrder?: number }) =>
+  update: (id: string, data: Partial<Category>) =>
     fetchAPI<Category>(`/categories/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -425,6 +445,27 @@ export const customOrderAPI = {
     }),
 };
 
+// FAQ API
+export interface FAQItem {
+  _id?: string;
+  question: string;
+  answer: string;
+  category: 'general' | 'delivery' | 'payment' | 'warranty' | 'custom_orders';
+  displayOrder?: number;
+}
+
+export const faqAPI = {
+  getAll: () =>
+    fetchAPI<{ success: boolean; data: FAQItem[] }>('/faq'),
+
+  updateAll: (faqs: FAQItem[]) =>
+    fetchAPI<{ success: boolean; data: FAQItem[]; message?: string }>('/faq', {
+      method: 'PUT',
+      body: JSON.stringify({ faqs }),
+      headers: getAuthHeader()
+    }),
+};
+
 // About API
 export interface AboutSection {
   title?: string;
@@ -454,6 +495,7 @@ export interface AboutData {
   workshopTitle?: string;
   workshopDescription?: string;
   workshopImages?: string[];
+  faqs?: { question: string; answer: string }[];
 }
 
 export interface AboutContent {

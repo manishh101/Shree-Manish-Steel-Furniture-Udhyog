@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import Service from '@/models/Service';
@@ -71,7 +72,7 @@ export async function GET(request: NextRequest) {
       services
     });
   } catch (error) {
-    console.error('Error fetching services:', error);
+    logger.error('Error fetching services:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to fetch services' },
       { status: 500 }
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
       service
     }, { status: 201 });
   } catch (error) {
-    console.error('Error creating service:', error);
+    logger.error('Error creating service:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to create service' },
       { status: 500 }
@@ -172,7 +173,7 @@ export async function PUT(request: NextRequest) {
       services: updatedServices
     });
   } catch (error) {
-    console.error('Error updating services:', error);
+    logger.error('Error updating services:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to update services' },
       { status: 500 }

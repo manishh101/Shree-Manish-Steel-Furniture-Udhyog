@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { GallerySection } from '@/models/Gallery';
@@ -66,7 +67,7 @@ export async function PUT(
       message: 'Image updated successfully'
     });
   } catch (error) {
-    console.error('Error updating image:', error);
+    logger.error('Error updating image:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update image' },
       { status: 500 }
@@ -121,7 +122,7 @@ export async function DELETE(
       message: 'Image deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting image:', error);
+    logger.error('Error deleting image:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to delete image' },
       { status: 500 }

@@ -36,11 +36,9 @@ const AdminContact = () => {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        console.log('Loading site settings from database...');
         const response = await settingsAPI.get();
         
         if (response.success && response.settings) {
-          console.log('Loaded settings:', response.settings);
           
           // Merge database values with defaults (database values take priority if they exist)
           const settings = response.settings;
@@ -66,7 +64,6 @@ const AdminContact = () => {
           });
         } else {
           // No settings in database, use defaults
-          console.log('No settings found in database, using defaults');
           setFormData(defaultContactInfo);
         }
       } catch (error) {
@@ -176,7 +173,6 @@ const AdminContact = () => {
         phone: cleanPhones[0]
       };
 
-      console.log('Saving site settings:', updatedFormData);
       
       // Validate required fields
       if (!updatedFormData.address.trim() || !updatedFormData.phone.trim() || !updatedFormData.email.trim()) {
@@ -190,7 +186,6 @@ const AdminContact = () => {
         throw new Error('Failed to save settings');
       }
       
-      console.log('Site settings saved successfully');
       
       // Update local state with response settings if available
       if (response.settings) {

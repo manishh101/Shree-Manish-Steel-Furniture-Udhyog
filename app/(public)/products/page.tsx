@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Script from 'next/script';
 import {
   FaSearch,
   FaChevronDown,
@@ -14,6 +15,7 @@ import { productAPI, categoryAPI, type Product, type Category } from '../../../s
 import ProductCard from '../../../components/common/ProductCard';
 import QuickView from '../../../components/QuickView';
 import useQuickView from '../../../hooks/useQuickView';
+import CategoryDescription from '../../../components/CategoryDescription';
 
 // Loading fallback component
 function ProductsPageSkeleton() {
@@ -283,14 +285,100 @@ function ProductsPageContent() {
     { value: 'newest', label: 'Newest First' }
   ];
 
+  // Generate breadcrumb schema for SEO
+  const generateBreadcrumbSchema = () => {
+    const baseUrl = 'https://manishsteel.com.np';
+    const items = [
+      {
+        position: 1,
+        name: 'Home',
+        item: baseUrl,
+      },
+    ];
+
+    if (selectedCategory === 'all') {
+      items.push({
+        position: 2,
+        name: 'All Products',
+        item: `${baseUrl}/products`,
+      });
+    } else {
+      items.push({
+        position: 2,
+        name: 'Products',
+        item: `${baseUrl}/products`,
+      });
+
+      const category = getCategoryById(selectedCategory);
+      if (category) {
+        items.push({
+          position: 3,
+          name: category.name,
+          item: `${baseUrl}/products?category=${selectedCategory}`,
+        });
+
+        if (selectedSubcategory) {
+          const subcategory = category.subcategories?.find(
+            (s: any) => (s._id || s.id) === selectedSubcategory
+          );
+          if (subcategory) {
+            items.push({
+              position: 4,
+              name: subcategory.name,
+              item: `${baseUrl}/products?category=${selectedCategory}&subcategory=${selectedSubcategory}`,
+            });
+          }
+        }
+      }
+    }
+
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: items.map(item => ({
+        '@type': 'ListItem',
+        position: item.position,
+        name: item.name,
+        item: item.item,
+      })),
+    };
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Structured Data - Breadcrumb Schema */}
+      <Script
+        id="breadcrumb-schema"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(generateBreadcrumbSchema()),
+        }}
+      />
+
       {/* Clean Header Section */}
       <header className="bg-white border-b border-gray-200">
         <div className="content-container py-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 text-center uppercase tracking-wider mb-2">PRODUCT CATALOGUE</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 text-center uppercase tracking-wider mb-2">
+            {selectedCategory === 'all' 
+              ? 'STEEL FURNITURE | स्टील फर्निचर BIRATNAGAR' 
+              : (() => {
+                  const category = getCategoryById(selectedCategory);
+                  return category?.name 
+                    ? `${category.name.toUpperCase()} - QUALITY FURNITURE BIRATNAGAR`
+                    : 'PRODUCT CATALOGUE';
+                })()
+            }
+          </h1>
           <p className="text-center text-gray-600 text-xs md:text-sm max-w-2xl mx-auto">
-            Discover our range of high-quality products tailored just for you.
+            {selectedCategory === 'all' 
+              ? 'Browse our complete collection of steel furniture including almirahs (daraj), office furniture, and powder coating services. Free delivery in Biratnagar, Dharan, Itahari.'
+              : (() => {
+                  const category = getCategoryById(selectedCategory);
+                  return category?.name 
+                    ? `Quality ${category.name.toLowerCase()} at affordable prices. Premium steel furniture with free delivery across Biratnagar, Dharan & Itahari.`
+                    : 'Discover our range of high-quality products tailored just for you.';
+                })()
+            }
           </p>
         </div>
         {error && (
@@ -305,11 +393,33 @@ function ProductsPageContent() {
       <div className="bg-white border-b border-gray-200">
         <div className="content-container py-3">
           <div className="flex justify-between items-center">
-            <nav>
+            <nav aria-label="Breadcrumb">
               <div className="flex items-center text-sm text-gray-600">
                 <Link href="/" className="hover:text-primary transition-colors">Home</Link>
                 <span className="mx-2">/</span>
-                <span className="text-gray-900">Product Catalogue</span>
+                {selectedCategory === 'all' ? (
+                  <span className="text-gray-900 font-medium">All Products</span>
+                ) : (
+                  <>
+                    <Link href="/products" className="hover:text-primary transition-colors">Products</Link>
+                    <span className="mx-2">/</span>
+                    <span className="text-gray-900 font-medium">
+                      {getCategoryById(selectedCategory)?.name || 'Category'}
+                      {selectedSubcategory && (
+                        <>
+                          {' / '}
+                          {(() => {
+                            const category = getCategoryById(selectedCategory);
+                            const subcat = category?.subcategories?.find(
+                              (s: any) => (s._id || s.id) === selectedSubcategory
+                            );
+                            return subcat?.name || 'Subcategory';
+                          })()}
+                        </>
+                      )}
+                    </span>
+                  </>
+                )}
               </div>
             </nav>
 
@@ -530,6 +640,19 @@ function ProductsPageContent() {
             {/* Products Grid */}
             {!loading && !error && (
               <>
+                {/* Category rich description when a category is selected */}
+                {selectedCategory !== 'all' && (() => {
+                  const cat = getCategoryById(selectedCategory);
+                  return cat?.description ? (
+                    <CategoryDescription
+                      name={cat.name}
+                      description={cat.description}
+                      dualKeywords={cat.dualKeywords}
+                      faqs={cat.faqs}
+                    />
+                  ) : null;
+                })()}
+
                 {filteredAndSortedProducts.length === 0 ? (
                   <div className="text-center py-20">
                     <div className="text-gray-400 mb-6">
@@ -573,6 +696,7 @@ function ProductsPageContent() {
                           <ProductCard
                             product={product}
                             onQuickView={openQuickView}
+                            index={index}
                           />
                         </div>
                       ))}

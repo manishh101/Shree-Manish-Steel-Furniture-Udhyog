@@ -12,6 +12,11 @@ interface CoreValue {
   icon?: string;
 }
 
+interface FAQItem {
+  question: string;
+  answer: string;
+}
+
 interface AboutData {
   heroTitle: string;
   heroDescription: string;
@@ -26,6 +31,7 @@ interface AboutData {
   workshopDescription: string;
   workshopImages: string[];
   coreValues: CoreValue[];
+  faqs: FAQItem[];
 }
 
 const initialAboutData: AboutData = {
@@ -41,7 +47,8 @@ const initialAboutData: AboutData = {
   workshopTitle: '',
   workshopDescription: '',
   workshopImages: [''],
-  coreValues: [{ title: '', description: '', icon: '' }]
+  coreValues: [{ title: '', description: '', icon: '' }],
+  faqs: [{ question: '', answer: '' }]
 };
 
 const AdminAbout = () => {
@@ -76,7 +83,8 @@ const AdminAbout = () => {
           workshopTitle: response.data.workshopTitle || '',
           workshopDescription: response.data.workshopDescription || '',
           workshopImages: response.data.workshopImages?.length ? response.data.workshopImages : [''],
-          coreValues: response.data.coreValues?.length ? response.data.coreValues : [{ title: '', description: '', icon: '' }]
+          coreValues: response.data.coreValues?.length ? response.data.coreValues : [{ title: '', description: '', icon: '' }],
+          faqs: response.data.faqs?.length ? response.data.faqs : [{ question: '', answer: '' }]
         };
         setAboutData(data);
         setOriginalData(data);
@@ -150,6 +158,31 @@ const AdminAbout = () => {
     }
   };
 
+  const handleFAQChange = (index: number, field: 'question' | 'answer', value: string) => {
+    setAboutData(prev => ({
+      ...prev,
+      faqs: prev.faqs.map((item, i) =>
+        i === index ? { ...item, [field]: value } : item
+      )
+    }));
+  };
+
+  const addFAQ = () => {
+    setAboutData(prev => ({
+      ...prev,
+      faqs: [...prev.faqs, { question: '', answer: '' }]
+    }));
+  };
+
+  const removeFAQ = (index: number) => {
+    if (aboutData.faqs.length > 1) {
+      setAboutData(prev => ({
+        ...prev,
+        faqs: prev.faqs.filter((_, i) => i !== index)
+      }));
+    }
+  };
+
   const handleReset = () => {
     setAboutData(originalData);
     showMessage('Changes discarded', 'success');
@@ -164,7 +197,8 @@ const AdminAbout = () => {
         ...aboutData,
         storyContent: aboutData.storyContent.filter(p => p.trim()),
         workshopImages: aboutData.workshopImages.filter(img => img.trim()),
-        coreValues: aboutData.coreValues.filter(v => v.title.trim() || v.description.trim())
+        coreValues: aboutData.coreValues.filter(v => v.title.trim() && v.description.trim()),
+        faqs: aboutData.faqs.filter(f => f.question.trim() && f.answer.trim())
       };
 
       const response = await aboutAPI.updateContent(cleanedData);
@@ -183,11 +217,12 @@ const AdminAbout = () => {
   };
 
   const tabs = [
-    { id: 'hero', label: 'Hero Section', icon: '' },
-    { id: 'story', label: 'Our Story', icon: '' },
-    { id: 'vision', label: 'Vision & Mission', icon: '' },
-    { id: 'values', label: 'Core Values', icon: '' },
-    { id: 'workshop', label: 'Workshop', icon: '' },
+    { id: 'hero', label: 'Hero Section', icon: '🏠' },
+    { id: 'story', label: 'Our Story', icon: '📖' },
+    { id: 'vision', label: 'Vision & Mission', icon: '🎯' },
+    { id: 'values', label: 'Core Values', icon: '⭐' },
+    { id: 'workshop', label: 'Workshop', icon: '🔧' },
+    { id: 'faqs', label: 'About Page FAQs', icon: '❓' },
   ];
 
   if (fetching) {
@@ -565,6 +600,71 @@ const AdminAbout = () => {
                 )}
               </div>
             </div>
+          </div>
+        )}
+
+        {/* About Page FAQs Tab */}
+        {activeTab === 'faqs' && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
+            <div className="flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                  ❓ About Page FAQs
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  These FAQs appear on the About page. For the main /faq page, use the{' '}
+                  <a href="/admin/faq" className="text-primary underline">FAQ Manager</a>.
+                </p>
+              </div>
+              <span className="text-sm text-gray-500">{aboutData.faqs.length} FAQs</span>
+            </div>
+
+            <div className="space-y-4">
+              {aboutData.faqs.map((faq, index) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="font-medium text-gray-700">FAQ #{index + 1}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeFAQ(index)}
+                      disabled={aboutData.faqs.length <= 1}
+                      className="text-red-500 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Question</label>
+                      <input
+                        type="text"
+                        value={faq.question}
+                        onChange={(e) => handleFAQChange(index, 'question', e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        placeholder="Enter question..."
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Answer</label>
+                      <textarea
+                        value={faq.answer}
+                        onChange={(e) => handleFAQChange(index, 'answer', e.target.value)}
+                        className="w-full p-3 border border-gray-300 rounded-lg h-24 focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        placeholder="Enter answer..."
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              type="button"
+              onClick={addFAQ}
+              className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
+            >
+              <FaPlus /> Add FAQ
+            </button>
           </div>
         )}
 

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import User from '@/models/User';
@@ -43,7 +44,7 @@ export async function POST(request: NextRequest) {
         });
 
         await user.save();
-        console.log('Default admin user created');
+        logger.info('Default admin user created');
       } else {
         return NextResponse.json(
           { success: false, message: 'Invalid credentials', code: 'INVALID_CREDENTIALS' },
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('Login error:', error);
+    logger.error('Login error:', error);
     return NextResponse.json(
       { success: false, message: 'Server error during authentication', code: 'SERVER_ERROR' },
       { status: 500 }
@@ -112,7 +113,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(user);
   } catch (error) {
-    console.error('Get user error:', error);
+    logger.error('Get user error:', error);
     return NextResponse.json(
       { success: false, message: 'Server error' },
       { status: 500 }

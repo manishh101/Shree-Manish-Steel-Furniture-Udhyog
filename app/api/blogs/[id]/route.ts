@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import connectDB from '@/lib/db';
@@ -58,7 +59,7 @@ export async function GET(
       blog
     });
   } catch (error) {
-    console.error('Error fetching blog post:', error);
+    logger.error('Error fetching blog post:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to fetch blog post' },
       { status: 500 }
@@ -132,7 +133,7 @@ export async function PUT(
       blog
     });
   } catch (error) {
-    console.error('Error updating blog post:', error);
+    logger.error('Error updating blog post:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to update blog post' },
       { status: 500 }
@@ -175,7 +176,7 @@ export async function DELETE(
       message: 'Blog post deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting blog post:', error);
+    logger.error('Error deleting blog post:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to delete blog post' },
       { status: 500 }

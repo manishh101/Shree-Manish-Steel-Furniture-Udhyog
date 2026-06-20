@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { GallerySection } from '@/models/Gallery';
@@ -35,7 +36,7 @@ export async function GET(
       data: section
     });
   } catch (error) {
-    console.error('Error fetching section:', error);
+    logger.error('Error fetching section:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch section' },
       { status: 500 }
@@ -89,7 +90,7 @@ export async function PUT(
       message: 'Section updated successfully'
     });
   } catch (error) {
-    console.error('Error updating section:', error);
+    logger.error('Error updating section:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update section' },
       { status: 500 }
@@ -137,7 +138,7 @@ export async function DELETE(
       message: 'Section deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting section:', error);
+    logger.error('Error deleting section:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to delete section' },
       { status: 500 }

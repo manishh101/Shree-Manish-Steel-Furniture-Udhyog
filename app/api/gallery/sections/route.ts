@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { GallerySection } from '@/models/Gallery';
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
       data: sections
     });
   } catch (error) {
-    console.error('Error fetching sections:', error);
+    logger.error('Error fetching sections:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch sections' },
       { status: 500 }
@@ -63,7 +64,7 @@ export async function POST(request: NextRequest) {
       message: 'Gallery section created successfully'
     }, { status: 201 });
   } catch (error) {
-    console.error('Error creating section:', error);
+    logger.error('Error creating section:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to create section' },
       { status: 500 }
@@ -97,7 +98,7 @@ export async function PUT(request: NextRequest) {
       message: 'Sections reordered successfully'
     });
   } catch (error) {
-    console.error('Error reordering sections:', error);
+    logger.error('Error reordering sections:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to reorder sections' },
       { status: 500 }

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Subcategory from '@/models/Subcategory';
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(subcategories);
   } catch (error) {
-    console.error('Error fetching subcategories:', error);
+    logger.error('Error fetching subcategories:', error);
     return NextResponse.json(
       { error: 'Server Error' },
       { status: 500 }
@@ -82,7 +83,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(subcategory, { status: 201 });
   } catch (error) {
-    console.error('Error creating subcategory:', error);
+    logger.error('Error creating subcategory:', error);
     return NextResponse.json(
       { error: 'Server Error' },
       { status: 500 }

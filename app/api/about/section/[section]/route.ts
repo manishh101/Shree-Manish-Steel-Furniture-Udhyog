@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import About from '@/models/About';
@@ -64,7 +65,7 @@ export async function PUT(
       data: aboutContent
     });
   } catch (error) {
-    console.error('Error updating about section:', error);
+    logger.error('Error updating about section:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update section' },
       { status: 500 }

@@ -41,16 +41,13 @@ const CleanTopProductsSection: React.FC<CleanTopProductsSectionProps> = ({ initi
       setLoading(true);
       setError(null);
       
-      console.log('Fetching top products from API...');
       
       // Use the correct API method for top products
       const response = await productAPI.getTopProducts(8);
       
-      console.log('Top products API response:', response);
       
       if (response) {
         const products = response.products || [];
-        console.log('Setting top products:', products.length, 'products');
         setTopProducts(products);
       } else {
         console.warn('No top products data received');
@@ -113,11 +110,26 @@ const CleanTopProductsSection: React.FC<CleanTopProductsSectionProps> = ({ initi
 
   if (loading) {
     return (
-      <section className="py-16 bg-white">
-        <div className="container mx-auto">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading top products...</p>
+      <section className="py-12 md:py-16 bg-white">
+        <div className="content-container">
+          {/* Section Header Skeleton */}
+          <div className="text-center mb-8 md:mb-10">
+            <div className="h-4 bg-gray-200 rounded w-32 mx-auto mb-2 animate-pulse"></div>
+            <div className="h-8 bg-gray-200 rounded w-56 mx-auto animate-pulse"></div>
+          </div>
+          {/* Product cards skeleton — matches real grid layout to prevent CLS */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden animate-pulse">
+                {/* Image area — matches ProductCard aspect-ratio 3/4 */}
+                <div className="w-full bg-gray-200" style={{ aspectRatio: '3/4' }}></div>
+                {/* Text area */}
+                <div className="p-4 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
+                  <div className="h-3 bg-gray-100 rounded w-1/2 mx-auto"></div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

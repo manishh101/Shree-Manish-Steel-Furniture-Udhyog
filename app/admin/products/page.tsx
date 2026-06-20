@@ -1,9 +1,19 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { productAPI, Product } from '@/services/api';
 import OptimizedImage from '@/components/common/OptimizedImage';
-import ProductFormEnhanced from '@/components/admin/ProductFormEnhanced';
+
+// Dynamic import for heavy admin form component
+const ProductFormEnhanced = dynamic(() => import('@/components/admin/ProductFormEnhanced'), {
+  loading: () => (
+    <div className="flex items-center justify-center p-8">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+    </div>
+  ),
+  ssr: false,
+});
 import {
   FaPencilAlt,
   FaTrash,
@@ -28,7 +38,6 @@ const AdminProducts = () => {
       setLoading(true);
       setError('');
 
-      console.log('🔄 Admin loading products...');
 
       const response = await productAPI.getAll(1, 1000);
 
@@ -40,7 +49,6 @@ const AdminProducts = () => {
         productsData = response.products;
       }
 
-      console.log(`✅ Admin loaded ${productsData.length} products`);
       setProducts(productsData);
 
       if (productsData.length === 0) {
@@ -60,28 +68,24 @@ const AdminProducts = () => {
   }, [loadProducts]);
 
   const openAddModal = () => {
-    console.log('Opening add modal');
     setEditingProduct(null);
     setError('');
     setIsModalOpen(true);
   };
 
   const openEditModal = (product: Product) => {
-    console.log('Opening edit modal for product:', product);
     setEditingProduct(product);
     setError('');
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
-    console.log('Closing modal');
     setIsModalOpen(false);
     setEditingProduct(null);
     setError('');
   };
 
   const handleSave = () => {
-    console.log('Product saved, reloading products');
     loadProducts();
     closeModal();
   };
@@ -90,7 +94,6 @@ const AdminProducts = () => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
         await productAPI.delete(productId);
-        console.log(`Successfully deleted product with ID: ${productId}`);
         await loadProducts();
       } catch (err) {
         console.error('Error deleting product:', err);
@@ -103,7 +106,6 @@ const AdminProducts = () => {
     try {
       const newFeaturedStatus = !currentFeaturedStatus;
       await productAPI.updateFeaturedStatus(productId, newFeaturedStatus);
-      console.log(`Updated featured status for product ${productId} to ${newFeaturedStatus}`);
 
       setProducts(prev => prev.map(product =>
         product._id === productId
@@ -120,7 +122,6 @@ const AdminProducts = () => {
     try {
       const newStatus = !currentStatus;
       await productAPI.updateMostSellingStatus(productId, newStatus);
-      console.log(`Updated most selling status for product ${productId} to ${newStatus}`);
 
       setProducts(prev => prev.map(product =>
         product._id === productId
@@ -137,7 +138,6 @@ const AdminProducts = () => {
     try {
       const newStatus = !currentStatus;
       await productAPI.updateTopProductStatus(productId, newStatus);
-      console.log(`Updated top product status for product ${productId} to ${newStatus}`);
 
       setProducts(prev => prev.map(product =>
         product._id === productId
@@ -154,7 +154,6 @@ const AdminProducts = () => {
     try {
       const newStatus = !currentStatus;
       await productAPI.updateCategoryThumbnailStatus(productId, newStatus);
-      console.log(`Updated category thumbnail status for product ${productId} to ${newStatus}`);
 
       // Reload products to ensure consistency
       await loadProducts();
@@ -179,7 +178,6 @@ const AdminProducts = () => {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
       const response = await fetch(`${apiUrl}/health`);
       const data = await response.json();
-      console.log('✅ API Connection Test Success:', data);
       alert(`✅ API Connection Success!\nStatus: ${data.status}\nTime: ${data.timestamp}`);
     } catch (error) {
       console.error('❌ API Connection Test Failed:', error);

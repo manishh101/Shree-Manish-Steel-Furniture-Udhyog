@@ -1,6 +1,10 @@
 import React from 'react';
 import Link from 'next/link';
 import type { Metadata } from 'next';
+import NotFoundClient from '@/components/NotFoundClient';
+import { connectDB } from '@/lib/db';
+import Category from '@/models/Category';
+import Product from '@/models/Product';
 
 export const metadata: Metadata = {
   title: 'Page Not Found | Shree Manish Steel Furniture',
@@ -11,30 +15,79 @@ export const metadata: Metadata = {
   },
 };
 
-export default function NotFound() {
+export default async function NotFound() {
+  // Fetch popular categories and products for the 404 page
+  let categories: any[] = [];
+  let popularProducts: any[] = [];
+
+  try {
+    await connectDB();
+    
+    // Fetch top 6 categories
+    const cats = await Category.find()
+      .sort({ displayOrder: 1 })
+      .limit(6)
+      .lean();
+    categories = JSON.parse(JSON.stringify(cats));
+
+    // Fetch featured or top products
+    let products = await Product.find({ featured: true })
+      .populate('categoryId', 'name')
+      .sort({ salesCount: -1 })
+      .limit(8)
+      .lean();
+
+    if (!products || products.length === 0) {
+      products = await Product.find({ isTopProduct: true })
+        .populate('categoryId', 'name')
+        .sort({ salesCount: -1 })
+        .limit(8)
+        .lean();
+    }
+
+    if (!products || products.length === 0) {
+      products = await Product.find({})
+        .populate('categoryId', 'name')
+        .sort({ createdAt: -1 })
+        .limit(8)
+        .lean();
+    }
+
+    popularProducts = JSON.parse(JSON.stringify(products));
+  } catch (error) {
+    console.error('Error fetching 404 page data:', error);
+  }
+
   return (
-    <div className="min-h-[70vh] flex items-center justify-center bg-gray-50">
-      <div className="container mx-auto px-4 text-center">
-        <h1 className="text-6xl md:text-8xl font-bold text-primary mb-6">404</h1>
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4">Page Not Found</h2>
-        <p className="text-lg text-gray-600 mb-8 max-w-md mx-auto">
-          The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Link 
-            href="/" 
-            className="inline-block bg-primary text-white font-medium px-6 py-3 rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            Return to Homepage
-          </Link>
-          <Link 
-            href="/products" 
-            className="inline-block bg-white text-primary border border-primary font-medium px-6 py-3 rounded-lg hover:bg-primary/5 transition-colors"
-          >
-            Browse Products
-          </Link>
-        </div>
-      </div>
-    </div>
+    <>
+      {/* Breadcrumb schema for 404 page */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'BreadcrumbList',
+            itemListElement: [
+              {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Home',
+                item: 'https://manishsteel.com.np',
+              },
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Page Not Found',
+              },
+            ],
+          }),
+        }}
+      />
+      
+      <NotFoundClient 
+        categories={categories} 
+        popularProducts={popularProducts} 
+      />
+    </>
   );
 }

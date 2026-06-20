@@ -102,9 +102,29 @@ html {
     -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
   }
   
-  /* Improved touch targets for mobile */
+  /* Improved touch targets for mobile - Requirements 8.3 */
   .mobile-touch-target {
-    @apply min-h-[44px] min-w-[44px];
+    @apply min-h-[48px] min-w-[48px];
+  }
+  
+  /* Ensure all interactive elements meet minimum tap target size */
+  @media (max-width: 768px) {
+    button:not(.mobile-touch-target),
+    a:not(.mobile-touch-target),
+    input[type="button"],
+    input[type="submit"],
+    [role="button"] {
+      min-height: 44px;
+      min-width: 44px;
+      padding: 0.5rem;
+    }
+    
+    /* Add proper spacing between adjacent interactive elements */
+    button + button,
+    a + button,
+    button + a {
+      margin-left: 0.5rem;
+    }
   }
   
   /* Custom product card styles */
@@ -338,7 +358,87 @@ body {
   }
 }
 
-/* Line clamp utilities */
+/* =============================================
+   CLS (Cumulative Layout Shift) Prevention
+   Requirement 10.2, 4.3 — ensures images and
+   dynamic content reserve space before loading.
+   ============================================= */
+
+/* Stable aspect-ratio image container utilities.
+   Use these wrappers to prevent layout shift when
+   images load asynchronously. */
+.img-container-square {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.img-container-product {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+}
+
+.img-container-landscape {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+}
+
+.img-container-portrait {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+}
+
+/* Ensure Next.js fill images never cause reflow */
+.img-container-square > img,
+.img-container-product > img,
+.img-container-landscape > img,
+.img-container-portrait > img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Contain layout so image loading doesn't shift
+   sibling or ancestor elements */
+.layout-stable {
+  contain: layout;
+}
+
+/* Reserve height for sections that load content
+   dynamically (prevents CLS from section appearing) */
+.section-min-reserve {
+  min-height: 200px;
+}
+
+/* Prevent font loading from causing layout shift */
+html {
+  font-display: optional;
+}
+
+/* Ensure all img and video elements have explicit
+   box sizing and prevent overflow-based reflow */
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* For images inside Next.js fill containers,
+   always prevent them from stretching the container */
+[data-nextjs-fill] {
+  position: absolute !important;
+  inset: 0 !important;
+}
+
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -352,3 +452,5 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* Line clamp utilities */

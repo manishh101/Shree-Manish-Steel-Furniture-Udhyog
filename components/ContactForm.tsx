@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { inquiryAPI } from '../services/api';
+import { trackContactFormSubmission } from '@/lib/analytics';
 
 type InquiryCategory = 'general' | 'support' | 'product' | 'service' | 'business';
 
@@ -36,6 +37,9 @@ const ContactForm: React.FC = () => {
         ...data,
         category
       });
+      
+      // Track successful form submission
+      trackContactFormSubmission(category, 'contact_form');
       
       setSubmitStatus({ success: true, message: 'Inquiry sent successfully! We will get back to you soon.' });
       reset();

@@ -6,6 +6,13 @@ import { connectDB } from '@/lib/db';
 import Blog, { IBlog } from '@/models/Blog';
 import SiteSettings from '@/models/SiteSettings';
 import { FaClock, FaCalendarAlt, FaUser, FaArrowLeft, FaPhone, FaTags, FaEnvelope } from 'react-icons/fa';
+import { metadataGenerator } from '@/lib/seo/metadataGenerator';
+import { schemaGenerator } from '@/lib/seo/schemaGenerator';
+import { CACHE_CONFIG } from '@/lib/cache';
+import SocialShareButtons from '@/components/SocialShareButtons';
+
+// Use ISR with caching for blog posts (Req 10.3)
+export const revalidate = 86400; // CACHE_CONFIG.BLOGS.revalidate
 
 interface PageParams {
   params: Promise<{ slug: string }>;
@@ -33,26 +40,28 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
     };
   }
 
-  const title = blog.metaTitle || `${blog.title} - श्री मनिष स्टील फर्निचर`;
-  const description = blog.metaDescription || blog.excerpt;
+  // Use metadataGenerator for consistent SEO metadata
+  const seoMetadata = metadataGenerator.generateBlogMetadata(blog);
 
   return {
-    title,
-    description,
+    title: seoMetadata.title,
+    description: seoMetadata.description,
+    keywords: seoMetadata.keywords,
     openGraph: {
-      title,
-      description,
+      title: seoMetadata.openGraph?.title || blog.title,
+      description: seoMetadata.openGraph?.description || blog.excerpt,
       type: 'article',
-      url: `https://manishsteel.com.np/blogs/${blog.slug}`,
-      images: blog.image ? [{ url: blog.image }] : [],
+      url: seoMetadata.openGraph?.url || `https://manishsteel.com.np/blogs/${blog.slug}`,
+      images: seoMetadata.openGraph?.images || (blog.image ? [{ url: blog.image, width: 1200, height: 630 }] : []),
       publishedTime: blog.createdAt ? new Date(blog.createdAt).toISOString() : undefined,
       modifiedTime: blog.updatedAt ? new Date(blog.updatedAt).toISOString() : undefined,
       authors: [blog.author || 'Shree Manish Steel Furniture'],
       locale: 'ne_NP',
+      alternateLocale: 'en_NP',
+      siteName: 'Shree Manish Steel Furniture',
     },
-    alternates: {
-      canonical: `https://manishsteel.com.np/blogs/${blog.slug}`,
-    },
+    twitter: seoMetadata.twitter,
+    alternates: seoMetadata.alternates,
   };
 }
 
@@ -69,59 +78,15 @@ export default async function BlogDetailsPage({ params }: PageParams) {
   const displayPhone = settings?.phones?.[0] || settings?.phone || '9824336371';
   const telLink = `tel:${displayPhone.replace(/[^\d+]/g, '')}`;
 
-  // Schema.org Article structured data
-  const articleSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': `https://manishsteel.com.np/blogs/${blog.slug}`,
-    },
-    headline: blog.title,
-    description: blog.excerpt,
-    image: blog.image || 'https://manishsteel.com.np/images/og-image.jpg',
-    datePublished: new Date(blog.createdAt).toISOString(),
-    dateModified: new Date(blog.updatedAt).toISOString(),
-    author: {
-      '@type': 'Organization',
-      name: 'Shree Manish Steel Furniture Udhyog',
-      url: 'https://manishsteel.com.np',
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'Shree Manish Steel Furniture Udhyog',
-      logo: {
-        '@type': 'ImageObject',
-        url: 'https://manishsteel.com.np/logo192.png',
-      },
-    },
-  };
+  // Generate Article schema using schemaGenerator
+  const articleSchema = schemaGenerator.generateArticleSchema(blog);
 
-  // Breadcrumb List Schema
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: 'https://manishsteel.com.np',
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: 'Blogs',
-        item: 'https://manishsteel.com.np/blogs',
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: blog.title,
-        item: `https://manishsteel.com.np/blogs/${blog.slug}`,
-      },
-    ],
-  };
+  // Generate Breadcrumb schema using schemaGenerator
+  const breadcrumbSchema = schemaGenerator.generateBreadcrumbSchema([
+    { name: 'Home', url: 'https://manishsteel.com.np' },
+    { name: 'Blogs', url: 'https://manishsteel.com.np/blogs' },
+    { name: blog.title, url: `https://manishsteel.com.np/blogs/${blog.slug}` },
+  ]);
 
   return (
     <div className="min-h-screen bg-gray-50/50 pb-20">
@@ -206,6 +171,16 @@ export default async function BlogDetailsPage({ params }: PageParams) {
               className="prose prose-blue max-w-none text-gray-800 leading-relaxed space-y-6 text-base md:text-lg"
               dangerouslySetInnerHTML={{ __html: blog.content }}
             />
+
+            {/* Social Share Buttons */}
+            <div className="mt-10 pt-6 border-t border-gray-200">
+              <SocialShareButtons
+                url={`https://manishsteel.com.np/blogs/${blog.slug}`}
+                title={blog.title}
+                description={blog.excerpt}
+                className="justify-center md:justify-start"
+              />
+            </div>
           </div>
 
           {/* Sidebar Area */}

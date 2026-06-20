@@ -168,15 +168,15 @@ class CloudinaryImageService {
       
       // Build transformation string
       const {
-        width = 1600,
-        height = 1600,
-        quality = 'auto:best',
+        width = 800,
+        height = 800,
+        quality = 'auto:good',
         format = 'auto',
-        crop = 'fit'
+        crop = 'limit'
       } = options;
       
       // Build a comprehensive transformation string
-      const transformations = `w_${width},h_${height},q_${quality},f_${format},c_${crop},dpr_auto`;
+      const transformations = `w_${width},h_${height},q_${quality},f_${format},c_${crop}`;
       
       // Create the optimized URL
       return `${baseUrl}/${transformations}/${publicId}`;

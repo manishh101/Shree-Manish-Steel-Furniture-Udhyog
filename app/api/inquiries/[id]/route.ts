@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Inquiry from '@/models/Inquiry';
@@ -32,7 +33,7 @@ export async function GET(
 
     return NextResponse.json(inquiry);
   } catch (error) {
-    console.error('Error fetching inquiry:', error);
+    logger.error('Error fetching inquiry:', error);
     return NextResponse.json(
       { error: 'Failed to fetch inquiry' },
       { status: 500 }
@@ -81,7 +82,7 @@ export async function PUT(
       data: inquiry
     });
   } catch (error) {
-    console.error('Error updating inquiry:', error);
+    logger.error('Error updating inquiry:', error);
     return NextResponse.json(
       { error: 'Failed to update inquiry' },
       { status: 500 }
@@ -121,7 +122,7 @@ export async function DELETE(
       message: 'Inquiry deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting inquiry:', error);
+    logger.error('Error deleting inquiry:', error);
     return NextResponse.json(
       { error: 'Failed to delete inquiry' },
       { status: 500 }

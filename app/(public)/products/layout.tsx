@@ -1,55 +1,77 @@
 import type { Metadata } from 'next';
+import { metadataGenerator } from '../../../lib/seo/metadataGenerator';
 
-export const metadata: Metadata = {
-  title: 'स्टील फर्निचर | Steel & Wood Furniture Products | विराटनगर नेपाल',
-  description: 'विराटनगरमा उत्कृष्ट स्टील फर्निचर किन्नुहोस्। अलमिरा, खाट, अफिस फर्निचर, र्‍याक सबै उत्तम मूल्यमा। Browse our complete collection of steel furniture. Free delivery in Biratnagar, Dharan, Itahari.',
-  keywords: [
-    // English keywords
-    'buy steel furniture Biratnagar',
-    'steel almirah price Nepal',
-    'office furniture Biratnagar',
-    'steel bed Biratnagar',
-    'furniture shop Biratnagar',
-    'wood furniture Nepal',
-    'steel rack price',
-    'wardrobe Biratnagar',
-    'furniture delivery Dharan Itahari',
-    'Shree Manish Steel Furniture',
-    // Nepali keywords
-    'स्टील फर्निचर',
-    'स्टील अलमिरा',
-    'अलमारी',
-    'विराटनगर फर्निचर',
-    'फर्निचर नेपाल',
-    'स्टील खाट',
-    'अफिस फर्निचर',
-    'फर्निचर किन्ने',
-    'धरान फर्निचर',
-    'इटहरी फर्निचर',
-    'वार्डरोब',
-    'स्टील र्‍याक',
-    // Transliterated keywords (how Nepalis might type in English)
-    'steel almirah price biratnagar',
-    'office table biratnagar',
-    'steel khat Nepal',
-    'furniture kinne thau biratnagar',
-    'almirah nepal',
-    'steel furniture price nepal',
-  ],
-  openGraph: {
-    title: 'स्टील फर्निचर | Steel & Wood Furniture | विराटनगर',
-    description: 'विराटनगरमा उत्कृष्ट स्टील फर्निचर। Premium steel furniture at affordable prices. Free delivery!',
-    type: 'website',
-    locale: 'ne_NP',
-  },
-  alternates: {
-    canonical: 'https://manishsteel.com.np/products',
-    languages: {
-      'ne-NP': 'https://manishsteel.com.np/products',
-      'en-NP': 'https://manishsteel.com.np/products',
-    },
-  },
+type Props = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 };
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const resolvedParams = (await searchParams) ?? {};
+  const category = resolvedParams.category as string | undefined;
+  const subcategory = resolvedParams.subcategory as string | undefined;
+  
+  // If we have category/subcategory filters, fetch that data and generate dynamic metadata
+  if (category && category !== 'all') {
+    try {
+      // Fetch category data from API
+      const categoryResponse = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || ''}/api/categories?includeSub=true`,
+        { cache: 'no-store' }
+      );
+      
+      if (categoryResponse.ok) {
+        const categories = await categoryResponse.json();
+        const selectedCategory = Array.isArray(categories) 
+          ? categories.find((cat: any) => (cat._id || cat.id) === category)
+          : null;
+        
+        if (selectedCategory) {
+          const selectedSubcategory = subcategory && selectedCategory.subcategories
+            ? selectedCategory.subcategories.find((sub: any) => (sub._id || sub.id) === subcategory)
+            : null;
+          
+          // Generate metadata using the metadata generator service
+          const seoData = metadataGenerator.generateCategoryMetadata(
+            selectedCategory,
+            selectedSubcategory
+          );
+          
+          return {
+            title: seoData.title,
+            description: seoData.description,
+            keywords: seoData.keywords,
+            openGraph: {
+              ...seoData.openGraph,
+              images: seoData.openGraph?.images,
+            },
+            twitter: seoData.twitter,
+            alternates: seoData.alternates,
+            robots: seoData.robots,
+          };
+        }
+      }
+    } catch (error) {
+      console.error('Error generating category metadata:', error);
+      // Fall through to default metadata
+    }
+  }
+  
+  // Default metadata for all products page
+  const defaultSeo = metadataGenerator.generatePageMetadata('products');
+  
+  return {
+    title: defaultSeo.title,
+    description: defaultSeo.description,
+    keywords: defaultSeo.keywords,
+    openGraph: {
+      ...defaultSeo.openGraph,
+      images: defaultSeo.openGraph?.images,
+    },
+    twitter: defaultSeo.twitter,
+    alternates: defaultSeo.alternates,
+    robots: defaultSeo.robots,
+  };
+}
 
 export default function ProductsLayout({
   children,

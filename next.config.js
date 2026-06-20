@@ -1,3 +1,7 @@
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+});
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Image Optimization
@@ -14,7 +18,7 @@ const nextConfig = {
     formats: ['image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    qualities: [75, 85],
+    qualities: [75, 85, 90],
     minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
     // Disable dangerous SVG features to prevent XSS
     dangerouslyAllowSVG: false,
@@ -24,6 +28,22 @@ const nextConfig = {
   // Performance Optimizations
   experimental: {
     optimizeCss: true,
+    optimizePackageImports: [
+      'react-icons',
+      '@heroicons/react',
+      'framer-motion',
+      'yet-another-react-lightbox',
+    ],
+    // Scroll restoration for better UX and perceived performance
+    scrollRestoration: true,
+  },
+
+  // Compiler optimizations
+  compiler: {
+    // Remove console logs in production
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
   },
 
   // Compression
@@ -120,4 +140,4 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+module.exports = withBundleAnalyzer(nextConfig);

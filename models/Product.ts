@@ -11,6 +11,10 @@ export interface IProduct extends Document {
   category?: string;
   subcategory?: string;
   features: string[];
+  faqs?: {
+    question: string;
+    answer: string;
+  }[];
   specifications: {
     material?: string;
     dimensions?: string;
@@ -61,6 +65,17 @@ export interface IProduct extends Document {
     email?: string;
     countryOfOrigin?: string;
   } | string;
+  
+  // SEO Enhancement Fields
+  metaTitle?: string;            // Custom meta title (optional override)
+  metaDescription?: string;      // Custom meta description
+  focusKeywords?: string[];      // Primary SEO keywords
+  dualKeywords?: {               // Formal/colloquial keyword pairs
+    formal: string;
+    colloquial: string;
+  }[];
+  contentQualityScore?: number;  // 0-100 score for content quality
+  lastSEOAudit?: Date;          // Last SEO review date
 }
 
 const ProductSchema = new Schema<IProduct>({
@@ -95,6 +110,10 @@ const ProductSchema = new Schema<IProduct>({
   },
   features: [{
     type: String
+  }],
+  faqs: [{
+    question: { type: String, required: true },
+    answer: { type: String, required: true }
   }],
   specifications: {
     material: { type: String, default: "" },
@@ -213,6 +232,38 @@ const ProductSchema = new Schema<IProduct>({
       email: "shreemanishfurniture@gmail.com",
       countryOfOrigin: "Nepal"
     }
+  },
+  
+  // SEO Enhancement Fields
+  metaTitle: {
+    type: String,
+    trim: true
+  },
+  metaDescription: {
+    type: String,
+    trim: true
+  },
+  focusKeywords: [{
+    type: String,
+    trim: true
+  }],
+  dualKeywords: [{
+    formal: {
+      type: String,
+      trim: true
+    },
+    colloquial: {
+      type: String,
+      trim: true
+    }
+  }],
+  contentQualityScore: {
+    type: Number,
+    min: 0,
+    max: 100
+  },
+  lastSEOAudit: {
+    type: Date
   }
 });
 
@@ -288,11 +339,6 @@ ProductSchema.pre('save', async function () {
   }
 });
 
-// Clear the model if it exists to ensure schema updates are picked up (important for dev hot-reloads)
-if (mongoose.models.Product) {
-  delete mongoose.models.Product;
-}
-
-const Product: Model<IProduct> = mongoose.model<IProduct>('Product', ProductSchema);
+const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>('Product', ProductSchema);
 
 export default Product;

@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import About from '@/models/About';
@@ -54,7 +55,7 @@ export async function PUT(
       data: aboutContent
     });
   } catch (error) {
-    console.error('Error updating core value:', error);
+    logger.error('Error updating core value:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update core value' },
       { status: 500 }
@@ -93,7 +94,7 @@ export async function DELETE(
       data: aboutContent
     });
   } catch (error) {
-    console.error('Error deleting core value:', error);
+    logger.error('Error deleting core value:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to delete core value' },
       { status: 500 }

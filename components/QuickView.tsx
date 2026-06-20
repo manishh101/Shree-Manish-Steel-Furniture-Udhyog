@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { FaTimes, FaEye, FaChevronLeft, FaChevronRight, FaExpand } from 'react-icons/fa';
 import imageService from '@/services/imageService';
 import OptimizedImage from '@/components/common/OptimizedImage';
+import { trackQuickViewOpen } from '@/lib/analytics';
 
 interface Product {
   _id?: string;
@@ -49,8 +50,15 @@ const QuickView: React.FC<QuickViewProps> = ({ product, isOpen, onClose, variant
     if (product) {
       setSelectedImageIndex(0);
       setFullScreenView(false);
+      
+      // Track quick view open
+      const productId = product._id || product.id || '';
+      const productName = product.name || 'Unknown Product';
+      const source = variant || 'standard';
+      
+      trackQuickViewOpen(productId, productName, source);
     }
-  }, [product]);
+  }, [product, variant]);
 
   // Handle modal background click
   const handleModalBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {

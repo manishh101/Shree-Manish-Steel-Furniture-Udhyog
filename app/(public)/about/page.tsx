@@ -4,71 +4,120 @@ import Image from 'next/image';
 import type { Metadata } from 'next';
 import { connectDB } from '@/lib/db';
 import About from '@/models/About';
+import { metadataGenerator } from '@/lib/seo/metadataGenerator';
+import { schemaGenerator } from '@/lib/seo/schemaGenerator';
 
 // Disable caching to ensure real-time updates from admin
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export const metadata: Metadata = {
-  title: 'हाम्रो बारेमा | About Us - श्री मनिष स्टील फर्निचर विराटनगर',
-  description: 'श्री मनिष स्टील फर्निचर - विराटनगरको विश्वसनीय फर्निचर उत्पादक। २००९ देखि गुणस्तरीय स्टील र काठको फर्निचर। Trusted furniture manufacturer in Biratnagar since 2009.',
+// Generate enhanced metadata using SEO service
+const seoMetadata = metadataGenerator.generatePageMetadata('about', {
+  title: 'About Shree Manish Steel - Trusted Furniture Manufacturer Biratnagar, Province 1',
+  description: '10+ years trusted furniture manufacturer in Biratnagar, Nepal. Quality steel almirahs (daraj), powder coating services, office furniture. Serving Biratnagar, Dharan, Itahari, Province 1 since 2009.',
   keywords: [
-    // Nepali keywords
-    'फर्निचर उत्पादक विराटनगर',
-    'स्टील फर्निचर कम्पनी नेपाल',
-    'श्री मनिष स्टील',
-    'फर्निचर कारखाना विराटनगर',
-    // English keywords
     'furniture manufacturer Biratnagar',
     'about Manish Steel',
-    'furniture company Nepal',
-    'steel furniture factory',
+    'furniture company Province 1',
+    'steel furniture factory Nepal',
+    'furniture maker Biratnagar',
+    'trusted furniture shop',
   ],
+});
+
+export const metadata: Metadata = {
+  title: seoMetadata.title,
+  description: seoMetadata.description,
+  keywords: seoMetadata.keywords,
+  alternates: {
+    canonical: seoMetadata.canonical,
+  },
   openGraph: {
-    locale: 'ne_NP',
+    title: seoMetadata.openGraph?.title,
+    description: seoMetadata.openGraph?.description,
+    type: 'website',
+    url: seoMetadata.openGraph?.url,
+    locale: seoMetadata.openGraph?.locale,
+    siteName: seoMetadata.openGraph?.siteName,
+  },
+  twitter: {
+    card: seoMetadata.twitter?.card,
+    title: seoMetadata.twitter?.title,
+    description: seoMetadata.twitter?.description,
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
 };
 
-// Default content - fallback if database fetch fails
+// Default content - Enhanced with local keywords and E-A-T signals
 const defaultContent = {
-  heroTitle: "About Our Company",
-  heroDescription: "Shree Manish Steel Furniture Industry is a leading manufacturer of high-quality steel and wooden furniture in Nepal, dedicated to providing durable and stylish solutions for homes and offices.",
-  storyTitle: "Our Story",
+  heroTitle: "About Shree Manish Steel Furniture - Biratnagar's Trusted Manufacturer Since 2009",
+  heroDescription: "Shree Manish Steel Furniture Industry is a leading manufacturer of high-quality steel and wooden furniture in Biratnagar, Nepal. Serving Province 1 for over 10 years with premium steel almirahs (daraj), powder coating services, office furniture, and custom solutions. Trusted by 1000+ customers across Biratnagar, Dharan, Itahari, and surrounding areas.",
+  storyTitle: "Our Story - Building Trust in Province 1 Since 2009",
   storyImage: "",
   storyContent: [
-    "Founded over a decade ago, Shree Manish Steel Furniture Industry began with a simple mission: to create high-quality, affordable furniture for Nepali homes and businesses. What started as a small workshop has grown into one of the most trusted furniture manufacturers in the region.",
-    "Our journey has been defined by a commitment to craftsmanship, innovation, and customer satisfaction. We take pride in our Nepali heritage and continue to support local communities through employment opportunities and sustainable business practices.",
-    "Today, we offer a comprehensive range of steel and wooden furniture solutions, from household almirahs to complete office setups, all designed with the unique needs of our customers in mind."
+    "Founded in 2009 in Biratnagar, Morang District, Shree Manish Steel Furniture Industry began with a simple mission: to create high-quality, affordable furniture for homes and businesses across Province 1, Nepal. What started as a small workshop on Dharan Road has grown into one of the most trusted furniture manufacturers in Eastern Nepal, serving customers in Biratnagar, Dharan, Itahari, Damak, and surrounding regions.",
+    "Our journey has been defined by a commitment to craftsmanship, innovation, and customer satisfaction. Located in the heart of Biratnagar's industrial area, our manufacturing facility employs skilled local craftsmen who bring decades of combined experience in metalworking and furniture design. We take pride in our Nepali heritage and continue to support local communities through employment opportunities, skills training, and sustainable business practices.",
+    "Today, we offer a comprehensive range of steel and wooden furniture solutions - from household almirahs (daraj) and powder coating services to complete office setups and custom-made furniture. Each piece is manufactured with premium materials, including high-grade steel and quality wood, ensuring durability that lasts for generations. Our products are designed specifically for Nepal's climate and the unique needs of our customers across Province 1.",
+    "We serve a wide area across Eastern Nepal, with free delivery and installation in Biratnagar, Dharan, Itahari, and nearby locations in Morang and Sunsari districts. Our commitment to quality has earned us the trust of over 1000 satisfied customers, including homes, offices, schools, and businesses throughout the region."
   ],
   yearsExperience: "10+",
   happyCustomers: "1000+",
-  vision: "To be the leading furniture manufacturer in Nepal, recognized for quality, innovation, and customer service. We envision a future where every Nepali home and office is furnished with our durable, stylish, and affordable products.",
-  mission: "To create furniture that combines functionality, durability, and aesthetic appeal at competitive prices. We are committed to using quality materials, employing skilled craftsmen, and maintaining high standards of production to deliver products that exceed customer expectations.",
+  vision: "To be the leading furniture manufacturer in Nepal, recognized for quality, innovation, and customer service. We envision a future where every home and office in Biratnagar, Province 1, and across Nepal is furnished with our durable, stylish, and affordable products. Our goal is to set the standard for excellence in steel furniture manufacturing while remaining accessible to families and businesses of all sizes.",
+  mission: "To create furniture that combines functionality, durability, and aesthetic appeal at competitive prices. We are committed to using quality materials, employing skilled local craftsmen, and maintaining high standards of production to deliver products that exceed customer expectations. Every almirah (daraj), powder coated product, and piece of furniture we manufacture represents our promise of quality and value to the people of Biratnagar and Province 1.",
   coreValues: [
     {
-      title: "Quality",
-      description: "We never compromise on the quality of our materials or craftsmanship, ensuring products that last for generations.",
+      title: "Quality Craftsmanship",
+      description: "We never compromise on the quality of our materials or craftsmanship. Every steel almirah (daraj), powder coated product, and furniture piece is built to last for generations using premium materials and expert manufacturing techniques.",
       icon: "quality"
     },
     {
-      title: "Innovation",
-      description: "We continuously explore new designs, technologies, and processes to improve our products and meet evolving customer needs.",
+      title: "Innovation & Design",
+      description: "We continuously explore new designs, technologies, and processes to improve our products. Our furniture combines traditional Nepali preferences with modern functionality, meeting the evolving needs of homes and businesses in Biratnagar and Province 1.",
       icon: "innovation"
     },
     {
-      title: "Integrity",
-      description: "We conduct our business with honesty, transparency, and ethical practices, building trust with customers, employees, and partners.",
+      title: "Integrity & Trust",
+      description: "We conduct our business with honesty, transparency, and ethical practices. Since 2009, we've built trust with customers, employees, and partners across Province 1 through fair pricing, honest communication, and reliable service.",
       icon: "integrity"
     },
     {
       title: "Customer Focus",
-      description: "We prioritize customer satisfaction by listening to feedback, providing excellent service, and creating products that meet real needs.",
+      description: "We prioritize customer satisfaction by listening to feedback, providing excellent service, and creating products that meet real needs. From free delivery in Biratnagar, Dharan, and Itahari to our 5-year warranty, everything we do is focused on customer happiness.",
       icon: "customer"
     }
   ],
-  workshopTitle: "Our Workshop & Team",
-  workshopDescription: "Take a glimpse into our production facility and meet the skilled craftsmen behind our quality furniture.",
-  workshopImages: [] as string[]
+  workshopTitle: "Our Manufacturing Workshop & Expert Team in Biratnagar",
+  workshopDescription: "Take a glimpse into our production facility in Biratnagar and meet the skilled craftsmen behind our quality furniture. Our modern workshop combines traditional metalworking expertise with modern equipment to manufacture premium steel furniture for Province 1.",
+  workshopImages: [] as string[],
+  faqs: [
+    {
+      question: "Where is Shree Manish Steel Furniture located in Biratnagar?",
+      answer: "We are located on Dharan Road in Biratnagar, Morang District, Province 1, Nepal. Our manufacturing facility and showroom serve customers across Biratnagar, Dharan, Itahari, and surrounding areas."
+    },
+    {
+      question: "How long has Manish Steel been manufacturing furniture?",
+      answer: "Shree Manish Steel Furniture has been manufacturing quality steel and wooden furniture since 2009, serving Province 1 for over 10 years. We have built trust with 1000+ satisfied customers across Eastern Nepal."
+    },
+    {
+      question: "What types of furniture and services does Manish Steel offer?",
+      answer: "We manufacture a wide range of steel and wooden furniture including almirahs (daraj), office furniture, study tables, dressing tables, cupboards, racks, and custom-made furniture. We also specialize in high-quality powder coating services for metal furniture and parts. All products are designed for durability and built with premium materials."
+    },
+    {
+      question: "Do you deliver furniture to Dharan and Itahari?",
+      answer: "Yes, we provide free delivery and installation services to Biratnagar, Dharan, Itahari, and surrounding areas in Morang and Sunsari districts. Our delivery team ensures safe transport and professional installation at your location."
+    },
+    {
+      question: "What makes Manish Steel different from other furniture shops?",
+      answer: "We are manufacturers, not just retailers. Every piece is crafted in our Biratnagar facility by skilled local craftsmen using high-grade materials. We offer competitive prices, 5-year warranty, free delivery in Province 1, and personalized customer service. Our 10+ years of experience and 1000+ satisfied customers reflect our commitment to quality."
+    },
+    {
+      question: "Can I order custom furniture and services from Manish Steel?",
+      answer: "Yes, we specialize in custom-made furniture and powder coating services tailored to your specific needs. Our team can design and manufacture custom almirahs, office furniture, powder coated components, and more. We provide free consultation and measurements at your location in Biratnagar, Dharan, and Itahari."
+    }
+  ]
 };
 
 // Fetch about content from database
@@ -91,7 +140,8 @@ async function getAboutContent() {
         coreValues: aboutData.coreValues?.length ? aboutData.coreValues : defaultContent.coreValues,
         workshopTitle: aboutData.workshopTitle || defaultContent.workshopTitle,
         workshopDescription: aboutData.workshopDescription || defaultContent.workshopDescription,
-        workshopImages: aboutData.workshopImages?.length ? aboutData.workshopImages : defaultContent.workshopImages
+        workshopImages: aboutData.workshopImages?.length ? aboutData.workshopImages : defaultContent.workshopImages,
+        faqs: aboutData.faqs?.length ? aboutData.faqs : defaultContent.faqs
       };
     }
 
@@ -143,8 +193,45 @@ function CoreValueIcon({ type }: { type: string }) {
 
 export default async function AboutPage() {
   const content = await getAboutContent();
+  const faqs = content.faqs || [];
+
+  // Generate breadcrumb schema
+  const breadcrumbs = [
+    { name: 'Home', url: '/' },
+    { name: 'About Us', url: '/about' }
+  ];
+
+  // Generate structured data
+  const breadcrumbSchema = schemaGenerator.generateBreadcrumbSchema(breadcrumbs);
+  const faqSchema = schemaGenerator.generateFAQSchema(faqs);
+  const organizationSchema = schemaGenerator.generateOrganizationSchema();
 
   return (
+    <>
+      {/* Structured Data - FAQ Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(faqSchema)
+        }}
+      />
+      
+      {/* Structured Data - Breadcrumb Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(breadcrumbSchema)
+        }}
+      />
+
+      {/* Structured Data - Organization Schema */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(organizationSchema)
+        }}
+      />
+
     <div className="min-h-screen">
       {/* Enhanced Hero Section */}
       <section className="relative bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-white py-20 overflow-hidden">
@@ -325,6 +412,45 @@ export default async function AboutPage() {
         </section>
       )}
 
+      {/* FAQ Section */}
+      <section className="py-20 bg-gradient-to-br from-gray-50 to-primary/5">
+        <div className="container mx-auto px-8 md:px-16 lg:px-24">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Common questions about our furniture manufacturing, delivery services, and business in Biratnagar, Province 1.
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto space-y-6">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
+                <details className="group">
+                  <summary className="cursor-pointer p-6 flex justify-between items-start">
+                    <h3 className="text-lg font-semibold text-gray-900 pr-8 group-open:text-primary transition-colors">
+                      {faq.question}
+                    </h3>
+                    <svg 
+                      className="w-6 h-6 text-primary flex-shrink-0 transform group-open:rotate-180 transition-transform duration-300" 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="px-6 pb-6 pt-2">
+                    <p className="text-gray-600 leading-relaxed border-t border-gray-100 pt-4">
+                      {faq.answer}
+                    </p>
+                  </div>
+                </details>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Call to Action */}
       <section className="py-20 bg-white">
         <div className="container mx-auto px-8 md:px-16 lg:px-24">
@@ -353,5 +479,6 @@ export default async function AboutPage() {
         </div>
       </section>
     </div>
+    </>
   );
 }

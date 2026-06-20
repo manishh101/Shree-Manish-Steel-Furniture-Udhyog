@@ -6,8 +6,8 @@ import {
   productPlaceholderImage,
   householdFurniturePlaceholderImage,
   officeProductsPlaceholderImage,
-  bedsPlaceholderImage
 } from '../utils/productPlaceholders';
+import { dualKeywordManager } from '../lib/seo/dualKeywordManager';
 
 interface TransformationOptions {
   width?: number;
@@ -26,6 +26,9 @@ interface ResponsiveImage {
 interface Product {
   name?: string;
   category?: string;
+  subcategory?: string;
+  material?: string;
+  description?: string;
 }
 
 class ImageService {
@@ -195,7 +198,6 @@ class ImageService {
   static getPlaceholderImage(category = 'Product'): string {
     // Map categories to placeholder images - using imported images
     const categoryMap: Record<string, string> = {
-      'beds': bedsPlaceholderImage,
       'chairs': householdFurniturePlaceholderImage,
       'tables': householdFurniturePlaceholderImage,
       'wardrobes': householdFurniturePlaceholderImage,
@@ -231,7 +233,7 @@ class ImageService {
   }
 
   static getImageSizes(): string {
-    return "(max-width: 480px) 400px, (max-width: 768px) 600px, (max-width: 1200px) 800px, 1200px";
+    return "(max-width: 480px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 400px";
   }
 
   static preloadImage(src: string): Promise<HTMLImageElement> {
@@ -244,17 +246,172 @@ class ImageService {
   }
 
   static getImageAlt(product: Product | null | undefined): string {
-    if (!product) return 'Product image';
+    if (!product) return 'Steel Furniture - Manish Steel Biratnagar Nepal';
 
     const name = product.name || 'Product';
-    const subcategory = (product as any).subcategory || '';
+    const subcategory = product.subcategory || '';
     const category = product.category || '';
 
     // Prefer subcategory for better SEO specificity
     const categoryLabel = subcategory || category;
 
-    return categoryLabel ? `${name} - ${categoryLabel} - Shree Manish Steel Furniture Nepal` : `${name} - Steel Furniture Nepal`;
+    // Enhanced SEO-optimized alt text with dual keywords and location
+    // Use dual keyword manager to enrich product name with colloquial terms
+    const enrichedName = dualKeywordManager.enrichContent(name);
+    
+    // Format: Product Name | Category | Location
+    const parts: string[] = [enrichedName];
+    
+    if (categoryLabel) {
+      const enrichedCategory = dualKeywordManager.enrichContent(categoryLabel);
+      parts.push(enrichedCategory);
+    }
+    
+    // Add location for local SEO
+    parts.push('Biratnagar Nepal');
+    
+    return parts.join(' | ');
+  }
+
+  /**
+   * Generate SEO-optimized alt text with dual keywords
+   * Enhanced version with more customization options
+   */
+  static generateSEOAltText(
+    product: Product | null | undefined,
+    options: {
+      includeLocation?: boolean;
+      includeMaterial?: boolean;
+      includeCategory?: boolean;
+      imageIndex?: number;
+    } = {}
+  ): string {
+    if (!product) return 'Steel Furniture - Manish Steel Biratnagar Nepal';
+    
+    const {
+      includeLocation = true,
+      includeMaterial = false,
+      includeCategory = true,
+      imageIndex,
+    } = options;
+    
+    const parts: string[] = [];
+    const name = product.name || 'Product';
+    const category = product.subcategory || product.category || '';
+    
+    // Add product name with dual keyword enrichment
+    const enrichedName = dualKeywordManager.enrichContent(name);
+    parts.push(enrichedName);
+    
+    // Add view indicator for additional images
+    if (imageIndex !== undefined && imageIndex > 0) {
+      parts.push(`View ${imageIndex + 1}`);
+    }
+    
+    // Add category with dual keyword enrichment
+    if (includeCategory && category) {
+      const enrichedCategory = dualKeywordManager.enrichContent(category);
+      parts.push(enrichedCategory);
+    }
+    
+    // Add material
+    if (includeMaterial) {
+      const material = product.material || 'Steel';
+      parts.push(`${material} Furniture`);
+    }
+    
+    // Add location for local SEO
+    if (includeLocation) {
+      parts.push('Biratnagar Nepal');
+    }
+    
+    return parts.join(' | ');
+  }
+
+  /**
+   * Generate image title attribute
+   */
+  static generateImageTitle(product: Product | null | undefined, category?: string): string {
+    if (!product) return 'Steel Furniture Nepal';
+    
+    const name = product.name || 'Product';
+    const cat = category || product.subcategory || product.category || 'Furniture';
+    
+    return `${name} - ${cat} | Shree Manish Steel Furniture`;
+  }
+
+  /**
+   * Generate image caption for sitemap
+   */
+  static generateImageCaption(
+    product: Product | null | undefined,
+    detailed: boolean = false
+  ): string {
+    if (!product) return 'Quality steel furniture from Biratnagar, Nepal';
+    
+    const name = product.name || 'Product';
+    const category = product.subcategory || product.category || 'Furniture';
+    
+    // Enrich name and category with dual keywords
+    const enrichedName = dualKeywordManager.enrichContent(name);
+    const enrichedCategory = dualKeywordManager.enrichContent(category);
+    
+    if (detailed) {
+      const description = product.description || '';
+      const shortDesc = description.substring(0, 100);
+      return `${enrichedName} - ${enrichedCategory}. ${shortDesc}. Free delivery in Biratnagar, Dharan, Itahari.`;
+    }
+    
+    return `${enrichedName} - Premium ${enrichedCategory} from Shree Manish Steel Furniture, Biratnagar Nepal`;
+  }
+
+  static generateAltText(
+    productName: string,
+    options: { category?: string; color?: string; location?: string } = {}
+  ): string {
+    const parts: string[] = [];
+    const enrichedName = dualKeywordManager.enrichContent(productName || 'Product');
+    parts.push(enrichedName);
+    
+    if (options.category) {
+      const enrichedCategory = dualKeywordManager.enrichContent(options.category);
+      parts.push(enrichedCategory);
+    }
+    
+    if (options.color) {
+      parts.push(options.color);
+    }
+    
+    if (options.location) {
+      parts.push(options.location);
+    } else {
+      parts.push('Biratnagar Nepal');
+    }
+    
+    return parts.join(' | ');
   }
 }
+
+export const imageService = {
+  generateAltText: ImageService.generateAltText,
+  getCloudinaryUrl: ImageService.getCloudinaryUrl,
+  getCloudinaryPlaceholder: ImageService.getCloudinaryPlaceholder,
+  getOptimizedImageUrl: ImageService.getOptimizedImageUrl,
+  isPlaceholder: ImageService.isPlaceholder,
+  isCloudinaryUrl: ImageService.isCloudinaryUrl,
+  enhanceCloudinaryUrl: ImageService.enhanceCloudinaryUrl,
+  fixCloudinaryUrl: ImageService.fixCloudinaryUrl,
+  convertToCloudinaryUrl: ImageService.convertToCloudinaryUrl,
+  ensurePublicAssetUrl: ImageService.ensurePublicAssetUrl,
+  getPlaceholderImage: ImageService.getPlaceholderImage,
+  getResponsiveImageSet: ImageService.getResponsiveImageSet,
+  generateSrcSet: ImageService.generateSrcSet,
+  getImageSizes: ImageService.getImageSizes,
+  preloadImage: ImageService.preloadImage,
+  getImageAlt: ImageService.getImageAlt,
+  generateSEOAltText: ImageService.generateSEOAltText,
+  generateImageTitle: ImageService.generateImageTitle,
+  generateImageCaption: ImageService.generateImageCaption,
+};
 
 export default ImageService;

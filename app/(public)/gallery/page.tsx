@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { FaImages, FaEye, FaFilter, FaThLarge, FaList, FaStar, FaHeart, FaAngleRight, FaExclamationTriangle, FaSync } from 'react-icons/fa';
 import { scrollToTop } from '@/utils/scrollUtils';
 import { productAPI, categoryAPI, Product as APIProduct, Category as APICategory } from '@/services/api';
@@ -10,7 +11,16 @@ import ProductCard from '@/components/common/ProductCard';
 import QuickView from '@/components/QuickView';
 import useQuickView from '@/hooks/useQuickView';
 import GalleryHero from '@/components/GalleryHero';
-import ProfessionalGalleryModal from '@/components/ProfessionalGalleryModal';
+
+// Dynamic import for gallery modal - only loads when user clicks to view images
+const ProfessionalGalleryModal = dynamic(() => import('@/components/ProfessionalGalleryModal'), {
+  loading: () => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-white"></div>
+    </div>
+  ),
+  ssr: false,
+});
 
 
 // Product interface
@@ -103,15 +113,25 @@ const GalleryPage = () => {
         }
       }
       
+      const productName = product.name || product.title || 'Steel Furniture';
+
+      // SEO-optimized alt text with dual keywords and category context
+      // Format: "[Product Name] - [Category] | Steel Furniture | Biratnagar Nepal"
+      const altText = imageService.generateSEOAltText(product, {
+        includeLocation: true,
+        includeMaterial: true,
+        includeCategory: true,
+      });
+
       return {
         id: product._id || product.id || `product-${Date.now()}-${Math.random()}`,
         _id: product._id || product.id,
-        name: product.name || product.title || 'Unnamed Product',
-        title: product.name || product.title || 'Unnamed Product',
+        name: productName,
+        title: productName,
         description: product.description || '',
         category: categoryInfo,
         src: optimizedImageUrl,
-        alt: `${product.name || 'Product'} image`,
+        alt: altText,
         featured: Boolean(product.featured),
         image: product.image,
         images: product.images,

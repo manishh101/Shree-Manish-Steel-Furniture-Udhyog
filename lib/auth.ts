@@ -57,3 +57,21 @@ export function getUserFromRequest(request: NextRequest): JWTPayload['user'] | n
   const payload = verifyToken(token);
   return payload?.user || null;
 }
+
+export function verifyAuth(request: NextRequest): { authenticated: boolean; valid: boolean; user?: JWTPayload['user'] | null } {
+  const user = getUserFromRequest(request);
+  const ok = !!user;
+  return {
+    authenticated: ok,
+    valid: ok,
+    user,
+  };
+}
+
+export async function authenticateAdmin(request: NextRequest): Promise<{ authenticated: boolean; user?: JWTPayload['user'] | null }> {
+  const user = getUserFromRequest(request);
+  if (!user || user.role !== 'admin') {
+    return { authenticated: false };
+  }
+  return { authenticated: true, user };
+}

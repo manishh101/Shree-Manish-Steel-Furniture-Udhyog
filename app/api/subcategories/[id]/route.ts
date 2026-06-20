@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { connectDB } from '@/lib/db';
@@ -26,7 +27,7 @@ export async function GET(
 
     return NextResponse.json(subcategory);
   } catch (error: any) {
-    console.error('Error fetching subcategory:', error);
+    logger.error('Error fetching subcategory:', error);
     if (error.kind === 'ObjectId') {
       return NextResponse.json(
         { msg: 'Subcategory not found' },
@@ -113,7 +114,7 @@ export async function PUT(
         { subcategoryId: id },
         { $set: { subcategory: data.name } }
       );
-      console.log(`Updated subcategory name from "${oldName}" to "${data.name}" in all related products`);
+      logger.info(`Updated subcategory name from "${oldName}" to "${data.name}" in all related products`);
     }
 
     // Revalidate cache for all subcategory-related pages
@@ -125,7 +126,7 @@ export async function PUT(
 
     return NextResponse.json(subcategory);
   } catch (error: any) {
-    console.error('Error updating subcategory:', error);
+    logger.error('Error updating subcategory:', error);
     if (error.kind === 'ObjectId') {
       return NextResponse.json(
         { msg: 'Subcategory not found' },
@@ -170,7 +171,7 @@ export async function DELETE(
 
     return NextResponse.json({ msg: 'Subcategory removed' });
   } catch (error: any) {
-    console.error('Error deleting subcategory:', error);
+    logger.error('Error deleting subcategory:', error);
     if (error.kind === 'ObjectId') {
       return NextResponse.json(
         { msg: 'Subcategory not found' },

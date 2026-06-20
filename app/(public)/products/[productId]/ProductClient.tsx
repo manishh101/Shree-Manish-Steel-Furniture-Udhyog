@@ -29,6 +29,8 @@ import ProductCard from '@/components/common/ProductCard';
 import QuickView from '@/components/QuickView';
 import useQuickView from '@/hooks/useQuickView';
 import { defaultProductImages } from '@/utils/productPlaceholders';
+import { dualKeywordManager } from '@/lib/seo/dualKeywordManager';
+import FAQSection, { FAQItem } from '@/components/FAQSection';
 
 // Only used as last-resort fallbacks when database images are not available
 const defaultImages = defaultProductImages;
@@ -664,6 +666,51 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
     scrollToTop({ instant: true });
   };
 
+  // Build product-specific FAQs (Req 5.5, 7.3) with dual keywords
+  const buildProductFAQs = (prod: Product): FAQItem[] => {
+    const name = prod.name || 'this furniture';
+    const cat = typeof prod.category === 'string' ? prod.category : 'furniture';
+    const price = prod.price ? `Rs. ${prod.price.toLocaleString()}` : 'competitive prices';
+    const deliveryLocations =
+      prod.deliveryInformation?.availableLocations?.join(', ') ||
+      'Biratnagar, Dharan, Itahari and nearby areas';
+
+    return [
+      {
+        question: `What is the price of ${name}?`,
+        answer: `The ${name} is available at ${price}. Prices may vary based on size, color, and customization. For bulk orders or special discounts, contact us via WhatsApp at +977 9824336371.`,
+      },
+      {
+        question: `Is free delivery available for this ${cat}?`,
+        answer: `Yes! Free home delivery is available in ${deliveryLocations}. Our team will also provide free installation and setup at your location.`,
+      },
+      {
+        question: `What warranty is offered on the ${name}?`,
+        answer: `All our steel furniture — including this ${name} — comes with a 10-year structural warranty. We guarantee the powder-coat paint finish and locking mechanism. Contact us if any issue arises.`,
+      },
+      {
+        question: `Can I get a custom size for this ${cat}?`,
+        answer: `Yes, we manufacture custom-sized steel furniture to your exact specifications. Visit our Biratnagar showroom or send your requirements via WhatsApp for a custom quote.`,
+      },
+      {
+        question: `What payment options are available?`,
+        answer: `We accept Cash, eSewa, Khalti, and bank transfer. For institutional or bulk orders, invoice-based payment is available.`,
+      },
+    ];
+  };
+
+  // Track WhatsApp clicks in Google Analytics (Req 6.2, 14.3)
+  const handleWhatsAppClick = (context: 'product_inquiry' | 'mobile_bar') => {
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', 'whatsapp_click', {
+        event_category: 'contact',
+        event_label: `WhatsApp Product Inquiry - ${product?.name || 'Unknown'}`,
+        event_source: context,
+        page_location: window.location.href,
+      });
+    }
+  };
+
   // Handle share functionality
   const handleShare = async () => {
     if (!product) return;
@@ -755,6 +802,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
             href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hello, I'm interested in *${product.name}*\n\nView Product: https://manishsteel.com.np/products/${(product as any).slug || product._id || productId}\n\nKindly share pricing and availability details. Thank you.`)}`}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => handleWhatsAppClick('mobile_bar')}
             className="flex-2 flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700"
           >
             <FaWhatsapp className="w-4 h-4 mr-2" />
@@ -807,7 +855,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                     >
                       <img 
                         src={img} 
-                        alt={`View ${idx + 1}`} 
+                        alt={idx === 0 ? dualKeywordManager.generateAltText(product.name, categoryName, { includeLocation: true, includeMaterial: true }) : `${product.name} - ${categoryName} - View ${idx + 1} | Biratnagar Nepal`}
                         className="w-full h-full object-cover" 
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = '/images/placeholder-product.png';
@@ -851,7 +899,9 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                   <div onClick={handleImageZoom} className="w-full h-full cursor-pointer flex items-center justify-center">
                     <img
                       src={allImages[selectedImageIndex] || '/images/placeholder-product.png'}
-                      alt={product.name || "Product Image"}
+                      alt={selectedImageIndex === 0 ? dualKeywordManager.generateAltText(product.name, categoryName, { includeLocation: true, includeMaterial: true }) : `${product.name} - ${categoryName} - Image ${selectedImageIndex + 1} | Biratnagar Nepal`}
+                      fetchPriority={selectedImageIndex === 0 ? 'high' : 'auto'}
+                      loading={selectedImageIndex === 0 ? 'eager' : 'lazy'}
                       onLoad={() => setImageLoaded(true)}
                       style={{
                         opacity: imageLoaded ? 1 : 0,
@@ -885,7 +935,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                     >
                       <img 
                         src={img} 
-                        alt={`View ${idx + 1}`} 
+                        alt={idx === 0 ? dualKeywordManager.generateAltText(product.name, categoryName, { includeLocation: true, includeMaterial: true }) : `${product.name} - View ${idx + 1}`}
                         className="w-full h-full object-cover" 
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = '/images/placeholder-product.png';
@@ -1005,6 +1055,7 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                 href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(`Hello, I'm interested in *${product.name}*\n\nView Product: https://manishsteel.com.np/products/${(product as any).slug || product._id || productId}\n\nKindly share pricing and availability details. Thank you.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => handleWhatsAppClick('product_inquiry')}
                 className="flex items-center justify-center px-2 sm:px-4 py-3 rounded-lg text-[11px] sm:text-sm font-semibold text-white bg-green-600 hover:bg-green-700 transition-all shadow-sm text-center"
               >
                 <FaWhatsapp className="w-4 h-4 sm:w-5 sm:h-5 mr-1 sm:mr-2 shrink-0" />
@@ -1124,9 +1175,26 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
               </details>
             </div>
 
+            {/* Delivery & Service Area Information (Req 6.5, 5.1) */}
+            <div className="mt-4 bg-blue-50 border border-blue-100 rounded-xl p-4 text-sm">
+              <div className="flex items-start gap-3">
+                <FaTruck className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold text-primary mb-1">Free Delivery Available</p>
+                  <p className="text-gray-700 leading-relaxed">
+                    {product.deliveryInformation?.availableLocations && product.deliveryInformation.availableLocations.length > 0
+                      ? `Delivering to: ${product.deliveryInformation.availableLocations.join(', ')}`
+                      : 'Biratnagar, Dharan, Itahari, Damak, Birtamod & nearby areas in Province 1'}
+                  </p>
+                  {product.deliveryInformation?.estimatedDelivery && (
+                    <p className="text-gray-600 mt-1">Estimated: {product.deliveryInformation.estimatedDelivery}</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Feature Badges for Mobile */}
-            <div className="lg:hidden bg-[#f3f4f6] border border-gray-200 rounded-xl p-4">
-              <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="lg:hidden bg-[#f3f4f6] border border-gray-200 rounded-xl p-4">              <div className="grid grid-cols-3 gap-2 text-center">
                 <div className="flex flex-col items-center gap-1.5">
                   <FaLock className="w-6 h-6 text-gray-600" />
                   <span className="text-[11px] sm:text-sm text-gray-700 font-medium leading-tight">Guarantee on Lock</span>
@@ -1151,6 +1219,18 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
                 ← Back to all products
               </Link>
             </div>
+          </div>
+        </div>
+
+        {/* Product FAQ Section (Req 5.5, 7.3) */}
+        <div className="mt-12 mb-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
+            <FAQSection
+              faqs={product.faqs && product.faqs.length > 0 ? product.faqs : buildProductFAQs(product)}
+              title={`Questions about ${product.name}`}
+              includeSchema
+              className="pb-2"
+            />
           </div>
         </div>
 
@@ -1280,8 +1360,9 @@ const ProductClient = ({ initialProduct, productId }: ProductClientProps) => {
         </div>
       </div>
 
-      {/* QuickView Modal for related products */}
-      {isQuickViewOpen && quickViewProduct && (
+
+
+      {/* QuickView Modal for related products */}      {isQuickViewOpen && quickViewProduct && (
         <QuickView
           product={quickViewProduct}
           isOpen={isQuickViewOpen}

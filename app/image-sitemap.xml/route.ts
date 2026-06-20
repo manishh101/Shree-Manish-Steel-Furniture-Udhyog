@@ -3,6 +3,7 @@ import { connectDB } from '@/lib/db';
 import Blog from '@/models/Blog';
 import Product from '@/models/Product';
 import { GallerySection } from '@/models/Gallery';
+import ImageService from '@/services/imageService';
 
 const baseUrl = 'https://manishsteel.com.np';
 
@@ -19,52 +20,61 @@ export async function GET() {
   try {
     await connectDB();
 
-    // Get all active products with images (consistent with main sitemap)
+    // ---- Products ----
     const products = await Product.find({ isActive: { $ne: false } })
       .populate('categoryId', 'name')
       .populate('subcategoryId', 'name')
-      .select('_id name description image images category subcategory categoryId subcategoryId slug')
+      .select('_id name description image images category subcategory categoryId subcategoryId slug specifications material')
       .lean();
 
-    // Build image sitemap XML
-    const imageEntries = products.map((product: any) => {
-      const productUrl = `${baseUrl}/products/${product.slug || product._id}`;
-      const productName = product.name || 'Product';
-      const categoryName = product.categoryId?.name || product.category || 'Steel Furniture';
-      const subcategoryName = product.subcategoryId?.name || product.subcategory;
-      const fullCategory = subcategoryName ? `${subcategoryName} - ${categoryName}` : categoryName;
-      
-      const images = [];
-      
-      // Add main product image
-      if (product.image) {
-        images.push({
-          loc: product.image,
-          title: `${productName} | ${fullCategory} | Shree Manish Steel Furniture`,
-          caption: product.description || `${productName} - Premium ${fullCategory} from Biratnagar, Nepal`,
-        });
-      }
-      
-      // Add additional images
-      if (product.images && Array.isArray(product.images)) {
-        product.images.forEach((img: string, index: number) => {
-          if (img && img !== product.image) {
-            images.push({
-              loc: img,
-              title: `${productName} - View ${index + 1} | ${fullCategory}`,
-              caption: `${productName} detailed view - ${fullCategory} - Shree Manish Steel Furniture Nepal`,
-            });
-          }
-        });
-      }
+    const imageEntries = products
+      .map((product: any) => {
+        const productUrl = `${baseUrl}/products/${product.slug || product._id}`;
+        const categoryName = product.subcategoryId?.name || product.categoryId?.name || product.subcategory || product.category || 'Steel Furniture';
+        const material = product.specifications?.material || product.material || 'Steel';
 
-      return {
-        url: productUrl,
-        images: images
-      };
-    }).filter((entry: ImageEntry) => entry.images.length > 0);
+        const productData = {
+          name: product.name,
+          category: product.category,
+          subcategory: product.subcategory,
+          specifications: product.specifications,
+          material: product.material,
+        };
 
-    // Get gallery images
+        const images: ImageEntry['images'] = [];
+
+        // Main product image
+        if (product.image) {
+          images.push({
+            loc: product.image,
+            title: ImageService.generateImageTitle(productData, categoryName),
+            caption: ImageService.generateImageCaption(productData, true),
+          });
+        }
+
+        // Additional product images
+        if (Array.isArray(product.images)) {
+          product.images.forEach((img: string, index: number) => {
+            if (img && img !== product.image) {
+              const altText = ImageService.generateSEOAltText(productData, {
+                includeLocation: true,
+                includeMaterial: true,
+                imageIndex: index + 1,
+              });
+              images.push({
+                loc: img,
+                title: `${product.name} - View ${index + 2} | ${categoryName} | ${material} | Biratnagar Nepal`,
+                caption: altText,
+              });
+            }
+          });
+        }
+
+        return { url: productUrl, images };
+      })
+      .filter((entry: ImageEntry) => entry.images.length > 0);
+
+    // ---- Gallery sections ----
     const galleryItems = await GallerySection.find({ isActive: { $ne: false } })
       .select('name description images category')
       .lean();
@@ -73,23 +83,43 @@ export async function GET() {
     const galleryUrl = `${baseUrl}/gallery`;
 
     galleryItems.forEach((section: any) => {
-      if (section.images && Array.isArray(section.images)) {
-        section.images.forEach((img: any) => {
-          if (img.src) {
-            galleryEntries.push({
-              url: galleryUrl,
-              images: [{
-                loc: img.src,
-                title: img.title || section.name || 'Shree Manish Steel Furniture Gallery',
-                caption: img.description || section.description || `${section.category || 'Steel Furniture'} - Our Work Gallery`,
-              }]
-            });
-          }
+      if (!Array.isArray(section.images)) return;
+
+      section.images.forEach((img: any) => {
+        if (!img.src) return;
+
+        const sectionCategory = section.category || 'Steel Furniture';
+        const imgTitle = img.title || section.name || 'Shree Manish Steel Furniture Gallery';
+
+        // Build a minimal product-like object for enrichment
+        const pseudoProduct = {
+          name: imgTitle,
+          category: sectionCategory,
+          subcategory: undefined,
+          specifications: undefined,
+          material: undefined,
+        };
+
+        // Enrich caption with dual keywords and location context
+        const enrichedCaption = img.description
+          || ImageService.generateImageCaption(pseudoProduct, false);
+
+        const enrichedTitle = img.title
+          ? `${img.title} | ${sectionCategory} | Shree Manish Steel Furniture`
+          : ImageService.generateImageTitle(pseudoProduct, sectionCategory);
+
+        galleryEntries.push({
+          url: galleryUrl,
+          images: [{
+            loc: img.src,
+            title: enrichedTitle,
+            caption: enrichedCaption,
+          }],
         });
-      }
+      });
     });
 
-    // Get blog images
+    // ---- Blog images ----
     const blogs = await Blog.find({ status: 'published' })
       .select('slug title excerpt image')
       .lean();
@@ -102,27 +132,35 @@ export async function GET() {
           images: [{
             loc: blog.image,
             title: `${blog.title} | Shree Manish Steel Furniture`,
-            caption: blog.excerpt || `${blog.title} - Learn more about steel furniture in Nepal`,
-          }]
+            caption: blog.excerpt
+              || `${blog.title} - Steel furniture tips and guides from Biratnagar, Nepal`,
+          }],
         });
       }
     });
 
-    // Combine all entries
+    // ---- Build XML ----
     const allEntries: ImageEntry[] = [...imageEntries, ...galleryEntries, ...blogEntries];
 
-    // Generate XML
     const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
-${allEntries.map((entry: ImageEntry) => `  <url>
+${allEntries
+  .map(
+    (entry: ImageEntry) => `  <url>
     <loc>${entry.url}</loc>
-${entry.images.map((img: any) => `    <image:image>
+${entry.images
+  .map(
+    (img) => `    <image:image>
       <image:loc>${img.loc}</image:loc>
       <image:title>${escapeXml(img.title)}</image:title>
       <image:caption>${escapeXml(img.caption)}</image:caption>
-    </image:image>`).join('\n')}
-  </url>`).join('\n')}
+    </image:image>`
+  )
+  .join('\n')}
+  </url>`
+  )
+  .join('\n')}
 </urlset>`;
 
     return new NextResponse(xml, {
@@ -138,6 +176,7 @@ ${entry.images.map((img: any) => `    <image:image>
 }
 
 function escapeXml(unsafe: string): string {
+  if (!unsafe) return '';
   return unsafe
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')

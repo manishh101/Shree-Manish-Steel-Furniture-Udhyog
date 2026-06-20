@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Subcategory from '@/models/Subcategory';
@@ -17,7 +18,7 @@ export async function GET(
 
     return NextResponse.json(subcategories);
   } catch (error: any) {
-    console.error('Error fetching category subcategories:', error);
+    logger.error('Error fetching category subcategories:', error);
     if (error.kind === 'ObjectId') {
       return NextResponse.json(
         { msg: 'Category not found' },

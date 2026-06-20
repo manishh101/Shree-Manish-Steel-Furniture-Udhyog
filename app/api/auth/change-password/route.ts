@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import User from '@/models/User';
@@ -75,7 +76,7 @@ export async function PUT(request: NextRequest) {
       message: 'Password changed successfully'
     });
   } catch (error) {
-    console.error('Change password error:', error);
+    logger.error('Change password error:', error);
     return NextResponse.json(
       { success: false, message: 'Server error' },
       { status: 500 }

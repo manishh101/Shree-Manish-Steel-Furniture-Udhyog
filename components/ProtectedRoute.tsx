@@ -24,11 +24,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   useEffect(() => {
     const checkAuthentication = async () => {
-      console.log('=== ProtectedRoute Authentication Check ===');
 
       // Check if actually authenticated through the service
       const authenticated = authService.isAuthenticated();
-      console.log('AuthService authentication result:', authenticated);
 
       if (!authenticated) {
         console.warn('ProtectedRoute: Not authenticated. Clearing stale data and redirecting.');
@@ -37,7 +35,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         // Redirect to login
         router.replace('/login');
       } else {
-        console.log('ProtectedRoute: Authentication successful, allowing access');
         setIsAuthenticated(true);
       }
 

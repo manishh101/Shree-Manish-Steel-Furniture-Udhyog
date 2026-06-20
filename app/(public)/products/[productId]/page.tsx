@@ -1,12 +1,15 @@
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import React, { Suspense } from 'react';
 import mongoose from 'mongoose';
 import { connectDB } from '@/lib/db';
 import Product from '@/models/Product';
 import ProductClient from './ProductClient';
+import { schemaGenerator } from '@/lib/seo/schemaGenerator';
+import { dualKeywordManager } from '@/lib/seo/dualKeywordManager';
+import { CACHE_CONFIG } from '@/lib/cache';
 
-// Revalidate every hour for fresh content
-export const revalidate = 3600;
+// Use ISR with stale-while-revalidate for product pages (Req 10.3)
+export const revalidate = 3600; // CACHE_CONFIG.PRODUCTS.revalidate
 // Enable dynamic params for products not in generateStaticParams
 export const dynamicParams = true;
 
@@ -46,8 +49,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
     // Fetch product with populated data
     const productDoc = await Product.findOne(query)
-      .populate('categoryId', 'name')
-      .populate('subcategoryId', 'name')
+      .populate('categoryId', 'name slug')
+      .populate('subcategoryId', 'name slug')
       .populate('colorVariants.productId', 'name image images colorName colorHex slug')
       .lean();
 
@@ -58,8 +61,59 @@ export default async function ProductDetailPage({ params }: PageProps) {
     // Resolve canonical slug — always use the product's own slug if available
     const canonicalSlug = (productDoc as any).slug || productId;
 
+    // 301 redirect: if accessed via ObjectId but product has a slug, redirect to slug URL
+    if (isObjectId && (productDoc as any).slug && (productDoc as any).slug !== productId) {
+      redirect(`/products/${(productDoc as any).slug}`);
+    }
+
     // Convert MongoDB document to plain object
     const product = JSON.parse(JSON.stringify(productDoc));
+    
+    // Get category and subcategory data
+    const categoryName = product.categoryId?.name || product.category || 'Furniture';
+    const subcategoryName = product.subcategoryId?.name || product.subcategory || '';
+    
+    // Generate enhanced Product schema with complete data
+    const productSchema = schemaGenerator.generateProductSchema(product);
+    
+    // Generate breadcrumb schema
+    const breadcrumbs = [
+      { name: 'Home', url: '/' },
+      { name: 'Products', url: '/products' },
+    ];
+    
+    if (categoryName) {
+      breadcrumbs.push({
+        name: categoryName,
+        url: `/products?category=${product.categoryId?._id || ''}`,
+      });
+    }
+    
+    if (subcategoryName) {
+      breadcrumbs.push({
+        name: subcategoryName,
+        url: `/products?category=${product.categoryId?._id || ''}&subcategory=${product.subcategoryId?._id || ''}`,
+      });
+    }
+    
+    breadcrumbs.push({
+      name: product.name,
+      url: `/products/${canonicalSlug}`,
+    });
+    
+    const breadcrumbSchema = schemaGenerator.generateBreadcrumbSchema(breadcrumbs);
+    
+    // Generate optimized alt text for product images
+    const generateImageAltText = (index: number = 0): string => {
+      if (index === 0) {
+        return dualKeywordManager.generateAltText(
+          product.name,
+          categoryName,
+          { includeLocation: true, includeMaterial: true }
+        );
+      }
+      return `${product.name} - ${categoryName} - View ${index + 1} | Biratnagar Nepal`;
+    };
 
     // Transform data for client component
     const transformedProduct = {
@@ -71,8 +125,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
       originalPrice: product.originalPrice,
       image: product.image,
       images: product.images || [],
-      category: product.categoryId?.name || product.category,
-      subcategory: product.subcategoryId?.name || product.subcategory,
+      category: categoryName,
+      subcategory: subcategoryName,
       features: product.features || [],
       specifications: product.specifications || {},
       colors: product.colors || [],
@@ -89,75 +143,114 @@ export default async function ProductDetailPage({ params }: PageProps) {
       updatedAt: product.updatedAt,
     };
 
-    // Render SEO-friendly HTML structure with JSON-LD
+    // Build optimized Cloudinary preload URL for the LCP product image
+    const productImageForPreload = product.image?.includes('res.cloudinary.com')
+      ? product.image.replace('/upload/', '/upload/f_webp,q_auto,w_1200,c_limit/')
+      : product.image;
+
+    // Render SEO-friendly HTML structure with enhanced JSON-LD schemas
     return (
       <>
-        {/* JSON-LD Structured Data for Google */}
+        {/* Preload first product image for LCP optimization (Req 10.1, 10.2) */}
+        {productImageForPreload && (
+          <link
+            rel="preload"
+            as="image"
+            href={productImageForPreload}
+            fetchPriority="high"
+            imageSizes="(max-width: 768px) 100vw, 50vw"
+          />
+        )}
+
+        {/* Enhanced Product Schema with complete data */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              '@context': 'https://schema.org',
-              '@type': 'Product',
-              name: product.name,
-              description: product.description,
-              image: product.images || [product.image],
-              sku: product.sku || product._id,
-              brand: {
-                '@type': 'Brand',
-                name: 'Shree Manish Steel Furniture',
-              },
-              color: product.colorName || product.colors?.join(', '),
-              offers: {
-                '@type': 'Offer',
-                url: `https://manishsteel.com.np/products/${canonicalSlug}`,
-                priceCurrency: 'NPR',
-                price: product.price || 0,
-                availability: product.stock > 0
-                  ? 'https://schema.org/InStock'
-                  : 'https://schema.org/OutOfStock',
-                seller: {
-                  '@type': 'Organization',
-                  name: 'Shree Manish Steel Furniture',
-                },
-              },
-              aggregateRating: product.rating ? {
-                '@type': 'AggregateRating',
-                ratingValue: product.rating,
-                reviewCount: product.reviewCount || 1,
-              } : undefined,
-            }),
+            __html: JSON.stringify(productSchema),
+          }}
+        />
+        
+        {/* BreadcrumbList Schema for navigation */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(breadcrumbSchema),
           }}
         />
 
-        {/* Server-rendered SEO content */}
+        {/* Server-rendered SEO content with enhanced microdata */}
         <article itemScope itemType="https://schema.org/Product">
           <meta itemProp="name" content={product.name} />
           <meta itemProp="description" content={product.description} />
-          <meta itemProp="image" content={product.image} />
           <meta itemProp="sku" content={product.sku || product._id} />
+          
+          {/* Main product image with optimized alt text */}
+          <link itemProp="image" href={product.image} />
+          
+          {/* Additional product images */}
+          {product.images?.map((img: string, idx: number) => (
+            <link key={idx} itemProp="image" href={img} />
+          ))}
 
           <div itemProp="brand" itemScope itemType="https://schema.org/Brand">
             <meta itemProp="name" content="Shree Manish Steel Furniture" />
           </div>
+          
+          {/* Manufacturer details */}
+          <div itemProp="manufacturer" itemScope itemType="https://schema.org/Organization">
+            <meta itemProp="name" content="Shree Manish Steel Furniture Udhyog" />
+            <div itemProp="address" itemScope itemType="https://schema.org/PostalAddress">
+              <meta itemProp="addressLocality" content="Biratnagar" />
+              <meta itemProp="addressRegion" content="Morang" />
+              <meta itemProp="addressCountry" content="NP" />
+            </div>
+          </div>
 
           <div itemProp="offers" itemScope itemType="https://schema.org/Offer">
-            <meta itemProp="url" content={`https://manishsteel.com.np/products/${canonicalSlug}`} />
+            <link itemProp="url" href={`https://manishsteel.com.np/products/${canonicalSlug}`} />
             <meta itemProp="priceCurrency" content="NPR" />
             <meta itemProp="price" content={(product.price || 0).toString()} />
             <link itemProp="availability" href={product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock'} />
+            <meta itemProp="itemCondition" content="https://schema.org/NewCondition" />
+            
+            <div itemProp="seller" itemScope itemType="https://schema.org/Organization">
+              <meta itemProp="name" content="Shree Manish Steel Furniture" />
+            </div>
           </div>
+          
+          {/* Category hierarchy */}
+          <meta itemProp="category" content={categoryName} />
+          {subcategoryName && <meta itemProp="additionalType" content={subcategoryName} />}
+          
+          {/* Color if available */}
+          {product.colorName && <meta itemProp="color" content={product.colorName} />}
+          
+          {/* Material if available */}
+          {(product.material || product.specifications?.material) && (
+            <meta itemProp="material" content={product.material || product.specifications.material} />
+          )}
+          
+          {/* Aggregate rating if available */}
+          {product.rating && product.reviewCount > 0 && (
+            <div itemProp="aggregateRating" itemScope itemType="https://schema.org/AggregateRating">
+              <meta itemProp="ratingValue" content={product.rating.toString()} />
+              <meta itemProp="reviewCount" content={product.reviewCount.toString()} />
+              <meta itemProp="bestRating" content="5" />
+              <meta itemProp="worstRating" content="1" />
+            </div>
+          )}
 
-          {/* Hidden SEO content for crawlers */}
+          {/* Hidden SEO content for crawlers with dual keywords */}
           <div className="sr-only">
-            <h1>{product.name} - {product.subcategoryId?.name || product.categoryId?.name} - Steel Furniture Nepal</h1>
+            <h1>{dualKeywordManager.enrichContent(product.name)} - {subcategoryName || categoryName} - Steel Furniture Biratnagar Nepal</h1>
             <p>{product.description}</p>
             {product.features?.map((feature: string, index: number) => (
               <p key={index}>{feature}</p>
             ))}
+            <p>Available in Biratnagar with free delivery to Dharan, Itahari, and Morang district.</p>
           </div>
 
-          {/* Client component with interactivity - wrap in Suspense for client-navigation hooks */}
+          {/* Client component with interactivity */}
           <React.Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading product...</div>}>
             <ProductClient initialProduct={transformedProduct} productId={productId} />
           </React.Suspense>

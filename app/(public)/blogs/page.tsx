@@ -4,25 +4,23 @@ import type { Metadata } from 'next';
 import { connectDB } from '@/lib/db';
 import Blog, { IBlog } from '@/models/Blog';
 import { FaClock, FaArrowRight, FaCalendarAlt, FaUser } from 'react-icons/fa';
+import { metadataGenerator } from '@/lib/seo/metadataGenerator';
+import { schemaGenerator } from '@/lib/seo/schemaGenerator';
+import { CACHE_CONFIG } from '@/lib/cache';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
+// Use ISR with appropriate caching strategy for blog listings (Req 10.3)
+export const revalidate = 86400; // CACHE_CONFIG.BLOGS.revalidate
+
+// Generate SEO metadata using metadataGenerator for consistency
+const blogPageMetadata = metadataGenerator.generatePageMetadata('blogs');
 
 export const metadata: Metadata = {
-  title: 'ब्लग र उपयोगी लेखहरू | Blogs & Furniture Guides - श्री मनिष स्टील फर्निचर',
-  description: 'फर्निचर खरिद गर्दा ध्यान दिनुपर्ने कुराहरू, रङ र डिजाइन छनोट, र गुणस्तरीय स्टील फर्निचर सम्बन्धी उपयोगी ब्लगहरू। Furniture guides & buying tips in Nepal.',
-  keywords: [
-    'फर्निचर ब्लग',
-    'steel furniture guide nepal',
-    'furniture buying tips biratnagar',
-    'cheapest furniture biratnagar',
-    'home decor tips nepal',
-    'office furniture setup'
-  ],
-  openGraph: {
-    locale: 'ne_NP',
-    type: 'website',
-  },
+  title: blogPageMetadata.title,
+  description: blogPageMetadata.description,
+  keywords: blogPageMetadata.keywords,
+  openGraph: blogPageMetadata.openGraph,
+  twitter: blogPageMetadata.twitter,
+  alternates: blogPageMetadata.alternates,
 };
 
 async function getPublishedBlogs(): Promise<IBlog[]> {
@@ -40,25 +38,11 @@ async function getPublishedBlogs(): Promise<IBlog[]> {
 export default async function BlogsPage() {
   const blogs = await getPublishedBlogs();
 
-  // JSON-LD Breadcrumb List
-  const breadcrumbSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      {
-        '@type': 'ListItem',
-        position: 1,
-        name: 'Home',
-        item: 'https://manishsteel.com.np',
-      },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: 'Blogs & Guides',
-        item: 'https://manishsteel.com.np/blogs',
-      },
-    ],
-  };
+  // Generate Breadcrumb schema using schemaGenerator
+  const breadcrumbSchema = schemaGenerator.generateBreadcrumbSchema([
+    { name: 'Home', url: 'https://manishsteel.com.np' },
+    { name: 'Blogs & Guides', url: 'https://manishsteel.com.np/blogs' },
+  ]);
 
   return (
     <div className="min-h-screen bg-gray-50/50">

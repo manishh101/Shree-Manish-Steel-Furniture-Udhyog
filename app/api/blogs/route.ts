@@ -1,8 +1,10 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath } from 'next/cache';
 import connectDB from '@/lib/db';
 import Blog from '@/models/Blog';
 import { getUserFromRequest } from '@/lib/auth';
+import { createCachedResponse } from '@/lib/cache';
 
 // Helper to generate a slug from a title
 function generateSlug(title: string): string {
@@ -65,18 +67,23 @@ export async function GET(request: NextRequest) {
       Blog.countDocuments(query)
     ]);
     
-    return NextResponse.json({
-      success: true,
-      blogs,
-      pagination: {
-        page,
-        limit,
-        total,
-        pages: Math.ceil(total / limit)
+    return NextResponse.json(
+      {
+        success: true,
+        blogs,
+        pagination: {
+          page,
+          limit,
+          total,
+          pages: Math.ceil(total / limit)
+        }
+      },
+      {
+        headers: createCachedResponse('BLOGS'),
       }
-    });
+    );
   } catch (error) {
-    console.error('Error listing blogs:', error);
+    logger.error('Error listing blogs:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to fetch blogs' },
       { status: 500 }
@@ -145,7 +152,7 @@ export async function POST(request: NextRequest) {
       blog
     }, { status: 201 });
   } catch (error) {
-    console.error('Error creating blog post:', error);
+    logger.error('Error creating blog post:', error);
     return NextResponse.json(
       { success: false, message: 'Failed to create blog post' },
       { status: 500 }

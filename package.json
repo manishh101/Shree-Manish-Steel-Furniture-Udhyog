@@ -7,13 +7,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "analyze": "ANALYZE=true next build"
+    "analyze": "ANALYZE=true next build --webpack",
+    "lighthouse": "lhci autorun",
+    "lighthouse:mobile": "lhci autorun --preset=mobile",
+    "seo:audit": "node scripts/run-seo-audit.js",
+    "seo:audit:live": "node scripts/run-seo-audit.js --live",
+    "seo:check-links": "node scripts/check-broken-links.js",
+    "seo:validate-sitemap": "node scripts/validate-sitemap.js"
   },
   "description": "Shree Manish Steel Furniture - Next.js Application",
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
     "@heroicons/react": "^2.2.0",
-    "axios": "^1.13.2",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.8.0",
     "critters": "^0.0.23",
@@ -26,13 +31,16 @@
     "react-dom": "^19.2.3",
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.69.0",
-    "react-icons": "^5.5.0",
+    "react-icons": "^4.12.0",
     "react-toastify": "^11.0.5",
     "tailwindcss": "^3.4.1",
+    "web-vitals": "^3.5.2",
     "yet-another-react-lightbox": "^3.28.0",
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.13.0",
+    "@next/bundle-analyzer": "^16.1.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.0.3",

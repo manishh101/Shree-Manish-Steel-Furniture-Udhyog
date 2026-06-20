@@ -86,7 +86,7 @@ const GalleryHero: React.FC<GalleryHeroProps> = ({
           <div className="absolute inset-0">
             <Image
               src={heroImage}
-              alt="Gallery Cover"
+              alt="Furniture Gallery Showcase - Steel Almirahs (Daraj), Beds (Palang) | Shree Manish Steel Biratnagar Nepal"
               fill
               sizes="100vw"
               className="object-contain opacity-20"

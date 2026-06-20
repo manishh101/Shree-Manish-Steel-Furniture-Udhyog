@@ -73,15 +73,26 @@ const EnhancedOptimizedImage: React.FC<EnhancedOptimizedImageProps> = ({
   fill = true,
   enableAvailabilityCheck = false,
 }) => {
+  // For priority images, compute the initial src synchronously to avoid LCP delay
+  const getInitialSrc = (): string | null => {
+    if (!priority) return null;
+    if (!src) return ImageService.getPlaceholderImage(category);
+    if (CloudinaryImageService.isCloudinaryUrl(src)) {
+      const { width } = sizeConfig[size] || sizeConfig.medium;
+      return CloudinaryImageService.optimizeCloudinaryUrl(src, { width, quality: 'auto:good' });
+    }
+    return src;
+  };
+
   const [imageState, setImageState] = useState<ImageState>({
     loaded: false,
     error: false,
-    currentSrc: null,
-    attemptedUrls: [],
+    currentSrc: getInitialSrc(),
+    attemptedUrls: priority && getInitialSrc() ? [getInitialSrc()!] : [],
     usingFallback: false,
   });
   const imgRef = useRef<HTMLDivElement>(null);
-  const [isInView, setIsInView] = useState(!lazy);
+  const [isInView, setIsInView] = useState(!lazy || priority);
 
   // Get all possible image sources in priority order
   const getImageSources = (): string[] => {
@@ -173,6 +184,15 @@ const EnhancedOptimizedImage: React.FC<EnhancedOptimizedImageProps> = ({
   useEffect(() => {
     if (!isInView) return;
 
+    // Priority images are pre-initialized synchronously — only reset on src change
+    if (priority && imageState.currentSrc) {
+      // Already initialized eagerly; just kick off the source pipeline if needed
+      if (imageState.attemptedUrls.length === 0) {
+        tryNextImageSource();
+      }
+      return;
+    }
+
     setImageState({
       loaded: false,
       error: false,
@@ -229,6 +249,7 @@ const EnhancedOptimizedImage: React.FC<EnhancedOptimizedImageProps> = ({
   const combinedClassName = `
     relative overflow-hidden bg-gray-100
     ${aspectRatioClasses[aspectRatio] || 'aspect-square'}
+    layout-stable
     ${className}
   `.trim();
 
@@ -261,6 +282,7 @@ const EnhancedOptimizedImage: React.FC<EnhancedOptimizedImageProps> = ({
           height={!fill ? dimensions.height : undefined}
           sizes={ImageService.getImageSizes()}
           priority={priority}
+          loading={priority ? undefined : 'lazy'}
           onLoad={handleLoad}
           onError={handleError}
           className={`

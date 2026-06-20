@@ -83,6 +83,8 @@ interface ProductCardProps {
   rank?: number | null;
   salesCount?: number | null;
   className?: string;
+  /** Card index in the grid — first 4 cards get priority image loading for LCP */
+  index?: number;
 }
 
 // Memoize ProductCard to prevent unnecessary re-renders in product grids.
@@ -97,7 +99,8 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
   variant = 'standard',
   rank = null,
   salesCount = null,
-  className = ''
+  className = '',
+  index = 99,
 }) => {
   const router = useRouter();
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -224,7 +227,7 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
       prefetch={true}
     >
       {/* Image container - taller aspect ratio like reference */}
-      <div className="relative w-full overflow-hidden bg-gray-50" style={{ aspectRatio: '3/4' }}>
+      <div className="img-container-product layout-stable bg-gray-50">
         {/* Loading skeleton */}
         {!imageLoaded && (
           <div className="absolute inset-0 bg-gray-100 animate-pulse flex items-center justify-center">
@@ -244,8 +247,9 @@ const ProductCard: React.FC<ProductCardProps> = React.memo(({
             imageClassName={`transition-all duration-500 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             onLoad={handleImageLoad}
             onError={handleImageError}
-            lazy={variant !== 'featured' && variant !== 'bestseller'}
-            priority={variant === 'featured' || variant === 'bestseller'}
+            // First 4 cards above the fold get priority loading for LCP (Req 10.1)
+            lazy={variant !== 'featured' && variant !== 'bestseller' && index >= 4}
+            priority={variant === 'featured' || variant === 'bestseller' || index < 4}
           />
         </div>
 

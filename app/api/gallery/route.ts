@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { GallerySection, GalleryConfig } from '@/models/Gallery';
@@ -29,7 +30,7 @@ export async function GET() {
       }
     });
   } catch (error) {
-    console.error('Error fetching gallery:', error);
+    logger.error('Error fetching gallery:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch gallery' },
       { status: 500 }

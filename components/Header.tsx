@@ -115,7 +115,7 @@ const Header = forwardRef<{ toggleMobileMenu: () => void }, HeaderProps>(
             <div className="flex-shrink-0 z-40">
               <button
                 onClick={toggleMobileMenu}
-                className="text-primary hover:text-primary-dark transition-all duration-200 focus:outline-none p-2 rounded-full hover:bg-gray-100 active:scale-95"
+                className="text-primary hover:text-primary-dark transition-all duration-200 focus:outline-none p-3 rounded-full hover:bg-gray-100 active:scale-95 min-h-[48px] min-w-[48px] flex items-center justify-center"
                 aria-label="Toggle menu"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -132,7 +132,8 @@ const Header = forwardRef<{ toggleMobileMenu: () => void }, HeaderProps>(
                   alt="Shree Manish Steel Furniture Industry" 
                   width={128}
                   height={64}
-                  className="h-16 w-auto"
+                  className="h-16"
+                  style={{ width: 'auto', height: 'auto', maxHeight: '4rem' }}
                 />
               </Link>
             </div>
@@ -141,7 +142,7 @@ const Header = forwardRef<{ toggleMobileMenu: () => void }, HeaderProps>(
             <div className="flex-shrink-0 z-40">
               <button
                 onClick={handleMobileSearchButtonClick}
-                className="text-primary hover:text-primary-dark transition-colors focus:outline-none p-2 rounded-full hover:bg-gray-100 active:scale-95"
+                className="text-primary hover:text-primary-dark transition-colors focus:outline-none p-3 rounded-full hover:bg-gray-100 active:scale-95 min-h-[48px] min-w-[48px] flex items-center justify-center"
                 aria-label="Search"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -160,7 +161,8 @@ const Header = forwardRef<{ toggleMobileMenu: () => void }, HeaderProps>(
                   alt="Shree Manish Steel Furniture Industry" 
                   width={140}
                   height={56}
-                  className="h-14 w-auto"
+                  className="h-14"
+                  style={{ width: 'auto', height: 'auto', maxHeight: '3.5rem' }}
                 />
               </Link>
             </div>

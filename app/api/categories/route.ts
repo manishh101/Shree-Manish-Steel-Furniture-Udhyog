@@ -1,8 +1,10 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Category from '@/models/Category';
 import Subcategory from '@/models/Subcategory';
 import { getUserFromRequest } from '@/lib/auth';
+import { createCachedResponse } from '@/lib/cache';
 
 // GET /api/categories - Get all categories
 export async function GET(request: NextRequest) {
@@ -32,9 +34,11 @@ export async function GET(request: NextRequest) {
         .lean();
     }
 
-    return NextResponse.json(categories);
+    return NextResponse.json(categories, {
+      headers: createCachedResponse('CATEGORIES'),
+    });
   } catch (error) {
-    console.error('Error fetching categories:', error);
+    logger.error('Error fetching categories:', error);
     return NextResponse.json(
       { error: 'Failed to fetch categories' },
       { status: 500 }
@@ -69,7 +73,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(category, { status: 201 });
   } catch (error) {
-    console.error('Error creating category:', error);
+    logger.error('Error creating category:', error);
     return NextResponse.json(
       { error: 'Failed to create category' },
       { status: 500 }

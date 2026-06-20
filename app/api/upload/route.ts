@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { uploadToCloudinary, deleteFromCloudinary } from '@/lib/cloudinary';
 import { getUserFromRequest } from '@/lib/auth';
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
       }))
     }, { status: 201 });
   } catch (error) {
-    console.error('Error uploading image:', error);
+    logger.error('Error uploading image:', error);
     return NextResponse.json(
       { error: 'Failed to upload image' },
       { status: 500 }
@@ -113,7 +114,7 @@ export async function DELETE(request: NextRequest) {
       message: 'Image deleted successfully'
     });
   } catch (error) {
-    console.error('Error deleting image:', error);
+    logger.error('Error deleting image:', error);
     return NextResponse.json(
       { error: 'Failed to delete image' },
       { status: 500 }

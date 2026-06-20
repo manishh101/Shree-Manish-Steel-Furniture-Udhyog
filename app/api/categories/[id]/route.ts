@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { connectDB } from '@/lib/db';
@@ -36,7 +37,7 @@ export async function GET(
 
     return NextResponse.json(category);
   } catch (error) {
-    console.error('Error fetching category:', error);
+    logger.error('Error fetching category:', error);
     return NextResponse.json(
       { error: 'Failed to fetch category' },
       { status: 500 }
@@ -93,7 +94,7 @@ export async function PUT(
         { categoryId: id },
         { $set: { category: data.name } }
       );
-      console.log(`Updated category name from "${oldCategory.name}" to "${data.name}" in all related products`);
+      logger.info(`Updated category name from "${oldCategory.name}" to "${data.name}" in all related products`);
     }
 
     // Revalidate cache for all category-related pages
@@ -105,7 +106,7 @@ export async function PUT(
 
     return NextResponse.json(category);
   } catch (error) {
-    console.error('Error updating category:', error);
+    logger.error('Error updating category:', error);
     return NextResponse.json(
       { error: 'Failed to update category' },
       { status: 500 }
@@ -145,7 +146,7 @@ export async function DELETE(
 
     return NextResponse.json({ message: 'Category deleted successfully' });
   } catch (error) {
-    console.error('Error deleting category:', error);
+    logger.error('Error deleting category:', error);
     return NextResponse.json(
       { error: 'Failed to delete category' },
       { status: 500 }

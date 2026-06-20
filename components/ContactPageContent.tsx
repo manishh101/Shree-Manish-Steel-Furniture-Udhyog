@@ -1,14 +1,55 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import ContactForm from './ContactForm';
+
+// Biratnagar coordinates for Google Maps
+const BIRATNAGAR_COORDS = {
+  latitude: 26.4525,
+  longitude: 87.2718,
+};
 
 const ContactPageContent = () => {
   const { settings, loading } = useSiteSettings();
   
   // Generate Google Maps directions URL
-  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(settings.address)}`;
+  const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${BIRATNAGAR_COORDS.latitude},${BIRATNAGAR_COORDS.longitude}`;
+  
+  // Generate Google Maps embed URL with business location
+  const mapEmbedUrl = settings.mapUrl || 
+    `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3570.0!2d${BIRATNAGAR_COORDS.longitude}!3d${BIRATNAGAR_COORDS.latitude}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjbCsDI3JzA5LjAiTiA4N8KwMTYnMTguNSJF!5e0!3m2!1sen!2snp!4v1234567890`;
+  
+  // WhatsApp number (clean format for URL)
+  const whatsappNumber = settings.social?.whatsapp 
+    ? settings.social.whatsapp.replace(/[^0-9]/g, '')
+    : '9779824336371';
+  
+  // WhatsApp click-to-chat URL with pre-filled message
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent('Hello! I would like to inquire about your furniture.')}`;
+  
+  // Track WhatsApp click
+  const handleWhatsAppClick = () => {
+    // Google Analytics tracking
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', 'whatsapp_click', {
+        event_category: 'contact',
+        event_label: 'WhatsApp Click-to-Chat',
+        page_location: window.location.href,
+      });
+    }
+  };
+  
+  // Track phone click
+  const handlePhoneClick = (phoneNumber: string) => {
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', 'phone_call', {
+        event_category: 'contact',
+        event_label: `Phone Call: ${phoneNumber}`,
+        page_location: window.location.href,
+      });
+    }
+  };
   
   // Social links
   const socialLinks = {
@@ -86,7 +127,12 @@ const ContactPageContent = () => {
                           <div className="flex flex-wrap items-center">
                             {phones.map((phoneNum: string, index: number) => (
                               <React.Fragment key={index}>
-                                <a href={`tel:${phoneNum.replace(/[^\d+]/g, '')}`} className="text-text/80 hover:text-primary transition-colors">
+                                <a 
+                                  href={`tel:${phoneNum.replace(/[^\d+]/g, '')}`}
+                                  onClick={() => handlePhoneClick(phoneNum)}
+                                  className="text-text/80 hover:text-primary transition-colors font-medium"
+                                  aria-label={`Call ${phoneNum}`}
+                                >
                                   {phoneNum}
                                 </a>
                                 {index < phones.length - 1 && <span className="text-text/80 mx-1">,</span>}
@@ -96,11 +142,17 @@ const ContactPageContent = () => {
                         );
                       }
                       return (
-                        <a href={`tel:${settings.phone}`} className="text-text/80 hover:text-primary transition-colors">
+                        <a 
+                          href={`tel:${settings.phone.replace(/[^\d+]/g, '')}`}
+                          onClick={() => handlePhoneClick(settings.phone)}
+                          className="text-text/80 hover:text-primary transition-colors font-medium"
+                          aria-label={`Call ${settings.phone}`}
+                        >
                           {settings.phone}
                         </a>
                       );
                     })()}
+                    <p className="text-sm text-text/60 mt-1">Click to call directly</p>
                   </div>
                 </div>
                 
@@ -138,6 +190,33 @@ const ContactPageContent = () => {
                     </p>
                   </div>
                 </div>
+                
+                {/* WhatsApp Contact - Prominent CTA */}
+                <div className="bg-green-50 border-2 border-green-500 rounded-lg p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mr-3 shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                        </svg>
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-green-700 mb-1">Chat on WhatsApp</h3>
+                        <p className="text-sm text-green-600">Get instant replies to your queries</p>
+                      </div>
+                    </div>
+                    <a
+                      href={whatsappUrl}
+                      onClick={handleWhatsAppClick}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-6 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors font-semibold shadow-md hover:shadow-lg"
+                      aria-label="Chat on WhatsApp"
+                    >
+                      Chat Now
+                    </a>
+                  </div>
+                </div>
               </div>
               
               {/* Social Media */}
@@ -145,7 +224,15 @@ const ContactPageContent = () => {
                 <h3 className="text-lg font-semibold text-primary mb-3">Connect With Us</h3>
                 <div className="flex flex-wrap gap-4">
                   {socialLinks.whatsapp && (
-                    <a href={socialLinks.whatsapp} target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors" title="WhatsApp">
+                    <a 
+                      href={whatsappUrl}
+                      onClick={handleWhatsAppClick}
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-colors" 
+                      title="WhatsApp"
+                      aria-label="Contact us on WhatsApp"
+                    >
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
                     </a>
                   )}
@@ -180,17 +267,29 @@ const ContactPageContent = () => {
         </div>
       </section>
       
-      {/* Enhanced Map Section */}
+      {/* Enhanced Map Section with NAP Information */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-8 md:px-16 lg:px-24">
-          <h2 className="section-title text-center mb-8">Visit Our Showroom</h2>
+          <h2 className="section-title text-center mb-8">Visit Our Showroom in Biratnagar</h2>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 md:gap-12 lg:gap-16">
-            {/* Location Info Card */}
+            {/* Location Info Card with Complete NAP */}
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h3 className="text-xl font-semibold text-primary mb-4">Our Location</h3>
               
+              {/* Consistent NAP Information */}
               <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mr-3 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">{settings.businessName}</p>
+                  </div>
+                </div>
+                
                 <div className="flex items-start">
                   <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mr-3 shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -200,6 +299,43 @@ const ContactPageContent = () => {
                   </div>
                   <div>
                     <p className="text-gray-700">{settings.address}</p>
+                    <p className="text-sm text-gray-600 mt-1">Biratnagar, Province 1, Nepal</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start">
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mr-3 shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                  </div>
+                  <div>
+                    {(() => {
+                      const phones = settings.phones;
+                      if (phones && phones.length > 0) {
+                        return phones.map((phoneNum: string, index: number) => (
+                          <a 
+                            key={index}
+                            href={`tel:${phoneNum.replace(/[^\d+]/g, '')}`}
+                            onClick={() => handlePhoneClick(phoneNum)}
+                            className="block text-gray-700 hover:text-primary transition-colors font-medium"
+                            aria-label={`Call ${phoneNum}`}
+                          >
+                            {phoneNum}
+                          </a>
+                        ));
+                      }
+                      return (
+                        <a 
+                          href={`tel:${settings.phone.replace(/[^\d+]/g, '')}`}
+                          onClick={() => handlePhoneClick(settings.phone)}
+                          className="text-gray-700 hover:text-primary transition-colors font-medium"
+                          aria-label={`Call ${settings.phone}`}
+                        >
+                          {settings.phone}
+                        </a>
+                      );
+                    })()}
                   </div>
                 </div>
                 
@@ -237,45 +373,30 @@ const ContactPageContent = () => {
               </div>
             </div>
             
-            {/* Map Container - Spans 2 columns on large screens */}
+            {/* Google Maps Embed - Spans 2 columns on large screens */}
             <div className="lg:col-span-2 rounded-lg overflow-hidden shadow-lg h-[400px]">
-              <div className="relative w-full h-full">
-                {/* Fallback */}
-                <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
-                  <div className="text-center p-6">
-                    <p>{settings.businessName} Location</p>
-                    <p className="text-sm text-gray-500 mt-2">{settings.address}</p>
-                    <a 
-                      href={directionsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer" 
-                      className="mt-4 inline-block bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors"
-                    >
-                      Get Directions
-                    </a>
-                  </div>
-                </div>
-                
-                {/* Google Maps iframe */}
-                {settings.mapUrl && (
-                  <iframe 
-                    src={settings.mapUrl}
-                    width="100%" 
-                    height="100%" 
-                    style={{border: 0, position: 'relative', zIndex: 1}} 
-                    allowFullScreen 
-                    loading="lazy" 
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title={`${settings.businessName} Location`}
-                  ></iframe>
-                )}
-              </div>
+              <iframe 
+                src={mapEmbedUrl}
+                width="100%" 
+                height="100%" 
+                style={{border: 0}} 
+                allowFullScreen 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade"
+                title={`${settings.businessName} - Biratnagar Location`}
+                aria-label="Google Maps showing Manish Steel Furniture location in Biratnagar"
+              ></iframe>
             </div>
           </div>
           
-          {/* Additional Info */}
-          <div className="mt-8 text-center text-gray-600">
-            <p>Looking for quality furniture? Visit our showroom today to see our full collection.</p>
+          {/* Service Area Information */}
+          <div className="mt-8 text-center">
+            <p className="text-gray-700 mb-2">
+              <span className="font-semibold">Free Delivery Available in:</span> Biratnagar, Dharan, Itahari, Morang District, and Sunsari District
+            </p>
+            <p className="text-gray-600">
+              Looking for quality steel furniture? Visit our showroom today to see our full collection of almirahs (daraj), office furniture, and explore our premium powder coating services.
+            </p>
           </div>
         </div>
       </section>

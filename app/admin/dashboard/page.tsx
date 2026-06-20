@@ -9,7 +9,8 @@ import {
   FaImages,
   FaPhone,
   FaSync,
-  FaEnvelope
+  FaEnvelope,
+  FaChartLine
 } from 'react-icons/fa';
 
 interface StatCardProps {
@@ -180,7 +181,7 @@ const AdminDashboard = () => {
               {/* Quick Links */}
               <div className="bg-white rounded-lg shadow-md p-4 sm:p-6">
                 <h2 className="text-lg sm:text-xl font-bold text-primary mb-4">Quick Actions</h2>
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 gap-2 sm:gap-4">
                   <Link href="/admin/products" className="bg-gray-100 hover:bg-gray-200 transition-colors p-3 sm:p-4 rounded-lg flex flex-col items-center text-center">
                     <FaThLarge className="h-6 w-6 sm:h-8 sm:w-8 text-blue-500 mb-2" />
                     <span className="font-medium text-sm sm:text-base">Manage Products</span>
@@ -200,6 +201,10 @@ const AdminDashboard = () => {
                   <Link href="/admin/inquiries" className="bg-gray-100 hover:bg-gray-200 transition-colors p-3 sm:p-4 rounded-lg flex flex-col items-center text-center">
                     <FaEnvelope className="h-6 w-6 sm:h-8 sm:w-8 text-purple-500 mb-2" />
                     <span className="font-medium text-sm sm:text-base">Inquiries</span>
+                  </Link>
+                  <Link href="/admin/seo" className="bg-gray-100 hover:bg-gray-200 transition-colors p-3 sm:p-4 rounded-lg flex flex-col items-center text-center">
+                    <FaChartLine className="h-6 w-6 sm:h-8 sm:w-8 text-indigo-500 mb-2" />
+                    <span className="font-medium text-sm sm:text-base">SEO Monitoring</span>
                   </Link>
                 </div>
               </div>

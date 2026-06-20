@@ -5,6 +5,8 @@ import Script from 'next/script';
 import ToastProvider from '@/components/ToastProvider';
 import ScrollToTop from '@/components/ScrollToTop';
 import NavigationProgress from '@/components/NavigationProgress';
+import WebVitalsReporter from '@/components/WebVitalsReporter';
+import AnalyticsTracker from '@/components/AnalyticsTracker';
 import './globals.css';
 
 const poppins = Poppins({
@@ -57,10 +59,10 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: 'Manish Steel Furniture - Premium Steel Furniture Nepal | Biratnagar',
+    default: 'Best Steel Furniture Biratnagar | Almirah Daraj Powder Coated | Affordable Prices Nepal',
     template: `%s | श्री मनिष स्टील फर्निचर विराटनगर`,
   },
-  description: siteConfig.description,
+  description: 'Best steel furniture shop in Biratnagar, Nepal. Premium powder-coated almirahs (daraj), tables & office furniture at affordable prices. Free delivery in Biratnagar, Dharan, Itahari. 5-year warranty. Shop quality steel furniture online.',
   keywords: [
     // Primary Local Keywords (Biratnagar Focus) - MOST IMPORTANT
     'best furniture in Biratnagar',
@@ -73,6 +75,16 @@ export const metadata: Metadata = {
     'steel furniture Biratnagar',
     'wood furniture Biratnagar',
     'furniture manufacturer Biratnagar',
+    
+    // Powder Coated Furniture Keywords
+    'powder coated furniture Biratnagar',
+    'powder coated steel furniture Biratnagar',
+    'powder coated almirah Biratnagar',
+    'powder coated furniture Nepal',
+    'powder coated steel Nepal',
+    'powder coating furniture Biratnagar',
+    'durable steel furniture Biratnagar',
+    'rust-proof furniture Biratnagar',
     
     // Affordable/Cheap Furniture Keywords
     'cheap furniture Biratnagar',
@@ -105,18 +117,6 @@ export const metadata: Metadata = {
     'school furniture Nepal',
     'college furniture Biratnagar',
     'educational furniture Biratnagar',
-    
-    // Bed/Palang Keywords
-    'bed Biratnagar',
-    'palang Biratnagar',
-    'steel bed Biratnagar',
-    'steel palang Biratnagar',
-    'bed frame Biratnagar',
-    'double bed Biratnagar',
-    'single bed Biratnagar',
-    'palang price Biratnagar',
-    'cheap bed Biratnagar',
-    'affordable bed Biratnagar',
     
     // Daraz-related Keywords (competing with Daraz)
     'furniture cheaper than Daraz',
@@ -181,13 +181,8 @@ export const metadata: Metadata = {
     'सस्तो फर्निचर',
     'अफिस फर्निचर',
     'स्कूल फर्निचर',
-    'पलंग',
     'स्टील अलमिरा',
     'अलमिरा मूल्य',
-    'खाट',
-    'स्टील खाट',
-    'डबल बेड',
-    'सिंगल बेड',
     'टेबल',
     'कुर्सी',
     'र्‍याक',
@@ -210,8 +205,6 @@ export const metadata: Metadata = {
     
     // Transliterated Nepali terms (how people type in English)
     'sasto furniture Nepal',
-    'khat price Biratnagar',
-    'palang price Nepal',
     'almirah kinnu',
     'furniture kinne thau',
     
@@ -236,22 +229,22 @@ export const metadata: Metadata = {
     locale: 'ne_NP',
     alternateLocale: ['en_NP'],
     url: siteConfig.url,
-    title: 'Manish Steel Furniture - Premium Steel Furniture Nepal | Biratnagar',
-    description: siteConfig.description,
+    title: 'Best Steel Furniture Biratnagar | Almirah Daraj Powder Coated | Affordable Prices Nepal',
+    description: 'Best steel furniture shop in Biratnagar, Nepal. Premium powder-coated almirahs (daraj), tables & office furniture at affordable prices. Free delivery in Biratnagar, Dharan, Itahari. 5-year warranty.',
     siteName: siteConfig.name,
     images: [
       {
         url: siteConfig.ogImage,
         width: 1200,
         height: 630,
-        alt: 'Manish Steel Furniture - Premium Steel Furniture Nepal',
+        alt: 'Manish Steel Furniture - Best Furniture Shop in Biratnagar Nepal',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Manish Steel Furniture - Premium Steel Furniture Nepal | Biratnagar',
-    description: siteConfig.description,
+    title: 'Best Steel Furniture Biratnagar | Almirah Daraj Powder Coated Nepal',
+    description: 'Premium powder-coated steel almirahs (daraj), office furniture at affordable prices. Free delivery & 5-year warranty.',
     images: [siteConfig.ogImage],
   },
   robots: {
@@ -280,14 +273,14 @@ export const metadata: Metadata = {
   },
 };
 
-// JSON-LD structured data for Local SEO
+// JSON-LD structured data for Local SEO with enhanced dual-keyword content
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'FurnitureStore',
   '@id': siteConfig.url,
   name: siteConfig.name,
-  alternateName: ['Manish Steel Furniture', 'Manish Steel', 'मनिष स्टील फर्निचर', 'Manish Furniture Biratnagar', 'Best Furniture Biratnagar'],
-  description: 'Best and most affordable furniture shop in Biratnagar, Nepal. We offer premium quality steel and wood furniture for office, school, and home at the cheapest prices. Products include beds (palang), almirahs, tables, chairs, racks and custom furniture with free delivery and installation.',
+  alternateName: ['Manish Steel Furniture', 'Manish Steel', 'मनिष स्टील फर्निचर', 'Manish Furniture Biratnagar', 'Best Furniture Biratnagar', 'Shree Manish Steel'],
+  description: 'Best and most affordable furniture shop in Biratnagar, Nepal. Premium steel almirahs (daraj), powder coating services, tables, office furniture at cheapest prices. Free delivery in Biratnagar, Dharan, Itahari. 5-year warranty on all steel furniture. Shop quality furniture online or visit our showroom.',
   url: siteConfig.url,
   logo: `${siteConfig.url}/logo192.png`,
   image: [
@@ -302,7 +295,7 @@ const jsonLd = {
     '@type': 'PostalAddress',
     streetAddress: 'Dharan Rd',
     addressLocality: 'Biratnagar',
-    addressRegion: 'Morang',
+    addressRegion: 'Morang, Province 1',
     postalCode: '56613',
     addressCountry: 'NP',
   },
@@ -335,11 +328,15 @@ const jsonLd = {
     },
     {
       '@type': 'AdministrativeArea',
-      name: 'Province 1, Nepal',
+      name: 'Morang District',
     },
     {
       '@type': 'AdministrativeArea',
-      name: 'Morang District',
+      name: 'Sunsari District',
+    },
+    {
+      '@type': 'AdministrativeArea',
+      name: 'Province 1, Nepal',
     },
   ],
   openingHoursSpecification: [
@@ -365,14 +362,32 @@ const jsonLd = {
   paymentAccepted: 'Cash, Bank Transfer, eSewa, Khalti, Online Payment',
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
-    name: 'Affordable Steel & Wood Furniture',
+    name: 'Affordable Steel & Wood Furniture - Best Prices in Biratnagar',
     itemListElement: [
       {
         '@type': 'Offer',
         itemOffered: {
           '@type': 'Product',
+          name: 'Steel Almirahs & Daraj (Wardrobes)',
+          alternateName: ['Steel Almirah', 'Steel Daraj', 'Steel Wardrobe', 'Steel Cupboard', 'Kapada Rakhne'],
+          description: 'Premium steel almirahs and daraj (wardrobes) in various sizes. Durable, secure storage solutions for home and office at best prices in Biratnagar.',
+        },
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Product',
+          name: 'Powder Coating Services',
+          alternateName: ['Metal Powder Coating', 'Rust-Proof Coating', 'Powder Coated Furniture', 'Electrostatic Paint', 'Industrial Powder Coating'],
+          description: 'High-quality powder coating services for steel furniture and industrial metal parts. Provides scratch-resistant, durable, and rust-proof finish.',
+        },
+      },
+      {
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Product',
           name: 'Office Furniture',
-          description: 'Complete office furniture solutions including desks, chairs, cabinets, and meeting tables at best prices in Biratnagar',
+          description: 'Complete office furniture solutions - desks, chairs, filing cabinets (office daraj), meeting tables at competitive prices in Biratnagar',
         },
       },
       {
@@ -380,23 +395,7 @@ const jsonLd = {
         itemOffered: {
           '@type': 'Product',
           name: 'School Furniture',
-          description: 'Durable school furniture - benches, desks, chairs, and storage at affordable prices for schools and colleges',
-        },
-      },
-      {
-        '@type': 'Offer',
-        itemOffered: {
-          '@type': 'Product',
-          name: 'Steel Beds (Palang)',
-          description: 'Strong steel beds and palang in various sizes - single, double at cheapest prices in Biratnagar',
-        },
-      },
-      {
-        '@type': 'Offer',
-        itemOffered: {
-          '@type': 'Product',
-          name: 'Steel Almirahs & Wardrobes',
-          description: 'Premium quality steel almirahs and cupboards for home and office at budget-friendly prices',
+          description: 'Durable school furniture - benches, desks, chairs at wholesale prices for schools and colleges',
         },
       },
       {
@@ -404,7 +403,7 @@ const jsonLd = {
         itemOffered: {
           '@type': 'Product',
           name: 'Tables & Desks',
-          description: 'Computer tables, study tables, dining tables in steel and wood at discount prices',
+          description: 'Computer tables, study tables, dining tables, office desks in steel and wood at discount prices',
         },
       },
       {
@@ -412,7 +411,7 @@ const jsonLd = {
         itemOffered: {
           '@type': 'Product',
           name: 'Steel Racks & Shelves',
-          description: 'Heavy-duty steel racks for shops, warehouses, and homes at wholesale prices',
+          description: 'Heavy-duty steel racks, display racks, book shelves, shoe racks for shops, warehouses, and homes',
         },
       },
       {
@@ -420,12 +419,12 @@ const jsonLd = {
         itemOffered: {
           '@type': 'Product',
           name: 'Custom Furniture',
-          description: 'Made-to-order custom steel and wood furniture as per your requirements',
+          description: 'Made-to-order custom steel and wood furniture designed as per your requirements',
         },
       },
     ],
   },
-  slogan: 'Best Quality, Cheapest Price - Furniture for Every Budget',
+  slogan: 'Best Quality, Affordable Price - सस्तो र टिकाउ फर्निचर',
   foundingDate: '2009',
   founder: {
     '@type': 'Person',
@@ -440,12 +439,12 @@ const jsonLd = {
     {
       '@type': 'Offer',
       name: 'Free Delivery',
-      description: 'Free delivery service in Biratnagar, Dharan, Itahari and nearby areas',
+      description: 'Free delivery service in Biratnagar, Dharan, Itahari and nearby areas in Province 1',
     },
     {
       '@type': 'Offer',
       name: 'Free Installation',
-      description: 'Complimentary installation service for all furniture',
+      description: 'Complimentary installation and setup service for all furniture',
     },
     {
       '@type': 'Offer',
@@ -455,7 +454,7 @@ const jsonLd = {
     {
       '@type': 'Offer',
       name: '5-Year Warranty',
-      description: 'Comprehensive 5-year warranty on all steel furniture',
+      description: 'Comprehensive 5-year warranty on all steel furniture products',
     },
   ],
 };
@@ -510,6 +509,15 @@ export default function RootLayout({
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+        
+        {/* Preload static hero image for faster LCP (Req 10.1, 10.2) */}
+        <link
+          rel="preload"
+          href="/images/home-page-1.png"
+          as="image"
+          fetchPriority="high"
+        />
         
         {/* JSON-LD Structured Data for SEO */}
         <script
@@ -529,9 +537,9 @@ export default function RootLayout({
         {/* Google Analytics - Loaded after page is interactive */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-TGW5L8QT90"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
         />
-        <Script id="google-analytics" strategy="afterInteractive">
+        <Script id="google-analytics" strategy="lazyOnload">
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
@@ -545,6 +553,10 @@ export default function RootLayout({
         <Suspense fallback={null}>
           <NavigationProgress />
         </Suspense>
+        <Suspense fallback={null}>
+          <AnalyticsTracker />
+        </Suspense>
+        <WebVitalsReporter />
         {children}
         <ScrollToTop />
         <ToastProvider />

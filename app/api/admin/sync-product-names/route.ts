@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Product from '@/models/Product';
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
     // Get all products
     const products = await Product.find({}).lean();
     
-    console.log(`Starting sync for ${products.length} products...`);
+    logger.info(`Starting sync for ${products.length} products...`);
     debugInfo.push(`Total products found: ${products.length}`);
 
     // Check first product structure
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
           updatedCount++;
         }
       } catch (error) {
-        console.error(`Error syncing product ${productData._id}:`, error);
+        logger.error(`Error syncing product ${productData._id}:`, error);
         errors++;
       }
     }
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
       debug: debugInfo.slice(0, 20) // Limit debug info
     });
   } catch (error) {
-    console.error('Error syncing product names:', error);
+    logger.error('Error syncing product names:', error);
     return NextResponse.json(
       { error: 'Failed to sync product names' },
       { status: 500 }

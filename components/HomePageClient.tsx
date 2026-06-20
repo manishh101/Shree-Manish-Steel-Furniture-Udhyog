@@ -211,11 +211,11 @@ export default function HomePageClient({
 
   return (
     <div>
-      {/* Hero Section */}
+      {/* Hero Section with Enhanced SEO Content (Req 2.3, 2.4, 6.5, 7.1) */}
       <section className="min-h-[85vh] flex items-center justify-center bg-background py-8">
         <div className="content-container">
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-10">
-            {/* Left Content */}
+            {/* Left Content - Enhanced with dual keywords and service areas */}
             <div className="md:w-[48%] lg:w-[45%] mb-10 md:mb-0 animate-fadeIn">
               {/* Premium Typography for Shree Manish Steel Furniture Udhyog */}
               <div className="text-center md:text-left">
@@ -225,9 +225,7 @@ export default function HomePageClient({
                 <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-primary leading-tight animate-slideInLeft" style={{ fontFamily: 'Playfair Display, serif' }}>
                   {homepageContent.heroTitle || 'Shree Manish Steel'}
                 </h1>
-                {/* <p className="text-sm md:text-base lg:text-lg text-gray-600 mt-4 max-w-md animate-fadeIn" style={{animationDelay: '0.2s'}}>
-                  Quality Steel Furniture for Every Space - Built to Last
-                </p> */}
+                
               </div>
 
               <div className="flex flex-wrap justify-center md:justify-start gap-3 mt-6 md:mt-8 animate-slideInLeft" style={{ animationDelay: '0.3s' }}>
@@ -246,6 +244,8 @@ export default function HomePageClient({
                   {homepageContent.heroSecondaryButtonText || 'Contact Us'}
                 </Link>
               </div>
+              
+
             </div>
 
 
@@ -255,9 +255,10 @@ export default function HomePageClient({
                 <Image
                   key={imageKey}
                   src={(homepageContent.heroImage && homepageContent.heroImage.trim() !== '') ? homepageContent.heroImage : '/images/home-page-1.png'}
-                  alt="Manish Steel Furniture Collection"
+                  alt="Manish Steel Furniture Collection - Best Steel Furniture Shop Biratnagar Nepal"
                   fill
                   priority
+                  fetchPriority="high"
                   quality={90}
                   className="object-cover transition-opacity duration-700"
                   sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 800px"
@@ -341,7 +342,8 @@ export default function HomePageClient({
             <div className="flex md:grid overflow-x-auto md:overflow-x-visible gap-2 md:grid-cols-2 lg:grid-cols-3 snap-x snap-mandatory md:snap-none pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
               {[1, 2, 3].map((index) => (
                 <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden flex-shrink-0 w-[85vw] md:w-auto snap-center">
-                  <div className="aspect-[4/3] bg-gray-200 animate-pulse"></div>
+                  {/* Matches real card aspect-ratio 1/1 to prevent CLS */}
+                  <div className="w-full bg-gray-200 animate-pulse" style={{ aspectRatio: '1/1' }}></div>
                   <div className="p-6">
                     <div className="bg-gray-200 h-6 rounded mb-2 animate-pulse"></div>
                     <div className="bg-gray-200 h-4 rounded mb-4 w-3/4 animate-pulse"></div>
@@ -365,7 +367,7 @@ export default function HomePageClient({
                     className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-xl animate-fadeInUp group flex-shrink-0 w-[85vw] md:w-auto snap-center"
                     style={{ animationDelay: `${0.1 + (index * 0.1)}s` }}
                   >
-                    <div className="relative w-full overflow-hidden bg-gray-100" style={{ aspectRatio: '1/1' }}>
+                    <div className="img-container-square layout-stable bg-gray-100">
                       <EnhancedOptimizedImage
                         src={thumbnailUrl || fallbackUrl}
                         alt={`${category.name} Products`}
@@ -589,6 +591,43 @@ export default function HomePageClient({
           </div>
         </section>
       )}
+
+      {/* Service Area Section (Req 6.5) */}
+      <section className="py-10 bg-white border-t border-gray-100">
+        <div className="content-container">
+          <div className="text-center mb-6">
+            <h2 className="text-xl md:text-2xl font-bold text-primary">
+              Free Delivery Across Province 1, Nepal
+            </h2>
+            <p className="text-gray-600 mt-2 text-sm md:text-base max-w-2xl mx-auto">
+              We deliver quality steel furniture directly to your home or office in Biratnagar and nearby cities — with free installation included.
+            </p>
+          </div>
+          <div className="flex flex-wrap justify-center gap-3 md:gap-4">
+            {[
+              { name: 'Biratnagar', label: 'Primary', labelClass: 'bg-primary text-white' },
+              { name: 'Dharan', label: 'Free Delivery', labelClass: 'bg-green-600 text-white' },
+              { name: 'Itahari', label: 'Free Delivery', labelClass: 'bg-green-600 text-white' },
+              { name: 'Damak', label: 'Available', labelClass: 'bg-blue-600 text-white' },
+              { name: 'Birtamod', label: 'Available', labelClass: 'bg-blue-600 text-white' },
+              { name: 'Morang District', label: 'Available', labelClass: 'bg-blue-600 text-white' },
+              { name: 'Sunsari District', label: 'Available', labelClass: 'bg-blue-600 text-white' },
+            ].map((area) => (
+              <div key={area.name} className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-primary shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className="font-medium text-gray-800 text-sm">{area.name}</span>
+                <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${area.labelClass}`}>{area.label}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-gray-500 text-xs mt-4">
+            * Delivery charges may apply for remote areas. Contact us for details.
+          </p>
+        </div>
+      </section>
 
       {/* Our Location Section */}
       {homepageContent.locationEnabled !== false && (

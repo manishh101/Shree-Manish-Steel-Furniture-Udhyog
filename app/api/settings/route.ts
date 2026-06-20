@@ -1,3 +1,4 @@
+import { logger } from '@/lib/logger';
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { connectDB } from '@/lib/db';
@@ -43,7 +44,7 @@ export async function GET() {
       settings
     });
   } catch (error) {
-    console.error('Error fetching site settings:', error);
+    logger.error('Error fetching site settings:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to fetch site settings' },
       { status: 500 }
@@ -77,7 +78,12 @@ export async function PUT(request: NextRequest) {
     // Update fields
     const allowedFields = [
       'phone', 'phones', 'email', 'address', 'businessHours',
-      'social', 'mapUrl', 'businessName', 'tagline', 'logo'
+      'social', 'mapUrl', 'businessName', 'tagline', 'logo',
+      // SEO fields
+      'businessInfo', 'serviceAreas', 'defaultTitleSuffix',
+      'defaultDescription', 'defaultKeywords', 'ogImage',
+      'googleAnalyticsId', 'googleSearchConsoleId',
+      'priceRange', 'currencyAccepted', 'paymentAccepted'
     ];
     
     allowedFields.forEach(field => {
@@ -123,7 +129,7 @@ export async function PUT(request: NextRequest) {
       settings
     });
   } catch (error) {
-    console.error('Error updating site settings:', error);
+    logger.error('Error updating site settings:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update site settings' },
       { status: 500 }

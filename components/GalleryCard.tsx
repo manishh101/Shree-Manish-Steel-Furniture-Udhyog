@@ -91,7 +91,7 @@ const GalleryCard: React.FC<GalleryCardProps> = ({
       onKeyDown={handleKeyDown}
     >
       {/* Image container with fixed aspect ratio */}
-      <div className={`${getAspectRatioClass()} relative overflow-hidden bg-gray-50`}>
+      <div className={`${getAspectRatioClass()} relative overflow-hidden bg-gray-50 layout-stable`}>
         {/* Loading skeleton */}
         {!imageLoaded && !imageError && (
           <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 animate-pulse">
@@ -114,9 +114,12 @@ const GalleryCard: React.FC<GalleryCardProps> = ({
         {/* Product image */}
         <Image
           src={getImageSrc()}
-          alt={product.alt || product.title || 'Product image'}
+          alt={product.alt || (product.category && product.category !== 'uncategorized'
+            ? `${product.title || 'Steel Furniture'} - ${product.category} | Steel Furniture | Biratnagar Nepal`
+            : `${product.title || 'Steel Furniture'} | Steel Furniture Biratnagar Nepal`)}
           fill
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
+          loading="lazy"
           className={`object-contain transition-all duration-500 ease-out 
             group-hover:scale-105 group-hover:brightness-105 ${!imageLoaded ? 'opacity-0' : 'opacity-100'}`}
           onLoad={() => setImageLoaded(true)}

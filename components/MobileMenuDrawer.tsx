@@ -146,7 +146,7 @@ const MobileMenuDrawer = ({ isOpen, onClose }: MobileMenuDrawerProps) => {
       <button
         type="button"
         onClick={onClose}
-        className={`absolute top-3 left-4 z-[110] w-10 h-10 flex items-center justify-center rounded-full bg-white/20 focus:outline-none hover:bg-white/30 ${
+        className={`absolute top-3 left-4 z-[110] min-h-[48px] min-w-[48px] flex items-center justify-center rounded-full bg-white/20 focus:outline-none hover:bg-white/30 ${
           isClosing 
             ? 'opacity-0 -rotate-90 scale-75 transition-all duration-300' 
             : 'opacity-100 rotate-0 scale-100'

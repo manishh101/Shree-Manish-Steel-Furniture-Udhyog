@@ -117,7 +117,7 @@ const HomepageSchema = new Schema<IHomepage>({
   
   // SEO
   metaTitle: { type: String, default: 'Shree Manish Steel Furniture - Quality Steel & Wooden Furniture in Nepal' },
-  metaDescription: { type: String, default: 'Premium quality steel and wooden furniture manufacturer in Biratnagar, Nepal. Almirahs, beds, office furniture and more.' },
+  metaDescription: { type: String, default: 'Premium quality powder-coated steel furniture manufacturer in Biratnagar, Nepal. Almirahs, office furniture and more.' },
   
   lastUpdated: { type: Date, default: Date.now }
 }, { timestamps: true });

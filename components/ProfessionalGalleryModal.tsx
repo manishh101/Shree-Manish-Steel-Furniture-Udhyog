@@ -218,7 +218,7 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
             <OptimizedImage
               key={`gallery-main-${currentIndex}`}
               src={currentImageUrl}
-              alt={`${productName} - Image ${currentIndex + 1}`}
+              alt={`${productName} - View ${currentIndex + 1} | Steel Furniture Gallery | Biratnagar Nepal`}
               onLoad={handleImageLoad}
               onError={() => handleImageError(currentIndex)}
               className="w-full h-full max-w-full max-h-[70vh] transition-opacity duration-300"
@@ -273,7 +273,7 @@ const ProfessionalGalleryModal: React.FC<ProfessionalGalleryModalProps> = ({
                 >
                   <OptimizedImage
                     src={image}
-                    alt={`Thumbnail ${index + 1}`}
+                    alt={`${productName} Thumbnail ${index + 1} | Gallery Preview | Biratnagar Nepal`}
                     className="w-full h-full"
                     size="thumbnail"
                     objectFit="contain"

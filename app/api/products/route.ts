@@ -7,6 +7,7 @@ import '@/models/Subcategory'; // Required for populate()
 import { getUserFromRequest } from '@/lib/auth';
 import { ValidationSchemas, escapeRegex } from '@/lib/validation';
 import { logger } from '@/lib/logger';
+import { createCachedResponse } from '@/lib/cache';
 
 // GET /api/products - Get all products
 export async function GET(request: NextRequest) {
@@ -59,12 +60,18 @@ export async function GET(request: NextRequest) {
       subcategory: product.subcategory || (product.subcategoryId?.name) || null,
     }));
 
-    return NextResponse.json({
-      products,
-      currentPage: page,
-      totalPages: Math.ceil(totalProducts / limit),
-      totalProducts
-    });
+    // Return response with caching headers for better performance
+    return NextResponse.json(
+      {
+        products,
+        currentPage: page,
+        totalPages: Math.ceil(totalProducts / limit),
+        totalProducts
+      },
+      {
+        headers: createCachedResponse('PRODUCTS'),
+      }
+    );
   } catch (error) {
     logger.error('Error fetching products', error as Error);
     return NextResponse.json(
