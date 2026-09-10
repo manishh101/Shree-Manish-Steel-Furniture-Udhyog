@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import ScrollAnimator from '@/components/ScrollAnimator';
 import CleanTopProductsSection from '@/components/CleanTopProductsSection';
 import CleanMostSellingSection from '@/components/CleanMostSellingSection';
+import TikTokContentSection from '@/components/TikTokContentSection';
 import OptimizedImage from '@/components/common/OptimizedImage';
 import EnhancedOptimizedImage from '@/components/common/EnhancedOptimizedImage';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
@@ -628,6 +629,9 @@ export default function HomePageClient({
           </p>
         </div>
       </section>
+
+      {/* TikTok Social Content Bridge Section */}
+      <TikTokContentSection profileUrl={settings.social?.tiktok || 'https://www.tiktok.com/@shreemanishfurniture'} />
 
       {/* Our Location Section */}
       {homepageContent.locationEnabled !== false && (

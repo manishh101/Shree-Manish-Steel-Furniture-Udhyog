@@ -34,6 +34,7 @@ export interface ILocalBusinessInfo {
     instagram?: string;
     youtube?: string;
     twitter?: string;
+    tiktok?: string;
   };
 }
 
@@ -166,7 +167,8 @@ const SiteSettingsSchema = new Schema<ISiteSettings>({
         facebook: { type: String, trim: true },
         instagram: { type: String, trim: true },
         youtube: { type: String, trim: true },
-        twitter: { type: String, trim: true }
+        twitter: { type: String, trim: true },
+        tiktok: { type: String, trim: true }
       }
     },
     required: false,

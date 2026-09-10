@@ -53,7 +53,8 @@ const SEOSettingsPage = () => {
       facebook: '',
       instagram: '',
       youtube: '',
-      twitter: ''
+      twitter: '',
+      tiktok: ''
     }
   });
 
@@ -115,7 +116,8 @@ const SEOSettingsPage = () => {
               facebook: s.social?.facebook || '',
               instagram: s.social?.instagram || '',
               youtube: s.social?.youtube || '',
-              twitter: s.social?.twitter || ''
+              twitter: s.social?.twitter || '',
+              tiktok: s.social?.tiktok || ''
             }
           });
         }
@@ -717,6 +719,16 @@ const SEOSettingsPage = () => {
                 onChange={(e) => handleBusinessInfoChange('socialProfiles.youtube', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="https://youtube.com/yourchannel"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">TikTok</label>
+              <input
+                type="url"
+                value={businessInfo.socialProfiles.tiktok || ''}
+                onChange={(e) => handleBusinessInfoChange('socialProfiles.tiktok', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder="https://tiktok.com/@yourusername"
               />
             </div>
             <div>

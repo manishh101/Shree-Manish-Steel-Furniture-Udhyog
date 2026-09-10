@@ -55,9 +55,9 @@ const ContactPageContent = () => {
   const socialLinks = {
     whatsapp: settings.social?.whatsapp || '',
     viber: settings.social?.viber || '',
-    facebook: settings.social?.facebook || '',
-    instagram: settings.social?.instagram || '',
-    tiktok: settings.social?.tiktok || '',
+    facebook: settings.social?.facebook || 'https://www.facebook.com/profile.php?id=61576758530152',
+    instagram: settings.social?.instagram || 'https://www.instagram.com/shreemanishfurniture',
+    tiktok: settings.social?.tiktok || 'https://www.tiktok.com/@shreemanishfurniture',
     twitter: settings.social?.twitter || '',
     youtube: settings.social?.youtube || ''
   };

@@ -46,6 +46,8 @@ const siteConfig = {
   addressNepali: 'धरान रोड, विराटनगर ५६६१३, मोरङ, नेपाल',
   links: {
     facebook: 'https://www.facebook.com/profile.php?id=61576758530152',
+    instagram: 'https://www.instagram.com/shreemanishfurniture',
+    tiktok: 'https://www.tiktok.com/@shreemanishfurniture',
   },
 };
 
@@ -355,7 +357,8 @@ const jsonLd = {
   ],
   sameAs: [
     siteConfig.links.facebook,
-    // Add other social links when available
+    siteConfig.links.instagram,
+    siteConfig.links.tiktok,
   ],
   priceRange: 'Rs. 2,000 - Rs. 100,000',
   currenciesAccepted: 'NPR',

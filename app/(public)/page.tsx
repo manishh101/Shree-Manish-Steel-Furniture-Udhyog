@@ -323,8 +323,14 @@ export default async function HomePage() {
       settings?.businessInfo?.socialProfiles?.facebook,
       settings?.businessInfo?.socialProfiles?.instagram,
       settings?.businessInfo?.socialProfiles?.youtube,
+      settings?.businessInfo?.socialProfiles?.tiktok,
       settings?.social?.facebook,
-    ].filter(Boolean),
+      settings?.social?.instagram,
+      settings?.social?.tiktok,
+      'https://www.facebook.com/profile.php?id=61576758530152',
+      'https://www.instagram.com/shreemanishfurniture',
+      'https://www.tiktok.com/@shreemanishfurniture',
+    ].filter(Boolean).filter((value, index, self) => self.indexOf(value) === index),
     hasOfferCatalog: {
       '@type': 'OfferCatalog',
       name: 'Steel & Wood Furniture - Best Prices in Biratnagar',
@@ -454,12 +460,16 @@ export default async function HomePage() {
       settings?.businessInfo?.socialProfiles?.instagram,
       settings?.businessInfo?.socialProfiles?.youtube,
       settings?.businessInfo?.socialProfiles?.twitter,
+      settings?.businessInfo?.socialProfiles?.tiktok,
       settings?.social?.facebook,
       settings?.social?.instagram,
       settings?.social?.youtube,
       settings?.social?.twitter,
-      'https://www.facebook.com/profile.php?id=61576758530152', // Fallback
-    ].filter(Boolean).filter((value, index, self) => self.indexOf(value) === index), // Remove duplicates
+      settings?.social?.tiktok,
+      'https://www.facebook.com/profile.php?id=61576758530152',
+      'https://www.instagram.com/shreemanishfurniture',
+      'https://www.tiktok.com/@shreemanishfurniture',
+    ].filter(Boolean).filter((value, index, self) => self.indexOf(value) === index),
   };
 
   // Generate WebSite schema with search action

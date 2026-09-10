@@ -20,6 +20,17 @@ export default function robots(): MetadataRoute.Robots {
         allow: '/',
         disallow: ['/admin'],
       },
+      {
+        // TikTok's web crawler - allow full access for better TikTok SEO
+        userAgent: 'Bytespider',
+        allow: '/',
+        disallow: ['/admin', '/api'],
+      },
+      {
+        // Facebook/Instagram crawler
+        userAgent: 'facebookexternalhit',
+        allow: '/',
+      },
     ],
     sitemap: [
       `${baseUrl}/sitemap.xml`,

@@ -18,7 +18,7 @@ const defaultSettings: SiteSettings = {
     viber: '9779824336371',
     facebook: 'https://www.facebook.com/profile.php?id=61576758530152',
     instagram: 'https://www.instagram.com/shreemanishfurniture',
-    tiktok: 'https://tiktok.com',
+    tiktok: 'https://www.tiktok.com/@shreemanishfurniture',
     twitter: 'https://twitter.com',
     youtube: ''
   },
