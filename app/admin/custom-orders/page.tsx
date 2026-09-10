@@ -14,8 +14,11 @@ import {
   FaChevronRight,
   FaCheck,
   FaTimes,
-  FaMapMarkerAlt
+  FaMapMarkerAlt,
+  FaWhatsapp,
+  FaReply
 } from 'react-icons/fa';
+import { adminToast } from '@/lib/adminToast';
 
 const AdminCustomOrders = () => {
   const [orders, setOrders] = useState<CustomOrder[]>([]);
@@ -25,8 +28,6 @@ const AdminCustomOrders = () => {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState('');
 
   const loadOrders = useCallback(async () => {
     try {
@@ -53,10 +54,7 @@ const AdminCustomOrders = () => {
     
     try {
       await customOrderAPI.updateStatus(orderId, newStatus);
-      
-      setNotificationMessage(`Order status updated to ${newStatus.replace('-', ' ')}`);
-      setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 3000);
+      adminToast.success(`Order status updated to ${newStatus.replace('-', ' ')}`);
       
       // Update local state
       setOrders(prevOrders => 
@@ -71,7 +69,7 @@ const AdminCustomOrders = () => {
       }
     } catch (err) {
       console.error('Error updating order status:', err);
-      setError('Failed to update status. Please try again.');
+      adminToast.error('Failed to update status. Please try again.');
     }
   };
 
@@ -79,10 +77,7 @@ const AdminCustomOrders = () => {
     if (window.confirm('Are you sure you want to delete this custom order?')) {
       try {
         await customOrderAPI.delete(orderId);
-        
-        setNotificationMessage('Order deleted successfully');
-        setShowNotification(true);
-        setTimeout(() => setShowNotification(false), 3000);
+        adminToast.success('Order deleted successfully');
         
         // Update local state
         setOrders(prevOrders => prevOrders.filter(order => order._id !== orderId));
@@ -93,7 +88,7 @@ const AdminCustomOrders = () => {
         }
       } catch (err) {
         console.error('Error deleting order:', err);
-        setError('Failed to delete order. Please try again.');
+        adminToast.error('Failed to delete order. Please try again.');
       }
     }
   };
@@ -101,12 +96,23 @@ const AdminCustomOrders = () => {
   const copyToClipboard = async (text: string, type: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setNotificationMessage(`${type} copied to clipboard`);
-      setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 2000);
+      adminToast.success(`${type} copied to clipboard`);
     } catch (err) {
       console.error('Failed to copy:', err);
+      adminToast.error(`Failed to copy ${type}`);
     }
+  };
+
+  const getWhatsAppLink = (order: CustomOrder) => {
+    if (!order.phone) return null;
+    let cleanPhone = order.phone.replace(/[^0-9]/g, '');
+    if (cleanPhone.length === 10 && (cleanPhone.startsWith('98') || cleanPhone.startsWith('97'))) {
+      cleanPhone = `977${cleanPhone}`;
+    }
+    const message = encodeURIComponent(
+      `Namaste ${order.name}! Thank you for choosing Shree Manish Steel Furniture Udhyog for your custom "${formatProductType(order.productType)}" order inquiry. We have received your request and would love to assist you with the customization details and quotation. When would be a convenient time to discuss?`
+    );
+    return `https://wa.me/${cleanPhone}?text=${message}`;
   };
 
   // Status styles matching actual model values
@@ -169,16 +175,6 @@ const AdminCustomOrders = () => {
     return parts.length > 0 ? parts.join(' × ') : null;
   };
 
-  // Notification component
-  const Notification = ({ message }: { message: string }) => (
-    <div className="fixed bottom-4 right-4 z-50">
-      <div className="bg-green-100 border-l-4 border-green-500 text-green-700 px-4 py-2 rounded shadow-md text-sm flex items-center">
-        <FaCheck className="h-4 w-4 mr-2" />
-        {message}
-      </div>
-    </div>
-  );
-
   // Status options matching actual model enum
   const statusOptions = [
     { value: 'new', label: 'New' },
@@ -193,8 +189,6 @@ const AdminCustomOrders = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {showNotification && <Notification message={notificationMessage} />}
-      
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-3">
         <h1 className="text-xl sm:text-2xl font-bold text-primary flex items-center">
           <FaShoppingBag className="mr-2" />
@@ -270,6 +264,7 @@ const AdminCustomOrders = () => {
                       <div>
                         <div className="text-sm font-medium text-gray-900">{order.name}</div>
                         <div className="text-sm text-gray-500">{order.email}</div>
+                        {order.phone && <div className="text-xs text-gray-400">{order.phone}</div>}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatProductType(order.productType)}</td>
@@ -278,20 +273,42 @@ const AdminCustomOrders = () => {
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button 
-                        onClick={() => setSelectedOrder(order)}
-                        className="text-primary hover:text-primary/80 mr-3"
-                        title="View Details"
-                      >
-                        <FaEye className="h-5 w-5" />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(order._id)}
-                        className="text-red-600 hover:text-red-800"
-                        title="Delete Order"
-                      >
-                        <FaTrash className="h-5 w-5" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        {order.phone && getWhatsAppLink(order) && (
+                          <a
+                            href={getWhatsAppLink(order)!}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-emerald-600 hover:text-emerald-800 p-1 hover:bg-emerald-50 rounded"
+                            title="Chat on WhatsApp"
+                          >
+                            <FaWhatsapp className="h-4 w-4" />
+                          </a>
+                        )}
+                        {order.phone && (
+                          <a
+                            href={`tel:${order.phone}`}
+                            className="text-blue-600 hover:text-blue-800 p-1 hover:bg-blue-50 rounded"
+                            title="Direct Call"
+                          >
+                            <FaPhone className="h-3.5 w-3.5" />
+                          </a>
+                        )}
+                        <button 
+                          onClick={() => setSelectedOrder(order)}
+                          className="text-primary hover:text-primary/80 p-1 hover:bg-primary/5 rounded"
+                          title="View Details"
+                        >
+                          <FaEye className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(order._id)}
+                          className="text-red-600 hover:text-red-800 p-1 hover:bg-red-50 rounded"
+                          title="Delete Order"
+                        >
+                          <FaTrash className="h-4 w-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -383,6 +400,39 @@ const AdminCustomOrders = () => {
                     >
                       <FaCopy className="h-3 w-3 text-gray-500" />
                     </button>
+                  </div>
+
+                  {/* Direct 1-Click Communication Shortcuts */}
+                  <div className="flex flex-wrap gap-2 pt-3 mt-3 border-t border-gray-200">
+                    {selectedOrder.phone && getWhatsAppLink(selectedOrder) && (
+                      <a
+                        href={getWhatsAppLink(selectedOrder)!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-all shadow-sm"
+                      >
+                        <FaWhatsapp className="h-3.5 w-3.5 mr-1.5" />
+                        WhatsApp Customer
+                      </a>
+                    )}
+                    {selectedOrder.phone && (
+                      <a
+                        href={`tel:${selectedOrder.phone}`}
+                        className="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-all shadow-sm"
+                      >
+                        <FaPhone className="h-3 w-3 mr-1.5" />
+                        Direct Call
+                      </a>
+                    )}
+                    {selectedOrder.email && (
+                      <a
+                        href={`mailto:${selectedOrder.email}?subject=${encodeURIComponent(`Quotation & Specifications for Custom Order - Shree Manish Steel Furniture`)}`}
+                        className="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-800 text-white text-xs font-semibold hover:bg-gray-900 transition-all shadow-sm"
+                      >
+                        <FaReply className="h-3 w-3 mr-1.5" />
+                        Send Email Quote
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>

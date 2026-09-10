@@ -14,9 +14,12 @@ import {
   FaArrowLeft,
   FaTimes,
   FaCopy,
-  FaSync
+  FaSync,
+  FaWhatsapp,
+  FaReply
 } from 'react-icons/fa';
 import { inquiryAPI, Inquiry } from '@/services/api';
+import { adminToast } from '@/lib/adminToast';
 
 const AdminInquiries = () => {
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
@@ -28,8 +31,6 @@ const AdminInquiries = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState('');
   const [showMobileDetails, setShowMobileDetails] = useState(false);
 
   // Debounce timeout ref
@@ -80,12 +81,25 @@ const AdminInquiries = () => {
   const copyToClipboard = async (text: string, type: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      setNotificationMessage(`${type} copied to clipboard`);
-      setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 2000);
+      adminToast.success(`${type} copied to clipboard`);
     } catch (err) {
       console.error('Failed to copy:', err);
+      adminToast.error(`Failed to copy ${type}`);
     }
+  };
+
+  const getWhatsAppLink = (inquiry: Inquiry) => {
+    if (!inquiry.phone) return null;
+    let cleanPhone = inquiry.phone.replace(/[^0-9]/g, '');
+    if (cleanPhone.length === 10 && (cleanPhone.startsWith('98') || cleanPhone.startsWith('97'))) {
+      cleanPhone = `977${cleanPhone}`;
+    }
+    const categoryName = getCategoryDisplayLabel(categorizeInquiry(inquiry));
+    const textSnippet = inquiry.message ? ` Regarding: "${inquiry.message.slice(0, 60)}..."` : '';
+    const message = encodeURIComponent(
+      `Namaste ${inquiry.name}! Thank you for contacting Shree Manish Steel Furniture Udhyog regarding ${categoryName}.${textSnippet} How can we help you today?`
+    );
+    return `https://wa.me/${cleanPhone}?text=${message}`;
   };
 
   // Load inquiries
@@ -151,10 +165,7 @@ const AdminInquiries = () => {
   const handleStatusChange = async (id: string, newStatus: string) => {
     try {
       await inquiryAPI.updateStatus(id, newStatus);
-      
-      setNotificationMessage(`Inquiry status updated to ${newStatus}`);
-      setShowNotification(true);
-      setTimeout(() => setShowNotification(false), 3000);
+      adminToast.success(`Inquiry status updated to ${newStatus}`);
       
       setInquiries(prevInquiries => 
         prevInquiries.map(inquiry => 
@@ -167,7 +178,7 @@ const AdminInquiries = () => {
       }
     } catch (err) {
       console.error('Error updating inquiry status:', err);
-      setError('Failed to update status. Please try again.');
+      adminToast.error('Failed to update status. Please try again.');
     }
   };
 
@@ -176,10 +187,7 @@ const AdminInquiries = () => {
     if (window.confirm('Are you sure you want to delete this inquiry?')) {
       try {
         await inquiryAPI.delete(id);
-        
-        setNotificationMessage('Inquiry deleted successfully');
-        setShowNotification(true);
-        setTimeout(() => setShowNotification(false), 3000);
+        adminToast.success('Inquiry deleted successfully');
         
         setInquiries(prevInquiries => 
           prevInquiries.filter(inquiry => inquiry._id !== id)
@@ -191,7 +199,7 @@ const AdminInquiries = () => {
         }
       } catch (err) {
         console.error('Error deleting inquiry:', err);
-        setError('Failed to delete inquiry. Please try again.');
+        adminToast.error('Failed to delete inquiry. Please try again.');
       }
     }
   };
@@ -272,19 +280,8 @@ const AdminInquiries = () => {
     }
   };
 
-  // Notification component
-  const Notification = ({ message }: { message: string }) => (
-    <div className="fixed bottom-4 right-4 z-50">
-      <div className="bg-green-100 border-l-4 border-green-500 text-green-700 px-4 py-2 rounded shadow-md text-sm flex items-center">
-        <FaCheck className="h-4 w-4 mr-2" />
-        {message}
-      </div>
-    </div>
-  );
-
   return (
     <div className="container mx-auto px-3 py-4 sm:px-4 sm:py-6">
-      {showNotification && <Notification message={notificationMessage} />}
 
       <div className="flex items-center justify-between mb-4">
         <h1 className={`text-lg sm:text-xl font-bold text-primary ${showMobileDetails ? 'hidden sm:block' : ''}`}>
@@ -577,8 +574,8 @@ const AdminInquiries = () => {
                 
                 <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                   <div className="flex items-center group">
-                    <a href={`mailto:${selectedInquiry.email}`} className="hover:text-primary flex items-center">
-                      <FaEnvelope className="h-4 w-4 mr-2 text-gray-400" />
+                    <a href={`mailto:${selectedInquiry.email}`} className="hover:text-primary flex items-center font-medium">
+                      <FaEnvelope className="h-4 w-4 mr-2 text-primary" />
                       {selectedInquiry.email}
                     </a>
                     <button
@@ -592,8 +589,8 @@ const AdminInquiries = () => {
                   
                   {selectedInquiry.phone && (
                     <div className="flex items-center group">
-                      <a href={`tel:${selectedInquiry.phone}`} className="hover:text-primary flex items-center">
-                        <FaPhone className="h-4 w-4 mr-2 text-gray-400" />
+                      <a href={`tel:${selectedInquiry.phone}`} className="hover:text-primary flex items-center font-medium">
+                        <FaPhone className="h-4 w-4 mr-2 text-primary" />
                         {selectedInquiry.phone}
                       </a>
                       <button
@@ -604,6 +601,41 @@ const AdminInquiries = () => {
                         <FaCopy className="h-3 w-3 text-gray-500" />
                       </button>
                     </div>
+                  )}
+                </div>
+
+                {/* Direct 1-Click Communication Bridge */}
+                <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-gray-200">
+                  {selectedInquiry.phone && getWhatsAppLink(selectedInquiry) && (
+                    <a
+                      href={getWhatsAppLink(selectedInquiry)!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-all shadow-sm"
+                    >
+                      <FaWhatsapp className="h-3.5 w-3.5 mr-1.5" />
+                      WhatsApp Customer
+                    </a>
+                  )}
+
+                  {selectedInquiry.phone && (
+                    <a
+                      href={`tel:${selectedInquiry.phone}`}
+                      className="inline-flex items-center px-3 py-1.5 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-all shadow-sm"
+                    >
+                      <FaPhone className="h-3 w-3 mr-1.5" />
+                      Direct Call
+                    </a>
+                  )}
+
+                  {selectedInquiry.email && (
+                    <a
+                      href={`mailto:${selectedInquiry.email}?subject=${encodeURIComponent('Regarding your inquiry - Shree Manish Steel Furniture')}`}
+                      className="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-800 text-white text-xs font-semibold hover:bg-gray-900 transition-all shadow-sm"
+                    >
+                      <FaReply className="h-3 w-3 mr-1.5" />
+                      Email Reply
+                    </a>
                   )}
                 </div>
                 
@@ -618,7 +650,7 @@ const AdminInquiries = () => {
               {/* Message content */}
               <div className="bg-gray-50 border rounded-lg p-4 mb-4 flex-grow overflow-y-auto">
                 <h3 className="text-sm font-medium text-gray-700 mb-2 border-b pb-2">Message</h3>
-                <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                <p className="text-sm text-gray-600 whitespace-pre-wrap leading-relaxed">
                   {selectedInquiry.message || <span className="italic text-gray-400">No message content</span>}
                 </p>
               </div>
@@ -628,9 +660,9 @@ const AdminInquiries = () => {
                 {selectedInquiry.status !== 'read' && (
                   <button
                     onClick={() => handleStatusChange(selectedInquiry._id, 'read')}
-                    className="flex items-center px-3 py-1.5 rounded bg-blue-100 text-sm text-blue-700 hover:bg-blue-200 transition-colors"
+                    className="flex items-center px-3 py-1.5 rounded-lg bg-blue-100 text-xs sm:text-sm text-blue-700 hover:bg-blue-200 font-medium transition-colors"
                   >
-                    <FaEnvelopeOpen className="h-4 w-4 mr-2" />
+                    <FaEnvelopeOpen className="h-3.5 w-3.5 mr-1.5" />
                     Mark as Read
                   </button>
                 )}
@@ -638,9 +670,9 @@ const AdminInquiries = () => {
                 {selectedInquiry.status !== 'replied' && (
                   <button
                     onClick={() => handleStatusChange(selectedInquiry._id, 'replied')}
-                    className="flex items-center px-3 py-1.5 rounded bg-green-100 text-sm text-green-700 hover:bg-green-200 transition-colors"
+                    className="flex items-center px-3 py-1.5 rounded-lg bg-green-100 text-xs sm:text-sm text-green-700 hover:bg-green-200 font-medium transition-colors"
                   >
-                    <FaCheck className="h-4 w-4 mr-2" />
+                    <FaCheck className="h-3.5 w-3.5 mr-1.5" />
                     Mark as Replied
                   </button>
                 )}
@@ -648,18 +680,18 @@ const AdminInquiries = () => {
                 {selectedInquiry.status !== 'archived' && (
                   <button
                     onClick={() => handleStatusChange(selectedInquiry._id, 'archived')}
-                    className="flex items-center px-3 py-1.5 rounded bg-gray-100 text-sm text-gray-700 hover:bg-gray-200 transition-colors"
+                    className="flex items-center px-3 py-1.5 rounded-lg bg-gray-100 text-xs sm:text-sm text-gray-700 hover:bg-gray-200 font-medium transition-colors"
                   >
-                    <FaArchive className="h-4 w-4 mr-2" />
+                    <FaArchive className="h-3.5 w-3.5 mr-1.5" />
                     Archive
                   </button>
                 )}
                 
                 <button
                   onClick={() => handleDelete(selectedInquiry._id)}
-                  className="flex items-center px-3 py-1.5 rounded bg-red-100 text-sm text-red-700 hover:bg-red-200 ml-auto transition-colors"
+                  className="flex items-center px-3 py-1.5 rounded-lg bg-red-100 text-xs sm:text-sm text-red-700 hover:bg-red-200 font-medium ml-auto transition-colors"
                 >
-                  <FaTrash className="h-4 w-4 mr-2" />
+                  <FaTrash className="h-3.5 w-3.5 mr-1.5" />
                   Delete
                 </button>
               </div>
